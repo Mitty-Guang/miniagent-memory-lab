@@ -66,20 +66,28 @@ def _repair_dangling_tool_calls(messages: List[AnyMessage]) -> List[AnyMessage]:
     （与主项目 memory_policies.repair_orphans 同源思路）。
     """
     repaired: List[AnyMessage] = []
-    pending: Dict[str, bool] = {}
+    open_calls: Dict[str, bool] = {}
+
+    def flush_open() -> None:
+        for call_id, answered in list(open_calls.items()):
+            if not answered and call_id:
+                repaired.append(
+                    ToolMessage(content="未执行（达到步数上限或已中断）。", tool_call_id=call_id)
+                )
+        open_calls.clear()
+
     for msg in messages:
-        repaired.append(msg)
         if isinstance(msg, AIMessage) and getattr(msg, "tool_calls", None):
-            pending = {call.get("id"): False for call in msg.tool_calls}
-        elif isinstance(msg, ToolMessage):
+            flush_open()   # 先补齐"上一组"悬空调用（插在该组之后、这条消息之前）
+            repaired.append(msg)
+            open_calls.update({call.get("id"): False for call in msg.tool_calls})
+            continue
+        if isinstance(msg, ToolMessage):
             call_id = getattr(msg, "tool_call_id", None)
-            if call_id in pending:
-                pending[call_id] = True
-    for call_id, answered in pending.items():
-        if not answered and call_id:
-            repaired.append(
-                ToolMessage(content="未执行（达到步数上限或已中断）。", tool_call_id=call_id)
-            )
+            if call_id in open_calls:
+                open_calls[call_id] = True
+        repaired.append(msg)
+    flush_open()
     return repaired
 
 
@@ -181,9 +189,21 @@ def build_team(
 
     def after_executor(state: TeamState) -> str:
         last = state["messages"][-1] if state.get("messages") else None
-        if getattr(last, "tool_calls", None) and int(state.get("steps", 0)) < max_steps:
+        has_calls = bool(getattr(last, "tool_calls", None))
+        if has_calls and int(state.get("steps", 0)) < max_steps:
             return "tools"
+        if has_calls:
+            return "flush"      # 步数上限：把未执行的调用占位，保持消息契约合法
         return "reviewer"
+
+    async def flush_pending_node(state: TeamState) -> Dict[str, Any]:
+        last = state["messages"][-1] if state.get("messages") else None
+        outputs: List[AnyMessage] = []
+        for call in getattr(last, "tool_calls", []) or []:
+            outputs.append(
+                ToolMessage(content="未执行（达到步数上限）。", tool_call_id=call["id"])
+            )
+        return {"messages": outputs, "log": ["[flush] 步数上限：未执行的工具调用已占位"]}
 
     # —— reviewer ——
     async def reviewer_node(state: TeamState) -> Dict[str, Any]:
@@ -230,6 +250,7 @@ def build_team(
     builder.add_node("approval", approval_node if require_approval else auto_approval_node)
     builder.add_node("executor", executor_agent_node)
     builder.add_node("tools", executor_tools_node)
+    builder.add_node("flush", flush_pending_node)
     builder.add_node("reviewer", reviewer_node)
     builder.add_node("finish", finish_node)
 
@@ -242,9 +263,10 @@ def build_team(
         {"executor": "executor", "finish": "finish"},
     )
     builder.add_conditional_edges(
-        "executor", after_executor, {"tools": "tools", "reviewer": "reviewer"}
+        "executor", after_executor, {"tools": "tools", "flush": "flush", "reviewer": "reviewer"}
     )
     builder.add_edge("tools", "executor")
+    builder.add_edge("flush", "reviewer")
     builder.add_conditional_edges(
         "reviewer", after_review, {"executor": "executor", "finish": "finish"}
     )

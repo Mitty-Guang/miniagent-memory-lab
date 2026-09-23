@@ -412,6 +412,34 @@ def test_openai_message_shape():
     print("test_openai_message_shape passed")
 
 
+def test_langgraph_message_repair():
+    """回归：LangGraph 版必须补齐"所有"悬空 tool_calls（≥2 组），否则接口 400。（缺依赖则跳过）"""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "extras" / "langgraph_compare"))
+        from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+
+        import multi_agent_graph as lag
+    except Exception as exc:
+        print(f"test_langgraph_message_repair skipped（{type(exc).__name__}: {exc}）")
+        return
+
+    messages = [
+        HumanMessage(content="任务"),
+        AIMessage(content="", tool_calls=[{"id": "c1", "name": "bash_execute", "args": {}}]),
+        AIMessage(content="", tool_calls=[{"id": "c2", "name": "bash_execute", "args": {}}]),
+        HumanMessage(content="[审查意见] FAIL"),
+    ]
+    fixed = lag._repair_dangling_tool_calls(messages)
+    answered = {getattr(m, "tool_call_id", None) for m in fixed if isinstance(m, ToolMessage)}
+    assert answered == {"c1", "c2"}, answered
+    # 两组的占位应分别插在各自 assistant 消息之后（顺序合法）
+    order = [type(m).__name__ for m in fixed]
+    ai_indices = [i for i, name in enumerate(order) if name == "AIMessage"]
+    tool_index = order.index("ToolMessage")
+    assert tool_index < ai_indices[1], order
+    print("test_langgraph_message_repair passed")
+
+
 if __name__ == "__main__":
     test_ltm_basic()
     test_trace_summary()
@@ -426,4 +454,5 @@ if __name__ == "__main__":
     test_auto_budget()
     test_chat_continuation()
     test_openai_message_shape()
-    print("\n✅ 所有离线测试通过（记忆 / tracing / HITL / multi-agent / sandbox / 检索 / 联网 / 记忆浏览器 / 自动参数 / 连续对话 / 消息格式）")
+    test_langgraph_message_repair()
+    print("\n✅ 所有离线测试通过（记忆 / tracing / HITL / multi-agent / sandbox / 检索 / 联网 / 记忆浏览器 / 自动参数 / 连续对话 / 消息格式 / LangGraph 消息修复）")
