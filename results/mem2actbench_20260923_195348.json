@@ -1,0 +1,2363 @@
+{
+  "summary": {
+    "memory": {
+      "n": 40,
+      "tool_accuracy": 0.375,
+      "avg_param_f1": 0.421
+    },
+    "nomemory": {
+      "n": 40,
+      "tool_accuracy": 0.1,
+      "avg_param_f1": 0.145
+    }
+  },
+  "rows": [
+    {
+      "qa_id": "qa_001",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.4,
+      "pred": {
+        "name": "_get-social-trending_impressions",
+        "arguments": {
+          "social": "Twitter"
+        }
+      },
+      "gold": {
+        "name": "/get-social-trending/impressions",
+        "arguments": {
+          "social": "Twitter",
+          "isCrypto": true,
+          "limit": 50,
+          "timestamp": "24h"
+        },
+        "grounding_info": {
+          "social": {
+            "source_text": "No platform mentioned in memory; Twitter is the de-facto standard for finance-ticker chatter",
+            "type": "default"
+          },
+          "isCrypto": {
+            "source_text": "User requests the latest videos on cryptocurrency trends",
+            "type": "inferred"
+          },
+          "limit": {
+            "source_text": "Schema allows 1-50; 50 gives the full top-list",
+            "type": "default"
+          },
+          "timestamp": {
+            "source_text": "Schema default for social-trending endpoints is 24h",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_001",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.5,
+      "pred": {
+        "name": "_get-social-trending_impressions",
+        "arguments": {
+          "social": "StockTwits",
+          "isCrypto": false,
+          "limit": 50,
+          "timestamp": "24h"
+        }
+      },
+      "gold": {
+        "name": "/get-social-trending/impressions",
+        "arguments": {
+          "social": "Twitter",
+          "isCrypto": true,
+          "limit": 50,
+          "timestamp": "24h"
+        },
+        "grounding_info": {
+          "social": {
+            "source_text": "No platform mentioned in memory; Twitter is the de-facto standard for finance-ticker chatter",
+            "type": "default"
+          },
+          "isCrypto": {
+            "source_text": "User requests the latest videos on cryptocurrency trends",
+            "type": "inferred"
+          },
+          "limit": {
+            "source_text": "Schema allows 1-50; 50 gives the full top-list",
+            "type": "default"
+          },
+          "timestamp": {
+            "source_text": "Schema default for social-trending endpoints is 24h",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_002",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.8,
+      "pred": {
+        "name": "Pitching_Leaders",
+        "arguments": {
+          "results": 10,
+          "sort_column": "ERA",
+          "season": "2024",
+          "sports_code": "mlb",
+          "game_type": "regular"
+        }
+      },
+      "gold": {
+        "name": "Pitching Leaders",
+        "arguments": {
+          "game_type": "regular season",
+          "results": 10,
+          "season": "2024",
+          "sort_column": "ERA",
+          "sports_code": "MLB"
+        },
+        "grounding_info": {
+          "game_type": {
+            "source_text": "regular season games",
+            "type": "explicit"
+          },
+          "results": {
+            "source_text": "default value (top 10)",
+            "type": "default"
+          },
+          "season": {
+            "source_text": "current season → inferred as 2024",
+            "type": "inferred"
+          },
+          "sort_column": {
+            "source_text": "Earned Run Average (ERA)",
+            "type": "explicit"
+          },
+          "sports_code": {
+            "source_text": "MLB sports code",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_002",
+      "mode": "nomemory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Pitching_Leaders",
+        "arguments": {
+          "results": 10,
+          "sort_column": "ERA",
+          "season": "2024",
+          "sports_code": "MLB",
+          "game_type": "regular season"
+        }
+      },
+      "gold": {
+        "name": "Pitching Leaders",
+        "arguments": {
+          "game_type": "regular season",
+          "results": 10,
+          "season": "2024",
+          "sort_column": "ERA",
+          "sports_code": "MLB"
+        },
+        "grounding_info": {
+          "game_type": {
+            "source_text": "regular season games",
+            "type": "explicit"
+          },
+          "results": {
+            "source_text": "default value (top 10)",
+            "type": "default"
+          },
+          "season": {
+            "source_text": "current season → inferred as 2024",
+            "type": "inferred"
+          },
+          "sort_column": {
+            "source_text": "Earned Run Average (ERA)",
+            "type": "explicit"
+          },
+          "sports_code": {
+            "source_text": "MLB sports code",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_003",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 0.667,
+      "pred": {
+        "name": "Real-time_Hashtag_Search",
+        "arguments": {
+          "keyword": "trendsetter",
+          "fresh": 1
+        }
+      },
+      "gold": {
+        "name": "Real-time Hashtag Search",
+        "arguments": {
+          "keyword": "trendsetter"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "I also need to retrieve statistics about a hashtag they are promoting on TikTok called 'trendsetter'.",
+            "type": "explicit"
+          },
+          "fresh": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_003",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Real-time Hashtag Search",
+        "arguments": {
+          "keyword": "trendsetter"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "I also need to retrieve statistics about a hashtag they are promoting on TikTok called 'trendsetter'.",
+            "type": "explicit"
+          },
+          "fresh": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_004",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Search_Cat_Breeds",
+        "arguments": {
+          "search": "heat resistant"
+        }
+      },
+      "gold": {
+        "name": "Search Cat Breeds",
+        "arguments": {
+          "search": "heat resistant"
+        },
+        "grounding_info": {
+          "search": {
+            "source_text": "which of the various cat breeds there are best resistant to heat",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_004",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_Cat_Breeds",
+        "arguments": {
+          "search": "climate"
+        }
+      },
+      "gold": {
+        "name": "Search Cat Breeds",
+        "arguments": {
+          "search": "heat resistant"
+        },
+        "grounding_info": {
+          "search": {
+            "source_text": "which of the various cat breeds there are best resistant to heat",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_005",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Download Video or Reel",
+        "arguments": {
+          "url": "https://www.facebook.com/video/example"
+        },
+        "grounding_info": {
+          "url": {
+            "source_text": "User provided the URL of the Facebook video: https://www.facebook.com/video/example.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_005",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Download Video or Reel",
+        "arguments": {
+          "url": "https://www.facebook.com/video/example"
+        },
+        "grounding_info": {
+          "url": {
+            "source_text": "User provided the URL of the Facebook video: https://www.facebook.com/video/example.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_006",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "GetEvents",
+        "arguments": {
+          "page": 1
+        }
+      },
+      "gold": {
+        "name": "GetEvents",
+        "arguments": {
+          "page": 1
+        },
+        "grounding_info": {
+          "page": {
+            "source_text": "I'm particularly interested in page 1 of the results.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_006",
+      "mode": "nomemory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "GetEvents",
+        "arguments": {
+          "page": 1
+        }
+      },
+      "gold": {
+        "name": "GetEvents",
+        "arguments": {
+          "page": 1
+        },
+        "grounding_info": {
+          "page": {
+            "source_text": "I'm particularly interested in page 1 of the results.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_007",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 0.667,
+      "pred": {
+        "name": "Stock_Quote_Price",
+        "arguments": {
+          "symbol": "AAPL",
+          "apikey": "demo"
+        }
+      },
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "AAPL"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "Could you tell me the current price of AAPL on the NASDAQ?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 7,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_007",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "AAPL"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "Could you tell me the current price of AAPL on the NASDAQ?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 7,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_008",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Get_Company_Financial_Ratios",
+        "arguments": {
+          "symbol": "VFIAX"
+        }
+      },
+      "gold": {
+        "name": "Get Company Financial Ratios",
+        "arguments": {
+          "symbol": "VFIAX"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "User is requesting ratings for the mutual fund with the symbol VFIAX.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_008",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Company Financial Ratios",
+        "arguments": {
+          "symbol": "VFIAX"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "User is requesting ratings for the mutual fund with the symbol VFIAX.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_009",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Retrieve Orderbook Depth",
+        "arguments": {
+          "slug": "Golden_Rush"
+        },
+        "grounding_info": {
+          "slug": {
+            "source_text": "User is requesting the order book depth for the NFT collection 'Golden_Rush' on OpenSea.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_009",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Retrieve Orderbook Depth",
+        "arguments": {
+          "slug": "Golden_Rush"
+        },
+        "grounding_info": {
+          "slug": {
+            "source_text": "User is requesting the order book depth for the NFT collection 'Golden_Rush' on OpenSea.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_010",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "stock analysis"
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "market capitalization"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User asks for an explanation of why market capitalization is important in stock analysis.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_010",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "stock analysis",
+          "pageIndex": 1,
+          "pageSize": 10
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "market capitalization"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User asks for an explanation of why market capitalization is important in stock analysis.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_011",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Stock Insider Holders",
+        "arguments": {
+          "stock": "AAPL"
+        },
+        "grounding_info": {
+          "stock": {
+            "source_text": "So AAPL has a Bearish Engulfing too?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_011",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Stock Insider Holders",
+        "arguments": {
+          "stock": "AAPL"
+        },
+        "grounding_info": {
+          "stock": {
+            "source_text": "So AAPL has a Bearish Engulfing too?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_012",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Phone_Validation_API",
+        "arguments": {
+          "phone": "+14155552671"
+        }
+      },
+      "gold": {
+        "name": "Phone Validation API",
+        "arguments": {
+          "phone": "+14155552671"
+        },
+        "grounding_info": {
+          "phone": {
+            "source_text": "User is requesting validation for the phone number +14155552671.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_012",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Phone Validation API",
+        "arguments": {
+          "phone": "+14155552671"
+        },
+        "grounding_info": {
+          "phone": {
+            "source_text": "User is requesting validation for the phone number +14155552671.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_013",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Earnings Before Interest and Taxes (EBIT)",
+        "arguments": {
+          "symbol": "AAPL",
+          "region": "US"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "Apple Inc. stock (AAPL)",
+            "type": "explicit"
+          },
+          "region": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 3,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_013",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Earnings Before Interest and Taxes (EBIT)",
+        "arguments": {
+          "symbol": "AAPL",
+          "region": "US"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "Apple Inc. stock (AAPL)",
+            "type": "explicit"
+          },
+          "region": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 3,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_014",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Likers List for Instagram Post",
+        "arguments": {
+          "shortcode": "B8J9kHFSRm"
+        },
+        "grounding_info": {
+          "shortcode": {
+            "source_text": "I've got this Instagram post with the shortcode B8J9kHFSRm",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_014",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Likers List for Instagram Post",
+        "arguments": {
+          "shortcode": "B8J9kHFSRm"
+        },
+        "grounding_info": {
+          "shortcode": {
+            "source_text": "I've got this Instagram post with the shortcode B8J9kHFSRm",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_015",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.5,
+      "pred": {
+        "name": "getPollutionLevels",
+        "arguments": {
+          "location": "global",
+          "pollutant": "nitrous oxide"
+        }
+      },
+      "gold": {
+        "name": "getPollutionLevels",
+        "arguments": {
+          "location": "atmosphere",
+          "pollutant": "nitrous oxide"
+        },
+        "grounding_info": {
+          "location": {
+            "source_text": "User requests current levels of nitrous oxide in the atmosphere.",
+            "type": "inferred"
+          },
+          "pollutant": {
+            "source_text": "Could you get the current levels of nitrous oxide in the atmosphere for me?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_015",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "getPollutionLevels",
+        "arguments": {
+          "location": "atmosphere",
+          "pollutant": "nitrous oxide"
+        },
+        "grounding_info": {
+          "location": {
+            "source_text": "User requests current levels of nitrous oxide in the atmosphere.",
+            "type": "inferred"
+          },
+          "pollutant": {
+            "source_text": "Could you get the current levels of nitrous oxide in the atmosphere for me?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_016",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 0.667,
+      "pred": {
+        "name": "Stock_Quote_Price",
+        "arguments": {
+          "symbol": "TSLA",
+          "apikey": ""
+        }
+      },
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "TSLA"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "I think the performance IDs are TSLA, AAPL, and AMZN respectively.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_016",
+      "mode": "nomemory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Stock_Quote_Price",
+        "arguments": {
+          "symbol": "TSLA"
+        }
+      },
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "TSLA"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "I think the performance IDs are TSLA, AAPL, and AMZN respectively.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_017",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Stock_Quote_Price",
+        "arguments": {
+          "symbol": "AAPL"
+        }
+      },
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "AAPL"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "User requests the latest stock quote for AAPL.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_017",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "AAPL"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "User requests the latest stock quote for AAPL.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_018",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Currency Price",
+        "arguments": {
+          "pair": "USD-EUR"
+        },
+        "grounding_info": {
+          "pair": {
+            "source_text": "Could you provide the current forex information for the USD-EUR pair, including its price and performance data?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 0,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_018",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Currency Price",
+        "arguments": {
+          "pair": "USD-EUR"
+        },
+        "grounding_info": {
+          "pair": {
+            "source_text": "Could you provide the current forex information for the USD-EUR pair, including its price and performance data?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 0,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_019",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Zodiac_Sign_Information",
+        "arguments": {
+          "sign": "aries"
+        }
+      },
+      "gold": {
+        "name": "Zodiac Sign Information",
+        "arguments": {
+          "sign": "aquarius"
+        },
+        "grounding_info": {
+          "sign": {
+            "source_text": "User is an Aquarius and is asking if there is a tool to find common traits for this zodiac sign.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_019",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Zodiac Sign Information",
+        "arguments": {
+          "sign": "aquarius"
+        },
+        "grounding_info": {
+          "sign": {
+            "source_text": "User is an Aquarius and is asking if there is a tool to find common traits for this zodiac sign.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_020",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "crowdfunding_donate",
+        "arguments": {
+          "campaignId": "ecocharge",
+          "amount": 500
+        }
+      },
+      "gold": {
+        "name": "crowdfunding.donate",
+        "arguments": {
+          "amount": 500,
+          "campaignId": "EcoCharge"
+        },
+        "grounding_info": {
+          "amount": {
+            "source_text": "Yes, please donate $500 to my EcoCharge campaign too.",
+            "type": "explicit"
+          },
+          "campaignId": {
+            "source_text": "Yes, please donate $500 to my EcoCharge campaign too.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_020",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "crowdfunding.donate",
+        "arguments": {
+          "amount": 500,
+          "campaignId": "EcoCharge"
+        },
+        "grounding_info": {
+          "amount": {
+            "source_text": "Yes, please donate $500 to my EcoCharge campaign too.",
+            "type": "explicit"
+          },
+          "campaignId": {
+            "source_text": "Yes, please donate $500 to my EcoCharge campaign too.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_021",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.182,
+      "pred": {
+        "name": "Search_Subreddits",
+        "arguments": {
+          "search_subreddits": "ffxiv",
+          "keyword": "seasonal event community importance",
+          "full_data": true,
+          "sort": "relevance"
+        }
+      },
+      "gold": {
+        "name": "Search Subreddits",
+        "arguments": {
+          "search_subreddits": "Final Fantasy XIV",
+          "keyword": "Halloween Festival",
+          "limit": 10,
+          "sort": "relevance",
+          "time": "all",
+          "full_data": false,
+          "proxy": ""
+        },
+        "grounding_info": {
+          "search_subreddits": {
+            "source_text": "User wants to know the significance of the Halloween Festival in the Final Fantasy XIV community.",
+            "type": "inferred"
+          },
+          "keyword": {
+            "source_text": "Halloween Festival",
+            "type": "explicit"
+          },
+          "limit": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "sort": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "time": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "full_data": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "proxy": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_021",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.333,
+      "pred": {
+        "name": "Search_Subreddits",
+        "arguments": {
+          "search_subreddits": "seasonal event",
+          "keyword": "seasonal event importance to the community",
+          "sort": "relevance",
+          "limit": 10,
+          "full_data": true
+        }
+      },
+      "gold": {
+        "name": "Search Subreddits",
+        "arguments": {
+          "search_subreddits": "Final Fantasy XIV",
+          "keyword": "Halloween Festival",
+          "limit": 10,
+          "sort": "relevance",
+          "time": "all",
+          "full_data": false,
+          "proxy": ""
+        },
+        "grounding_info": {
+          "search_subreddits": {
+            "source_text": "User wants to know the significance of the Halloween Festival in the Final Fantasy XIV community.",
+            "type": "inferred"
+          },
+          "keyword": {
+            "source_text": "Halloween Festival",
+            "type": "explicit"
+          },
+          "limit": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "sort": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "time": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "full_data": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "proxy": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_022",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Get_Sports_List",
+        "arguments": {
+          "language": "en",
+          "format": "JSON"
+        }
+      },
+      "gold": {
+        "name": "Get Sports List",
+        "arguments": {
+          "language": "English"
+        },
+        "grounding_info": {
+          "language": {
+            "source_text": "User is requesting a list of sports provided by Pinnacle in English.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_022",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Get_Sports_List",
+        "arguments": {
+          "language": "en",
+          "format": "JSON"
+        }
+      },
+      "gold": {
+        "name": "Get Sports List",
+        "arguments": {
+          "language": "English"
+        },
+        "grounding_info": {
+          "language": {
+            "source_text": "User is requesting a list of sports provided by Pinnacle in English.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_023",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Daily_Forecast__10_days_",
+        "arguments": {
+          "latitude": "34.0522",
+          "longitude": "-118.2437"
+        }
+      },
+      "gold": {
+        "name": "Daily Forecast (10 days)",
+        "arguments": {
+          "latitude": "34.0522",
+          "longitude": "-118.2437"
+        },
+        "grounding_info": {
+          "latitude": {
+            "source_text": "The latitude is 34.0522 and the longitude is -118.2437.",
+            "type": "explicit"
+          },
+          "longitude": {
+            "source_text": "The latitude is 34.0522 and the longitude is -118.2437.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_023",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Daily_Forecast__10_days_",
+        "arguments": {
+          "latitude": "40.7128",
+          "longitude": "-74.0060"
+        }
+      },
+      "gold": {
+        "name": "Daily Forecast (10 days)",
+        "arguments": {
+          "latitude": "34.0522",
+          "longitude": "-118.2437"
+        },
+        "grounding_info": {
+          "latitude": {
+            "source_text": "The latitude is 34.0522 and the longitude is -118.2437.",
+            "type": "explicit"
+          },
+          "longitude": {
+            "source_text": "The latitude is 34.0522 and the longitude is -118.2437.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_024",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search",
+        "arguments": {
+          "q": "heavy bag boxing training health benefits cardiovascular fitness",
+          "number": 10
+        }
+      },
+      "gold": {
+        "name": "Search",
+        "arguments": {
+          "language": "en",
+          "number": 0,
+          "offset": 0,
+          "q": "health benefits of boxing"
+        },
+        "grounding_info": {
+          "language": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "number": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "offset": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "q": {
+            "source_text": "User has recently started practicing boxing and is asking if it has significant health benefits.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_024",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search",
+        "arguments": {
+          "q": "benefits of heavy bag boxing training on physical fitness and body composition",
+          "number": 5
+        }
+      },
+      "gold": {
+        "name": "Search",
+        "arguments": {
+          "language": "en",
+          "number": 0,
+          "offset": 0,
+          "q": "health benefits of boxing"
+        },
+        "grounding_info": {
+          "language": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "number": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "offset": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "q": {
+            "source_text": "User has recently started practicing boxing and is asking if it has significant health benefits.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_025",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "business_travel_planner",
+        "arguments": {
+          "departure_date": "10/20/2023",
+          "destination": "San Francisco",
+          "return_date": "10/25/2023",
+          "preferences": []
+        },
+        "grounding_info": {
+          "departure_date": {
+            "source_text": "Then, I'll be heading to San Francisco on 10/20/2023 and return on 10/25/2023.",
+            "type": "explicit"
+          },
+          "destination": {
+            "source_text": "Then, I'll be heading to San Francisco on 10/20/2023 and return on 10/25/2023.",
+            "type": "explicit"
+          },
+          "return_date": {
+            "source_text": "Then, I'll be heading to San Francisco on 10/20/2023 and return on 10/25/2023.",
+            "type": "explicit"
+          },
+          "preferences": {
+            "source_text": "No preference items found in memory; defaulting to empty array.",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_025",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "business_travel_planner",
+        "arguments": {
+          "departure_date": "10/20/2023",
+          "destination": "San Francisco",
+          "return_date": "10/25/2023",
+          "preferences": []
+        },
+        "grounding_info": {
+          "departure_date": {
+            "source_text": "Then, I'll be heading to San Francisco on 10/20/2023 and return on 10/25/2023.",
+            "type": "explicit"
+          },
+          "destination": {
+            "source_text": "Then, I'll be heading to San Francisco on 10/20/2023 and return on 10/25/2023.",
+            "type": "explicit"
+          },
+          "return_date": {
+            "source_text": "Then, I'll be heading to San Francisco on 10/20/2023 and return on 10/25/2023.",
+            "type": "explicit"
+          },
+          "preferences": {
+            "source_text": "No preference items found in memory; defaulting to empty array.",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_026",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Get_Ether_Balance",
+        "arguments": {
+          "address": "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"
+        }
+      },
+      "gold": {
+        "name": "Get Ether Balance",
+        "arguments": {
+          "address": "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"
+        },
+        "grounding_info": {
+          "address": {
+            "source_text": "The wallet address is 0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_026",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Ether Balance",
+        "arguments": {
+          "address": "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"
+        },
+        "grounding_info": {
+          "address": {
+            "source_text": "The wallet address is 0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_027",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "crypto",
+          "pageIndex": 1,
+          "pageSize": 10
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "Bitcoin"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User is requesting the latest market data for the Bitcoin ticker BTC.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_027",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "crypto",
+          "pageIndex": 0,
+          "pageSize": 10
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "Bitcoin"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User is requesting the latest market data for the Bitcoin ticker BTC.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_028",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.333,
+      "pred": {
+        "name": "Search",
+        "arguments": {
+          "text": "Cybernetic Rhapsody"
+        }
+      },
+      "gold": {
+        "name": "Search",
+        "arguments": {
+          "text": "Cybernetic Rhapsody",
+          "analyzed": false,
+          "morph": false,
+          "page": 1,
+          "source": "global"
+        },
+        "grounding_info": {
+          "text": {
+            "source_text": "That's okay, can you get me more details about the movie Cybernetic Rhapsody?",
+            "type": "explicit"
+          },
+          "analyzed": {
+            "source_text": "default value definition: false",
+            "type": "default"
+          },
+          "morph": {
+            "source_text": "default value definition: false",
+            "type": "default"
+          },
+          "page": {
+            "source_text": "default value definition: 1",
+            "type": "default"
+          },
+          "source": {
+            "source_text": "default value definition: 'global'",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_028",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Search",
+        "arguments": {
+          "text": "Cybernetic Rhapsody",
+          "analyzed": false,
+          "morph": false,
+          "page": 1,
+          "source": "global"
+        },
+        "grounding_info": {
+          "text": {
+            "source_text": "That's okay, can you get me more details about the movie Cybernetic Rhapsody?",
+            "type": "explicit"
+          },
+          "analyzed": {
+            "source_text": "default value definition: false",
+            "type": "default"
+          },
+          "morph": {
+            "source_text": "default value definition: false",
+            "type": "default"
+          },
+          "page": {
+            "source_text": "default value definition: 1",
+            "type": "default"
+          },
+          "source": {
+            "source_text": "default value definition: 'global'",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_029",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.286,
+      "pred": {
+        "name": "Search",
+        "arguments": {
+          "q": "foods to boost immune system defenses",
+          "number": 10,
+          "language": "en"
+        }
+      },
+      "gold": {
+        "name": "Search",
+        "arguments": {
+          "language": "en",
+          "number": 0,
+          "offset": 0,
+          "q": "foods to boost immune system healthy diet"
+        },
+        "grounding_info": {
+          "language": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "number": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "offset": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "q": {
+            "source_text": "User is trying to adjust their diet to boost their immune system ... + User asks for recommendations on foods to focus on for a healthy diet",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_029",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.286,
+      "pred": {
+        "name": "Search",
+        "arguments": {
+          "q": "foods to boost immune system naturally diet",
+          "language": "en",
+          "number": 10
+        }
+      },
+      "gold": {
+        "name": "Search",
+        "arguments": {
+          "language": "en",
+          "number": 0,
+          "offset": 0,
+          "q": "foods to boost immune system healthy diet"
+        },
+        "grounding_info": {
+          "language": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "number": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "offset": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "q": {
+            "source_text": "User is trying to adjust their diet to boost their immune system ... + User asks for recommendations on foods to focus on for a healthy diet",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_030",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Stock_Quote_Price",
+        "arguments": {
+          "symbol": "AAPL",
+          "apikey": ""
+        }
+      },
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "AMZN"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "Hey there, can you help me out with the current value of the Amazon stock, AMZN, in the US Market?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_030",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Stock Quote Price",
+        "arguments": {
+          "symbol": "AMZN"
+        },
+        "grounding_info": {
+          "symbol": {
+            "source_text": "Hey there, can you help me out with the current value of the Amazon stock, AMZN, in the US Market?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_031",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Search_Cat_Breeds",
+        "arguments": {
+          "search": "american"
+        }
+      },
+      "gold": {
+        "name": "Search Cat Breeds",
+        "arguments": {
+          "search": "american"
+        },
+        "grounding_info": {
+          "search": {
+            "source_text": "User is asking for information about cat breeds from the United States.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_031",
+      "mode": "nomemory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Search_Cat_Breeds",
+        "arguments": {
+          "search": "american"
+        }
+      },
+      "gold": {
+        "name": "Search Cat Breeds",
+        "arguments": {
+          "search": "american"
+        },
+        "grounding_info": {
+          "search": {
+            "source_text": "User is asking for information about cat breeds from the United States.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_032",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "check_domain_availability",
+        "arguments": {
+          "domain": "newsabouttech.com"
+        }
+      },
+      "gold": {
+        "name": "check_domain_availability",
+        "arguments": {
+          "domain": "newsabouttech.com"
+        },
+        "grounding_info": {
+          "domain": {
+            "source_text": "Can you fetch the domain details for the website \"newsabouttech.com\"?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_032",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "check_domain_availability",
+        "arguments": {
+          "domain": "newsabouttech.com"
+        },
+        "grounding_info": {
+          "domain": {
+            "source_text": "Can you fetch the domain details for the website \"newsabouttech.com\"?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_033",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "hotel.find",
+        "arguments": {
+          "location": "London"
+        },
+        "grounding_info": {
+          "location": {
+            "source_text": "I need to find a hotel in London",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_033",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "hotel.find",
+        "arguments": {
+          "location": "London"
+        },
+        "grounding_info": {
+          "location": {
+            "source_text": "I need to find a hotel in London",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_034",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Get_Number_of_Schools_in_Indonesian_City_District",
+        "arguments": {
+          "kode_wilayah_propinsi_id": "31"
+        }
+      },
+      "gold": {
+        "name": "Get Number of Schools in Indonesian City/District",
+        "arguments": {
+          "kode_wilayah_propinsi_id": "31"
+        },
+        "grounding_info": {
+          "kode_wilayah_propinsi_id": {
+            "source_text": "User is requesting the number of schools in Jakarta Province, Indonesia.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_034",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Get Number of Schools in Indonesian City/District",
+        "arguments": {
+          "kode_wilayah_propinsi_id": "31"
+        },
+        "grounding_info": {
+          "kode_wilayah_propinsi_id": {
+            "source_text": "User is requesting the number of schools in Jakarta Province, Indonesia.",
+            "type": "inferred"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_035",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Object Detection API",
+        "arguments": {
+          "url": "http://example.com/my-image.jpg"
+        },
+        "grounding_info": {
+          "url": {
+            "source_text": "User requests evaluation of image quality and provides the image URL: http://example.com/my-image.jpg.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_035",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Object Detection API",
+        "arguments": {
+          "url": "http://example.com/my-image.jpg"
+        },
+        "grounding_info": {
+          "url": {
+            "source_text": "User requests evaluation of image quality and provides the image URL: http://example.com/my-image.jpg.",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_036",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "currency market news"
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "forex markets",
+          "pageIndex": 1,
+          "pageSize": 10
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User requests recent updates on significant events affecting the forex markets to stay informed during travels.",
+            "type": "explicit"
+          },
+          "pageIndex": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "pageSize": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_036",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.333,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "currency market news",
+          "pageIndex": 0,
+          "pageSize": 10
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "forex markets",
+          "pageIndex": 1,
+          "pageSize": 10
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User requests recent updates on significant events affecting the forex markets to stay informed during travels.",
+            "type": "explicit"
+          },
+          "pageIndex": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "pageSize": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_037",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Suggest",
+        "arguments": {
+          "keyword": "Parkinson's disease quotes",
+          "lr": "en-US"
+        }
+      },
+      "gold": {
+        "name": "Suggest",
+        "arguments": {
+          "keyword": "technology"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User asks for popular quotes related to technology.",
+            "type": "inferred"
+          },
+          "lr": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_037",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Suggest",
+        "arguments": {
+          "keyword": "technology"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User asks for popular quotes related to technology.",
+            "type": "inferred"
+          },
+          "lr": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_038",
+      "mode": "memory",
+      "ta": true,
+      "param_f1": 1.0,
+      "pred": {
+        "name": "Get_Random_Named_Color",
+        "arguments": {
+          "quantity": 5
+        }
+      },
+      "gold": {
+        "name": "Get Random Named Color",
+        "arguments": {
+          "quantity": 5
+        },
+        "grounding_info": {
+          "quantity": {
+            "source_text": "Can you generate a set of 5 random HEX color codes for me?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_038",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Get_Random_Named_Color",
+        "arguments": {
+          "quantity": 10
+        }
+      },
+      "gold": {
+        "name": "Get Random Named Color",
+        "arguments": {
+          "quantity": 5
+        },
+        "grounding_info": {
+          "quantity": {
+            "source_text": "Can you generate a set of 5 random HEX color codes for me?",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 2,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_039",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.333,
+      "pred": {
+        "name": "DatabaseQueryExecutor_executeRangeQuery",
+        "arguments": {
+          "connectionString": "jdbc:mysql:worldcup",
+          "query": "SELECT DISTINCT winner FROM world_cup_champions",
+          "parameters": []
+        }
+      },
+      "gold": {
+        "name": "DatabaseQueryExecutor.executeRangeQuery",
+        "arguments": {
+          "connectionString": "jdbc:mysql:world_cup_stats",
+          "query": "SELECT country, COUNT(*) AS titles FROM world_cup_winners GROUP BY country HAVING COUNT(*) >= 1 ORDER BY titles DESC",
+          "parameters": []
+        },
+        "grounding_info": {
+          "connectionString": {
+            "source_text": "User repeatedly asks about soccer/football World Cup winners; inferred MySQL database named 'world_cup_stats'",
+            "type": "inferred"
+          },
+          "query": {
+            "source_text": "User asks: 'What are the countries that won at least 1 soccer world cup?'",
+            "type": "inferred"
+          },
+          "parameters": {
+            "source_text": "No parameters needed for this particular range query",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_039",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.333,
+      "pred": {
+        "name": "DatabaseQueryExecutor_executeRangeQuery",
+        "arguments": {
+          "connectionString": "jdbc:mysql:worldcup",
+          "query": "SELECT nation FROM world_cup_winners GROUP BY nation HAVING COUNT(*) >= 1",
+          "parameters": []
+        }
+      },
+      "gold": {
+        "name": "DatabaseQueryExecutor.executeRangeQuery",
+        "arguments": {
+          "connectionString": "jdbc:mysql:world_cup_stats",
+          "query": "SELECT country, COUNT(*) AS titles FROM world_cup_winners GROUP BY country HAVING COUNT(*) >= 1 ORDER BY titles DESC",
+          "parameters": []
+        },
+        "grounding_info": {
+          "connectionString": {
+            "source_text": "User repeatedly asks about soccer/football World Cup winners; inferred MySQL database named 'world_cup_stats'",
+            "type": "inferred"
+          },
+          "query": {
+            "source_text": "User asks: 'What are the countries that won at least 1 soccer world cup?'",
+            "type": "inferred"
+          },
+          "parameters": {
+            "source_text": "No parameters needed for this particular range query",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_040",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "crypto market this week"
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "Bitcoin market trend"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User wants to analyze the market trend for Bitcoin.",
+            "type": "inferred"
+          },
+          "pageIndex": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "pageSize": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_040",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": {
+        "name": "Search_News",
+        "arguments": {
+          "keyword": "crypto",
+          "pageIndex": 0,
+          "pageSize": 10
+        }
+      },
+      "gold": {
+        "name": "Search News",
+        "arguments": {
+          "keyword": "Bitcoin market trend"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "User wants to analyze the market trend for Bitcoin.",
+            "type": "inferred"
+          },
+          "pageIndex": {
+            "source_text": "default value",
+            "type": "default"
+          },
+          "pageSize": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    }
+  ],
+  "config": {
+    "limit": 40,
+    "top_k": 3,
+    "distractors": 40,
+    "modes": "memory,nomemory"
+  }
+}

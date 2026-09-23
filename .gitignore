@@ -180,3 +180,6 @@ progress.log
 *.log
 results/gui_ltm.sqlite3*
 results/hitl_trace.jsonl
+
+benchmarks/mem2actbench/data/
+mcp_demo.txt

@@ -311,5 +311,29 @@
 - 国内网络可用镜像：`HF_ENDPOINT=https://hf-mirror.com`；
 - 接口已接入 `LongTermMemory`（`get_retriever("embedding")` 或 `retriever=` 参数），默认仍是零依赖 TF-IDF。
 
+### 6.11 MCP 接入（2026-09-23）
+
+- `extras/mcp/mcp_server.py`：把沙箱工具（Python / 文件 / 命令）暴露为标准 MCP 工具（stdio）；
+- `extras/mcp/client_demo.py`：客户端拉取工具列表并调用——`run_python` 返回 42、
+  `run_command("rm -rf ...")` 被沙箱黑名单拦截、文件读写正常；
+- 依赖 mcp 2.x（`MCPServer`，即原 FastMCP）；接入其他 MCP 客户端的配置示例见目录 README。
+
+### 6.12 公开基准：Mem2ActBench（ACL 2026，2026-09-23）
+
+- 场景：用户跨会话提到过的偏好/状态（记忆）需被检索并用于"选对工具 + 填对参数"——
+  真实业务助手形态；数据来自 ToolACE / BFCL / OASST1 合成的 2,029 段会话与 400 个任务；
+- 简化协议：每题的证据片段 + 40 条随机干扰片段 → 本项目长期记忆管线（TF-IDF 检索 →
+  注入）→ 原生 Function Calling 生成工具调用 → 判分（TA / 参数 F1）；对照"无记忆"；
+- 结果（40 题子集，Top-3，每题 40 条干扰；仅上下文不同，其余完全一致）：
+
+| 模式 | Tool Accuracy | 平均参数 F1 |
+| --- | --- | --- |
+| **有记忆（本项目管线）** | **37.5%** | **0.421** |
+| 无记忆（仅 query） | 10.0% | 0.145 |
+
+- 结论：记忆管线把工具准确率从 10% → **37.5%**（3.75×）、参数 F1 从 0.145 → **0.421**（2.9×）；
+- 口径说明：这是**简化协议**（证据片段 + 干扰片段，非完整数千轮历史），与论文完整设置
+  的多框架对比不可直接比数；价值在于"同模型同 prompt、仅上下文不同"的受控验证。
+
 原始数据：`results/sweep_*.json`、`results/compare_*.json`、`results/compare_multi_agent_*.json`、
-`results/compare_models_*.json`、`results/ablation_injection_*.json`。
+`results/compare_models_*.json`、`results/ablation_injection_*.json`、`results/mem2actbench_*.json`。

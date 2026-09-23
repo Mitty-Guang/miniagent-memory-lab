@@ -20,6 +20,8 @@
 | 可观测性 | `TraceLogger`：LLM / 工具 / 审批 / 记忆读写事件 + token / 延迟统计 |
 | 可视化 | 交互式 GUI（实时轨迹 / 上下文选择 / 审批按钮 / token 面板）+ 实验监控面板 |
 | 多 Agent | Planner → Executor → Reviewer 监督式协作（含失败反馈重试）与单 Agent 对照 |
+| MCP | `extras/mcp/`：把沙箱工具包成标准 MCP Server（stdio），附客户端演示与接入配置 |
+| 公开基准 | `benchmarks/mem2actbench/`：Mem2ActBench（ACL 2026）适配器——记忆驱动的工具调用，对比有/无记忆 |
 | 对照实验 | 手写循环 vs LangGraph、单 Agent vs 多 Agent、跨模型（flash vs pro）、记忆注入方式消融 |
 
 ## 快速开始
@@ -55,6 +57,12 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 
 # 记忆注入方式消融（system_prompt vs 独立 system 消息）
 .\.venv\Scripts\python.exe ablation_injection.py --repeat 2 --budget 800 --policy impact
+
+# MCP：把沙箱工具暴露为标准 MCP 工具（需 extras/mcp/requirements-extras.txt）
+.\.venv\Scripts\python.exe extras\mcp\client_demo.py
+
+# 公开基准：Mem2ActBench（记忆驱动的工具调用；需先下载数据，见 benchmarks/mem2actbench/README.md）
+.\.venv\Scripts\python.exe benchmarks\mem2actbench\run_benchmark.py --limit 40 --top-k 3
 
 # 可视化
 .\.venv\Scripts\python.exe gui.py            # 交互式 Demo: http://127.0.0.1:8901
@@ -94,6 +102,10 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 
 **向量检索**：`EmbeddingRetriever`（fastembed + bge-small-zh）冒烟通过；
 国内可用 `HF_ENDPOINT=https://hf-mirror.com` 下载模型，默认仍是零依赖 TF-IDF。
+
+**公开基准（Mem2ActBench，ACL 2026，40 题子集）**：记忆驱动的工具调用任务上，
+本项目记忆管线把 Tool Accuracy 从 10% 提升到 **37.5%**、参数 F1 从 0.145 到 **0.421**
+（同模型同 prompt，仅上下文不同；简化协议，详见 `benchmarks/mem2actbench/README.md`）。
 
 ## 目录结构
 

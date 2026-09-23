@@ -1,0 +1,226 @@
+{
+  "summary": {
+    "memory": {
+      "n": 3,
+      "tool_accuracy": 0.0,
+      "avg_param_f1": 0.0
+    },
+    "nomemory": {
+      "n": 3,
+      "tool_accuracy": 0.0,
+      "avg_param_f1": 0.0
+    }
+  },
+  "rows": [
+    {
+      "qa_id": "qa_001",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "/get-social-trending/impressions",
+        "arguments": {
+          "social": "Twitter",
+          "isCrypto": true,
+          "limit": 50,
+          "timestamp": "24h"
+        },
+        "grounding_info": {
+          "social": {
+            "source_text": "No platform mentioned in memory; Twitter is the de-facto standard for finance-ticker chatter",
+            "type": "default"
+          },
+          "isCrypto": {
+            "source_text": "User requests the latest videos on cryptocurrency trends",
+            "type": "inferred"
+          },
+          "limit": {
+            "source_text": "Schema allows 1-50; 50 gives the full top-list",
+            "type": "default"
+          },
+          "timestamp": {
+            "source_text": "Schema default for social-trending endpoints is 24h",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_001",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "/get-social-trending/impressions",
+        "arguments": {
+          "social": "Twitter",
+          "isCrypto": true,
+          "limit": 50,
+          "timestamp": "24h"
+        },
+        "grounding_info": {
+          "social": {
+            "source_text": "No platform mentioned in memory; Twitter is the de-facto standard for finance-ticker chatter",
+            "type": "default"
+          },
+          "isCrypto": {
+            "source_text": "User requests the latest videos on cryptocurrency trends",
+            "type": "inferred"
+          },
+          "limit": {
+            "source_text": "Schema allows 1-50; 50 gives the full top-list",
+            "type": "default"
+          },
+          "timestamp": {
+            "source_text": "Schema default for social-trending endpoints is 24h",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_002",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Pitching Leaders",
+        "arguments": {
+          "game_type": "regular season",
+          "results": 10,
+          "season": "2024",
+          "sort_column": "ERA",
+          "sports_code": "MLB"
+        },
+        "grounding_info": {
+          "game_type": {
+            "source_text": "regular season games",
+            "type": "explicit"
+          },
+          "results": {
+            "source_text": "default value (top 10)",
+            "type": "default"
+          },
+          "season": {
+            "source_text": "current season → inferred as 2024",
+            "type": "inferred"
+          },
+          "sort_column": {
+            "source_text": "Earned Run Average (ERA)",
+            "type": "explicit"
+          },
+          "sports_code": {
+            "source_text": "MLB sports code",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_002",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Pitching Leaders",
+        "arguments": {
+          "game_type": "regular season",
+          "results": 10,
+          "season": "2024",
+          "sort_column": "ERA",
+          "sports_code": "MLB"
+        },
+        "grounding_info": {
+          "game_type": {
+            "source_text": "regular season games",
+            "type": "explicit"
+          },
+          "results": {
+            "source_text": "default value (top 10)",
+            "type": "default"
+          },
+          "season": {
+            "source_text": "current season → inferred as 2024",
+            "type": "inferred"
+          },
+          "sort_column": {
+            "source_text": "Earned Run Average (ERA)",
+            "type": "explicit"
+          },
+          "sports_code": {
+            "source_text": "MLB sports code",
+            "type": "explicit"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_003",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Real-time Hashtag Search",
+        "arguments": {
+          "keyword": "trendsetter"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "I also need to retrieve statistics about a hashtag they are promoting on TikTok called 'trendsetter'.",
+            "type": "explicit"
+          },
+          "fresh": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_003",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.0,
+      "pred": null,
+      "gold": {
+        "name": "Real-time Hashtag Search",
+        "arguments": {
+          "keyword": "trendsetter"
+        },
+        "grounding_info": {
+          "keyword": {
+            "source_text": "I also need to retrieve statistics about a hashtag they are promoting on TikTok called 'trendsetter'.",
+            "type": "explicit"
+          },
+          "fresh": {
+            "source_text": "default value",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    }
+  ],
+  "config": {
+    "limit": 3,
+    "top_k": 3,
+    "distractors": 40,
+    "modes": "memory,nomemory"
+  }
+}

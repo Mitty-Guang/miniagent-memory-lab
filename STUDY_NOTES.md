@@ -250,3 +250,14 @@ Planner → Executor → Reviewer（失败带反馈重试）对比单 Agent：8 
 坑：把 `ToolNode` 包进自定义节点时忘记传 `config`，会抛
 `ValueError: Missing required config key 'N/A'`——第一次工具调用就崩；修复是直接把它
 作为节点使用，或在包装节点里显式透传 config。这个坑说明"框架原语不是包一层就行"。
+
+**Q21：MCP 是怎么接的？**
+把项目的沙箱工具（Python 执行 / 文件 / 命令）包成标准 **MCP Server**（stdio），
+任何 MCP 客户端都能发现并调用；`client_demo.py` 演示了完整链路（列工具 → 调用 →
+黑名单拦截生效）。依赖 mcp 2.x（FastMCP 已更名 MCPServer，踩过一次版本坑）。
+
+**Q22：怎么在公开基准上验证的？**
+接入了 **Mem2ActBench（ACL 2026）**：400 个"记忆驱动工具调用"任务（跨会话记住偏好 →
+选对工具 + 填对参数）。简化协议：证据片段 + 40 条干扰 → 走本项目的记忆管线检索注入 →
+原生 Function Calling 生成调用 → 判分 TA/参数 F1，并对比"无记忆"。
+它同时也是我科研计划要接入的基准，工程与科研互相印证。
