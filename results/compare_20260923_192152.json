@@ -1,0 +1,42 @@
+{
+  "rows": [
+    {
+      "impl": "langgraph",
+      "task_id": "sum_1_100",
+      "success": true,
+      "llm_calls": 2,
+      "prompt_tokens": 1030,
+      "completion_tokens": 90,
+      "seconds": 1.89,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "error": ""
+    },
+    {
+      "impl": "miniagent",
+      "task_id": "sum_1_100",
+      "success": true,
+      "llm_calls": 2,
+      "prompt_tokens": 1230,
+      "completion_tokens": 89,
+      "seconds": 1.63,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "error": ""
+    }
+  ],
+  "summary": [
+    {
+      "impl": "miniagent",
+      "success_rate": 1.0,
+      "avg_calls": 2.0,
+      "avg_prompt_tokens": 1230.0,
+      "avg_seconds": 1.63
+    },
+    {
+      "impl": "langgraph",
+      "success_rate": 1.0,
+      "avg_calls": 2.0,
+      "avg_prompt_tokens": 1030.0,
+      "avg_seconds": 1.89
+    }
+  ]
+}

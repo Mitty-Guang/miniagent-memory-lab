@@ -1,0 +1,4 @@
+# LangGraph 对照实验的额外依赖（主项目本身不需要）
+langchain>=1.0
+langchain-openai>=1.0
+langgraph>=1.0

@@ -1,0 +1,94 @@
+{
+  "budget_chars": 1200,
+  "policies": [
+    "all",
+    "recent",
+    "relevance",
+    "impact"
+  ],
+  "timestamp": "20260922_165707",
+  "summary": {
+    "all": {
+      "n_tasks": 1,
+      "success_rate": 1.0,
+      "avg_steps": 2.0,
+      "avg_llm_calls": 2.0,
+      "avg_prompt_chars": 591.0,
+      "avg_seconds": 1.77
+    },
+    "recent": {
+      "n_tasks": 1,
+      "success_rate": 1.0,
+      "avg_steps": 2.0,
+      "avg_llm_calls": 2.0,
+      "avg_prompt_chars": 591.0,
+      "avg_seconds": 1.47
+    },
+    "relevance": {
+      "n_tasks": 1,
+      "success_rate": 1.0,
+      "avg_steps": 2.0,
+      "avg_llm_calls": 2.0,
+      "avg_prompt_chars": 591.0,
+      "avg_seconds": 1.55
+    },
+    "impact": {
+      "n_tasks": 1,
+      "success_rate": 1.0,
+      "avg_steps": 2.0,
+      "avg_llm_calls": 2.0,
+      "avg_prompt_chars": 591.0,
+      "avg_seconds": 2.06
+    }
+  },
+  "records": [
+    {
+      "task_id": "sum_1_100",
+      "policy": "all",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 1.77,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100_7ixqt_yq",
+      "error": ""
+    },
+    {
+      "task_id": "sum_1_100",
+      "policy": "recent",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 1.47,
+      "final_answer": "**结果：5050**",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100_nopzht3p",
+      "error": ""
+    },
+    {
+      "task_id": "sum_1_100",
+      "policy": "relevance",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 1.55,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100_7lyd4r5t",
+      "error": ""
+    },
+    {
+      "task_id": "sum_1_100",
+      "policy": "impact",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 2.06,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100__epx53vb",
+      "error": ""
+    }
+  ]
+}

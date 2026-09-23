@@ -1,0 +1,142 @@
+{
+  "budget_chars": 500,
+  "policies": [
+    "all",
+    "recent",
+    "relevance",
+    "impact"
+  ],
+  "timestamp": "20260922_170734",
+  "summary": {
+    "all": {
+      "n_tasks": 2,
+      "success_rate": 1.0,
+      "avg_steps": 2.5,
+      "avg_llm_calls": 2.5,
+      "avg_prompt_chars": 950.0,
+      "avg_seconds": 3.16
+    },
+    "recent": {
+      "n_tasks": 2,
+      "success_rate": 1.0,
+      "avg_steps": 4.0,
+      "avg_llm_calls": 4.0,
+      "avg_prompt_chars": 1805.0,
+      "avg_seconds": 5.16
+    },
+    "relevance": {
+      "n_tasks": 2,
+      "success_rate": 1.0,
+      "avg_steps": 2.5,
+      "avg_llm_calls": 2.5,
+      "avg_prompt_chars": 984.0,
+      "avg_seconds": 1.72
+    },
+    "impact": {
+      "n_tasks": 2,
+      "success_rate": 1.0,
+      "avg_steps": 2.5,
+      "avg_llm_calls": 2.5,
+      "avg_prompt_chars": 932.0,
+      "avg_seconds": 2.27
+    }
+  },
+  "records": [
+    {
+      "task_id": "sum_1_100",
+      "policy": "all",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 1.69,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100__k7_ym1n",
+      "error": ""
+    },
+    {
+      "task_id": "write_hello",
+      "policy": "all",
+      "success": true,
+      "steps": 3,
+      "llm_calls": 3,
+      "prompt_chars": 1310,
+      "seconds": 4.62,
+      "final_answer": "完成 ✅\n\n已在当前目录创建 `hello.txt` 文件，内容为：**Hello MiniAgent**",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_write_hello_31_qe8ei",
+      "error": ""
+    },
+    {
+      "task_id": "sum_1_100",
+      "policy": "recent",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 1.29,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100_9vccqbh9",
+      "error": ""
+    },
+    {
+      "task_id": "write_hello",
+      "policy": "recent",
+      "success": true,
+      "steps": 6,
+      "llm_calls": 6,
+      "prompt_chars": 3019,
+      "seconds": 9.03,
+      "final_answer": "已完成 ✅\n\n已在当前目录创建 `hello.txt` 文件，并验证内容无误：\n\n- **文件路径**：`./hello.txt`\n- **文件内容**：`Hello MiniAgent`\n\n任务完成。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_write_hello_pphh3vj4",
+      "error": ""
+    },
+    {
+      "task_id": "sum_1_100",
+      "policy": "relevance",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 1.0,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100_a6wxsjh6",
+      "error": ""
+    },
+    {
+      "task_id": "write_hello",
+      "policy": "relevance",
+      "success": true,
+      "steps": 3,
+      "llm_calls": 3,
+      "prompt_chars": 1376,
+      "seconds": 2.44,
+      "final_answer": "完成 ✅\n\n- **文件路径**：当前目录下的 `hello.txt`\n- **文件内容**：`Hello MiniAgent`\n\n已创建并读取验证，内容与要求一致。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_write_hello_j5hxxmvw",
+      "error": ""
+    },
+    {
+      "task_id": "sum_1_100",
+      "policy": "impact",
+      "success": true,
+      "steps": 2,
+      "llm_calls": 2,
+      "prompt_chars": 591,
+      "seconds": 1.4,
+      "final_answer": "1 到 100 的和是 **5050**。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_sum_1_100__qjgtpjs",
+      "error": ""
+    },
+    {
+      "task_id": "write_hello",
+      "policy": "impact",
+      "success": true,
+      "steps": 3,
+      "llm_calls": 3,
+      "prompt_chars": 1273,
+      "seconds": 3.14,
+      "final_answer": "已完成 ✅\n\n我在当前目录创建了 `hello.txt` 文件，内容为：\n\n```\nHello MiniAgent\n```\n\n已读取验证，文件内容和路径均正确。",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\miniagent_write_hello_8k12um6h",
+      "error": ""
+    }
+  ]
+}
