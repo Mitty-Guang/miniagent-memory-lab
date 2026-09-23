@@ -108,11 +108,12 @@ class MiniAgent:
             
             print(f"💭 思考结果: {response.content}")
             
-            # 保存助手消息
+            # 保存助手消息（含思考模式的 reasoning_content，需回传给接口）
             self.memory.add_message(
                 Message.assistant_message(
                     content=response.content,
-                    tool_calls=response.tool_calls
+                    tool_calls=response.tool_calls,
+                    reasoning_content=getattr(response, "reasoning_content", None),
                 )
             )
             

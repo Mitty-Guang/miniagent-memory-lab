@@ -10,6 +10,7 @@ class LLMResponse(BaseModel):
     """LLM响应结果"""
     content: Optional[str] = None
     tool_calls: Optional[List[Dict[str, Any]]] = None
+    reasoning_content: Optional[str] = None   # 思考模式模型的思维链（必须回传，否则接口 400）
 
 
 class SimpleLLM:
@@ -61,6 +62,7 @@ class SimpleLLM:
             # 解析响应
             result = LLMResponse()
             result.content = message.content
+            result.reasoning_content = getattr(message, "reasoning_content", None)
             
             # 解析工具调用
             if message.tool_calls:

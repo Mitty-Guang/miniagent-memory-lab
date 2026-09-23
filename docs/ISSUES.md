@@ -47,6 +47,8 @@
 | E13 | 模型把检索到的历史任务当成当前任务回答（"记住偏好"却回了 hello.txt 的完成报告） | 长期记忆注入系统提示词后，弱模型把"记忆里的示例"当成当前任务 | 记录为已知风险；缓解：任务描述更具体、预算/相关度控制注入条数、记忆库可手动删除干扰项 | 复现后通过"新会话 + 删除干扰记忆"验证行为恢复 |
 | E14 | 相关性判断被弱词欺骗（生肖黄历页因命中"今年"被判为相关，导致自动重试不触发） | bigram token 含"今年/年的"等弱词，命中即算相关 | token 提取剔除弱词/虚词（今年/推荐/的/了…）；判相关改为"弱词过滤后命中 ≥1" | 单测 + 实测：原查询正确触发重搜 |
 | E15 | 兜底查询的验收标准难定（严格 ≥2 命中会拒掉好结果；宽松 ≥1 又会放过"只命中地名"的百科页） | 泛词查询里"北京"这类地名 token 命中率高、区分度低 | 兜底结果改用**领域话题词**验收（实习→实习/招聘/岗位/校招），无领域配置时退回普通相关性 | 「北京实习」百科页被拒 → 继续尝试平台词前置查询 ✓ |
+| E16 | GUI 连续对话报 `重试 8 次后仍失败（422 … missing field content）` | assistant 消息带 tool_calls 但 content 为空时，消息转换 `if msg.content:` 把 **content 字段整个省略** → 接口反序列化失败（422） | 统一为"content 始终存在（空内容用空串）"，3 处：`memory_policies.to_openai_messages` / `schema.Memory.get_messages` / `config.as_chat_message`；新增回归测试 `test_openai_message_shape` | 修复后 422 消失（随即暴露下一层 E17） |
+| E17 | 修完 E16 出现 400 `The reasoning_content in the thinking mode must be passed back to the API` | 思考模式模型的**思维链未保存/未回传**（只留 content），接口判定上下文不完整 | `LLMResponse`/`Message` 增加 `reasoning_content`；`SimpleLLM` 与 `CountingLLM` 解析时保存；`agent.think()` 写回消息时携带；消息转换按需回传 | 真实 API 两步验证通过（"content 与 reasoning_content 都通过校验"） |
 
 ---
 

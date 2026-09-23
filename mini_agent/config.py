@@ -61,7 +61,9 @@ def as_chat_message(message) -> dict:
     表现为"功能静默回退"，排查成本高。这里做一次归一化，避免同类问题。
     """
     if isinstance(message, dict):
-        return message
+        data = dict(message)
+        data.setdefault("content", "")   # 空内容也必须有 content 字段（接口严格校验）
+        return data
     role = getattr(message, "role", "user")
     role = getattr(role, "value", role)
     data = {"role": str(role), "content": getattr(message, "content", "") or ""}
@@ -71,6 +73,9 @@ def as_chat_message(message) -> dict:
     tool_call_id = getattr(message, "tool_call_id", None)
     if tool_call_id:
         data["tool_call_id"] = tool_call_id
+    reasoning = getattr(message, "reasoning_content", None)
+    if reasoning:
+        data["reasoning_content"] = reasoning
     return data
 
 
@@ -149,6 +154,7 @@ class CountingLLM(SimpleLLM):
 
             message = response.choices[0].message
             result = LLMResponse(content=message.content)
+            result.reasoning_content = getattr(message, "reasoning_content", None)
             if message.tool_calls:
                 result.tool_calls = [
                     {

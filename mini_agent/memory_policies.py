@@ -107,16 +107,20 @@ def message_groups(messages: List[Message]) -> List[List[int]]:
 
 
 def to_openai_messages(messages: List[Message]) -> List[Dict[str, Any]]:
-    """Message 列表 -> OpenAI API 消息格式。"""
+    """Message 列表 -> OpenAI API 消息格式。
+
+    注意：`content` 必须**始终存在**（可为空字符串）。曾因空内容时省略该字段，
+    导致 assistant(tool_calls) 消息缺 `content` → 接口 422 `missing field content`。
+    """
     result = []
     for msg in messages:
-        item: Dict[str, Any] = {"role": msg.role.value}
-        if msg.content:
-            item["content"] = msg.content
+        item: Dict[str, Any] = {"role": msg.role.value, "content": msg.content or ""}
         if msg.tool_calls:
             item["tool_calls"] = msg.tool_calls
         if msg.tool_call_id:
             item["tool_call_id"] = msg.tool_call_id
+        if msg.reasoning_content:
+            item["reasoning_content"] = msg.reasoning_content   # 思考模式必须回传
         result.append(item)
     return result
 

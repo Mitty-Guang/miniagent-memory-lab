@@ -377,6 +377,41 @@ def test_chat_continuation():
     print("test_chat_continuation passed")
 
 
+def test_openai_message_shape():
+    """回归：所有消息必须带 content 字段（空内容也要有），否则接口 422 missing field content。"""
+    from mini_agent.memory_policies import to_openai_messages
+    from mini_agent.schema import Memory, Message
+
+    messages = [
+        Message.user_message("任务"),
+        Message.assistant_message(
+            content="",
+            tool_calls=[{"id": "c1", "function": {"name": "bash_execute", "arguments": "{}"}}],
+            reasoning_content="我先看看有哪些文件",
+        ),
+        Message.tool_message(content="ok", tool_call_id="c1"),
+        Message.assistant_message(content="完成"),
+    ]
+    for item in to_openai_messages(messages):
+        assert "content" in item, item
+    assert to_openai_messages(messages)[1]["content"] == ""
+    # 思考模式的思维链必须回传
+    assert to_openai_messages(messages)[1]["reasoning_content"] == "我先看看有哪些文件"
+
+    memory = Memory()
+    for msg in messages:
+        memory.add_message(msg)
+    for item in memory.get_messages():
+        assert "content" in item, item
+
+    # as_chat_message：外部传入的 dict 缺 content 时自动补空串
+    from mini_agent.config import as_chat_message
+
+    fixed = as_chat_message({"role": "assistant", "tool_calls": [{"id": "x"}]})
+    assert fixed["content"] == "" and "tool_calls" in fixed, fixed
+    print("test_openai_message_shape passed")
+
+
 if __name__ == "__main__":
     test_ltm_basic()
     test_trace_summary()
@@ -390,4 +425,5 @@ if __name__ == "__main__":
     test_memory_browser()
     test_auto_budget()
     test_chat_continuation()
-    print("\n✅ 所有离线测试通过（记忆 / tracing / HITL / multi-agent / sandbox / 检索 / 联网 / 记忆浏览器 / 自动参数 / 连续对话）")
+    test_openai_message_shape()
+    print("\n✅ 所有离线测试通过（记忆 / tracing / HITL / multi-agent / sandbox / 检索 / 联网 / 记忆浏览器 / 自动参数 / 连续对话 / 消息格式）")
