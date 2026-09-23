@@ -55,7 +55,6 @@ async def run_multi_agent_task(task: Dict, policy: str, budget: int, priors: Dic
                 llm=llm,
                 policy=policy,
                 budget_chars=budget,
-                impact_priors=priors,
                 ltm=ltm,
                 session_id=f"{task['id']}#{index}",
                 task_id=task["id"],
@@ -119,7 +118,6 @@ async def main():
     await warmup_async()
 
     tasks = TASKS[: args.limit]
-    priors = load_priors() if args.policy == "impact" else {}
 
     rows: List[Dict] = []
     for task in tasks:
@@ -128,7 +126,6 @@ async def main():
             task,
             policy=args.policy,
             budget_chars=args.budget,
-            impact_priors=priors or None,
         )
         rows.append(
             {

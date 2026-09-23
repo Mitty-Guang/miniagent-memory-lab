@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-09-24T01:24:14.521156",
+  "summary": {
+    "n_tasks": 1,
+    "handwritten": {
+      "success_rate": 1.0,
+      "avg_seconds": 3.43,
+      "avg_llm_calls": 4.0,
+      "avg_rounds": 1.0
+    },
+    "langgraph": {
+      "success_rate": 1.0,
+      "avg_seconds": 4.38,
+      "avg_llm_calls": 4.0,
+      "avg_rounds": 1.0,
+      "prompt_tokens": 1386,
+      "completion_tokens": 651
+    }
+  },
+  "rows": [
+    {
+      "task_id": "sum_1_100",
+      "handwritten": {
+        "success": true,
+        "seconds": 3.43,
+        "llm_calls": 4,
+        "rounds": 1,
+        "review": "PASS\n结果5050正确，且给出了计算与验证过程。"
+      },
+      "langgraph": {
+        "success": true,
+        "seconds": 4.38,
+        "llm_calls": 4,
+        "rounds": 1,
+        "review": "PASS\n正确给出1到100的和为5050。"
+      }
+    }
+  ]
+}

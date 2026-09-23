@@ -14,16 +14,8 @@ from typing import Dict, List, Optional
 from mini_agent.runner import run_agent_task
 from mini_agent.task_suite import TASKS
 
-POLICIES = ["all", "recent", "relevance", "impact"]
+POLICIES = ["all", "recent", "relevance"]
 RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
-
-
-def load_priors(path: str = "results/impact_priors.json") -> Dict[str, float]:
-    file = Path(path)
-    if not file.exists():
-        print(f"[warn] 未找到先验表 {path}，impact 策略将使用默认先验 0.5")
-        return {}
-    return json.loads(file.read_text(encoding="utf-8"))
 
 
 def aggregate(records: List[Dict]) -> Dict:
@@ -48,7 +40,6 @@ async def run(
 ) -> Dict:
     policies = policies or POLICIES
     tasks = TASKS[:limit] if limit else TASKS
-    priors = load_priors()
 
     all_records: List[Dict] = []
     summary: Dict[str, Dict] = {}
@@ -61,7 +52,6 @@ async def run(
                 task,
                 policy=policy,
                 budget_chars=budget_chars,
-                impact_priors=priors if policy == "impact" else None,
             )
             result.pop("messages", None)  # 消息流不进评测摘要
             records.append(result)

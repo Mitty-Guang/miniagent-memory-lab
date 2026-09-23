@@ -1,4 +1,5 @@
-# LangGraph 对照实验的额外依赖（主项目本身不需要）
+# Optional dependencies for the LangGraph / LangChain extras in this folder.
+# The core project (mini_agent/) stays dependency-free.
 langchain>=1.0
 langchain-openai>=1.0
 langgraph>=1.0

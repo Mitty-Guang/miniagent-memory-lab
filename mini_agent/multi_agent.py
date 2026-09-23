@@ -39,7 +39,6 @@ class MultiAgentTeam:
         llm,
         policy: str = "relevance",
         budget_chars: int = 1200,
-        impact_priors: Optional[Dict[str, float]] = None,
         ltm=None,
         session_id: str = "",
         task_id: str = "",
@@ -51,7 +50,6 @@ class MultiAgentTeam:
         self.llm = llm
         self.policy = policy
         self.budget_chars = budget_chars
-        self.impact_priors = impact_priors
         self.ltm = ltm
         self.session_id = session_id
         self.task_id = task_id
@@ -84,7 +82,6 @@ class MultiAgentTeam:
                 task_id=self.task_id,
                 policy=self.policy,
                 budget_chars=self.budget_chars,
-                impact_priors=self.impact_priors,
                 max_steps=self.max_steps,
                 approval_fn=self.approval_fn,
                 trace=self.trace,

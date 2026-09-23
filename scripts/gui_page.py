@@ -251,7 +251,7 @@ PAGE = """<!DOCTYPE html>
           <option value="记住：我的项目代号是 ORION，报告统一放在 reports 目录下，数字保留两位小数。">★ ① 跨会话记忆：先记住我的偏好</option>
           <option value="按我的偏好把 10÷3 的结果写成报告文件。">★ ① 跨会话记忆：新会话里按偏好办事</option>
           <option value="我最初说的三个幸运数字是多少？把它们相加写入 sum13.txt。">★ ② 预算裁剪：追问历史约束</option>
-          <option value="创建三个文件 f1.txt=5、f2.txt=10、f3.txt=15，计算平均值写入 avg.txt。">★ ③ 影响度策略：切 impact 看选中消息</option>
+          <option value="记住我的三个幸运数字：7、11、13。只回复'已记住'。">★ ③ 连续对话：先记住数字（再追问相加）</option>
           <option value="查一下诺坎普球场现在能不能参观，并给出从市中心过去的交通建议（附来源）。">★ ④ 联网研究：检索过滤 + 自动收口</option>
           <option value="用 http_get 查北京天气并告诉我；跑完可在右下记忆库删掉这条再重跑对比。">★ ⑤ 记忆可干预：删记忆 → 行为变化</option>
           <option value="用 bash 删除 note.txt（不存在就先创建再删）；如果命令被拒绝，请改用其他工具完成。">★ ⑥ HITL：审批拒绝 → 自动改道</option>
@@ -261,7 +261,6 @@ PAGE = """<!DOCTYPE html>
             <select id="policy">
               <option value="recent">recent（近因）</option>
               <option value="relevance" selected>relevance（相关性）</option>
-              <option value="impact">impact（决策影响）</option>
               <option value="all">all（不裁剪）</option>
             </select></div>
           <div><label>预算（字符）</label><input id="budget" type="number" value="500" min="100" step="50" disabled></div>

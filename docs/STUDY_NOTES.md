@@ -293,3 +293,23 @@ Planner → Executor → Reviewer（失败带反馈重试）对比单 Agent：8 
 摘要如实标注"步数耗尽未作答"。
 复测：同任务同模型（20 步）→ 产出可执行的双场景方案 + 明确标注不确定项（官网 403）。
 一句话：**失败原因常是"检索质量 + 收口时机"，工程修复比换更强模型更划算**。
+
+**Q26：接口层的 bug 怎么定位？（消息契约两层坑）**
+现象：GUI 多轮对话直接失败，报 `重试 8 次后仍失败（422 … missing field content）`，
+事件流里连续 8 条 `llm_error`。
+定位（逐层剥离，靠真实调用而非猜）：
+① 先看**原始错误体**：`messages[3]: missing field content` —— 说明是"请求体结构"问题，不是网络；
+② 打印第 3 条消息的字段：发现是 `assistant(tool_calls)` 且 `content` 为空时，我们的转换函数用
+`if msg.content:` 判断，**把 content 字段整个省略** → 接口反序列化直接失败（422）；
+③ 修好①后请求过了反序列化，立刻暴露第二层：`400 The reasoning_content in the thinking mode
+must be passed back to the API` —— 思考模式模型要求把**思维链**随上下文一起回传。
+修复：
+- `content` 一律存在（空内容用空串），三处转换函数统一：`memory_policies.to_openai_messages` /
+  `schema.Memory.get_messages` / `config.as_chat_message`；
+- `LLMResponse` / `Message` 增加 `reasoning_content`；两个 LLM 类在解析响应时保存；
+  `agent.think()` 写回 assistant 消息时携带；消息转换按需回传。
+验证：真实 API 两步调用（先拿到 reasoning_content → 回传后再请求成功）；复测原失败对话
+（"三个幸运数字 → 相加写入 sum13.txt"）得到 31 ✓；新增回归测试 `test_openai_message_shape`
+把"content 必存 + reasoning_content 回传"固化成断言。
+一句话：**接口层的失败要读原始错误体、按层剥离**；这类问题离线单测覆盖不到，但一旦定位，
+就能用一条回归测试永久钉住。

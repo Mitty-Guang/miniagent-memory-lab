@@ -85,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("--models", type=str, default="deepseek-flash,deepseek-v4-pro")
     parser.add_argument("--limit", type=int, default=6)
     parser.add_argument("--budget", type=int, default=500)
-    parser.add_argument("--policy", type=str, default="impact")
+    parser.add_argument("--policy", type=str, default="relevance")
     args = parser.parse_args()
     asyncio.run(
         run(

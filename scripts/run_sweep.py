@@ -2,7 +2,7 @@
 
 用法：
     .\\.venv\\Scripts\\python.exe run_sweep.py
-    .\\.venv\\Scripts\\python.exe run_sweep.py --budgets 300,600 --policies relevance,impact --limit 6
+    .\\.venv\\Scripts\\python.exe run_sweep.py --budgets 300,600 --policies recent,relevance --limit 6
 """
 
 import sys
@@ -21,7 +21,7 @@ from mini_agent.evaluate import load_priors
 from mini_agent.runner import run_agent_task
 from mini_agent.task_suite import TASKS
 
-POLICIES = ["recent", "relevance", "impact"]
+POLICIES = ["recent", "relevance"]
 BUDGETS = [300, 500, 800, 1200]
 RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
@@ -49,7 +49,6 @@ async def run(
 
     await warmup_async()
     tasks = TASKS[:limit] if limit else TASKS
-    priors = load_priors()
 
     records: List[Dict] = []
     table: Dict[str, Dict[str, Dict]] = {}
@@ -66,7 +65,6 @@ async def run(
                     task,
                     policy=policy,
                     budget_chars=budget,
-                    impact_priors=priors if policy == "impact" else None,
                 )
                 result.pop("messages", None)
                 result.pop("answers", None)

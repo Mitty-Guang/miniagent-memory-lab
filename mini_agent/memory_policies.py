@@ -4,11 +4,13 @@
 本模块提供 BudgetedMemory：在预算内按策略选择要放进上下文的消息，并保持与上游
 接口完全兼容（get_messages 仍返回 OpenAI 消息格式），MiniAgent 无需改动。
 
-四种策略（用于对比实验）：
+三种策略（用于对比实验）：
 - all       上游行为：不选择，全量上下文（无预算）
 - recent    近因策略：保留最近的消息
 - relevance 相关性策略：按与任务文本的字符二元组重叠度选择
-- impact    决策影响策略：相关性 + 近因 + 离线干预测得的“决策影响”先验
+
+> 曾实现 impact（决策影响）策略，实测无增益（跨会话 81.2% = 相关性 81.2%），
+> 已移除；负结果与机制分析见 docs/SECONDARY_DEV.md「负结果记录」。
 
 安全约束：任何 tool 消息必须保留其对应的 assistant tool_calls 消息，
 否则 OpenAI 接口会报错（孤儿修复）。
@@ -47,12 +49,6 @@ def message_chars(msg: Message) -> int:
 
 def contains_digit(text: str) -> bool:
     return any(ch.isdigit() for ch in text)
-
-
-def impact_key(msg: Message) -> str:
-    """决策影响先验的分组键（离线统计用）。"""
-    kind = "num" if contains_digit(msg.content or "") else "txt"
-    return f"{msg.role.value}:{kind}"
 
 
 def repair_orphans(messages: List[Message]) -> List[Message]:
@@ -130,7 +126,6 @@ class BudgetedMemory(Memory):
 
     policy: str = "all"
     budget_chars: int = DEFAULT_BUDGET_CHARS
-    impact_priors: Dict[str, float] = {}
     last_selection: Dict[str, Any] = {}
 
     def get_messages(self) -> List[Dict[str, Any]]:
@@ -168,10 +163,7 @@ class BudgetedMemory(Memory):
         relevance = jaccard(bigrams(msg.content or ""), query_bg)
         if self.policy == "recent":
             return recency
-        if self.policy == "relevance":
-            return relevance
-        prior = self.impact_priors.get(impact_key(msg), 0.5)
-        return 0.4 * relevance + 0.2 * recency + 0.4 * prior
+        return relevance
 
     def _must_keep(self, messages: List[Message]) -> set:
         """任务定义（首条用户消息）+ 最新状态（含其 assistant 调用）。"""
@@ -234,11 +226,9 @@ class BudgetedMiniAgent(MiniAgent):
         max_steps: int = 10,
         policy: str = "all",
         budget_chars: int = DEFAULT_BUDGET_CHARS,
-        impact_priors: Optional[Dict[str, float]] = None,
     ):
         super().__init__(llm=llm, name=name, max_steps=max_steps)
         self.memory = BudgetedMemory(
             policy=policy,
             budget_chars=budget_chars,
-            impact_priors=impact_priors or {},
         )

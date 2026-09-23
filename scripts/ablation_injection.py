@@ -1,7 +1,7 @@
 """消融实验：长期记忆的注入方式（独立 system 消息 vs 系统提示词）对跨会话任务的影响。
 
 运行：
-    .\\.venv\\Scripts\\python.exe ablation_injection.py --repeat 2 --budget 800 --policy impact
+    .\\.venv\\Scripts\\python.exe ablation_injection.py --repeat 2 --budget 800 --policy relevance
 
 设计：
 - 任务：4 个跨会话任务（phase 1 教 → phase 2 用；每阶段独立会话、共享记忆库）；
@@ -49,7 +49,6 @@ def summarize(rows: List[Dict], mode: str) -> Dict:
 async def run(repeat: int, budget: int, policy: str) -> Dict:
     await warmup_async()
     tasks = [t for t in TASKS if t.get("phases")]
-    priors = load_priors() if policy == "impact" else {}
 
     rows: List[Dict] = []
     for mode in MODES:
@@ -63,7 +62,6 @@ async def run(repeat: int, budget: int, policy: str) -> Dict:
                     task,
                     policy=policy,
                     budget_chars=budget,
-                    impact_priors=priors or None,
                     memory_injection=mode,
                 )
                 result.pop("messages", None)
@@ -111,6 +109,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--repeat", type=int, default=2)
     parser.add_argument("--budget", type=int, default=800)
-    parser.add_argument("--policy", type=str, default="impact")
+    parser.add_argument("--policy", type=str, default="relevance")
     args = parser.parse_args()
     asyncio.run(run(repeat=args.repeat, budget=args.budget, policy=args.policy))
