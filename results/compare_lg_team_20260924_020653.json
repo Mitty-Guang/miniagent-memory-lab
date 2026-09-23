@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-09-24T02:06:53.936397",
+  "summary": {
+    "n_tasks": 1,
+    "handwritten": {
+      "success_rate": 1.0,
+      "avg_seconds": 4.43,
+      "avg_llm_calls": 4.0,
+      "avg_rounds": 1.0
+    },
+    "langgraph": {
+      "success_rate": 1.0,
+      "avg_seconds": 4.59,
+      "avg_llm_calls": 4.0,
+      "avg_rounds": 1.0,
+      "prompt_tokens": 1408,
+      "completion_tokens": 614
+    }
+  },
+  "rows": [
+    {
+      "task_id": "sum_1_100",
+      "handwritten": {
+        "success": true,
+        "seconds": 4.43,
+        "llm_calls": 4,
+        "rounds": 1,
+        "review": "PASS\n给出了正确最终结果 5050，并说明计算方式。"
+      },
+      "langgraph": {
+        "success": true,
+        "seconds": 4.59,
+        "llm_calls": 4,
+        "rounds": 1,
+        "review": "PASS\n结果 5050 正确，且说明了用 Python 计算的方式。"
+      }
+    }
+  ]
+}

@@ -120,6 +120,13 @@ def build_team(
     llm_with_tools = llm.bind_tools(TOOLS)
     tool_map = {t.name: t for t in TOOLS}
 
+    # —— intake：把本轮用户输入写入消息流（多轮会话时历史里才有"上一轮用户原话"）——
+    async def intake_node(state: TeamState) -> Dict[str, Any]:
+        return {
+            "messages": [HumanMessage(content=state["task"])],
+            "log": [f"[intake] 接收：{state['task'][:24]}"],
+        }
+
     # —— planner ——
     async def planner_node(state: TeamState) -> Dict[str, Any]:
         resp = await llm.ainvoke(
@@ -139,7 +146,7 @@ def build_team(
 
     # —— executor：ReAct（agent → tools → agent…）——
     async def executor_agent_node(state: TeamState) -> Dict[str, Any]:
-        history = _repair_dangling_tool_calls(list(state.get("messages", []))[-max_steps * 2 :])
+        history = _repair_dangling_tool_calls(list(state.get("messages", []))[-max_steps * 3 :])
         prompt = [
             SystemMessage(content=EXECUTOR_PROMPT),
             HumanMessage(content=f"任务：{state['task']}\n\n计划：\n{state.get('plan', '')}"),
@@ -218,6 +225,7 @@ def build_team(
         return {"final": final or state.get("plan", ""), "log": ["[finish] 结束"]}
 
     builder = StateGraph(TeamState)
+    builder.add_node("intake", intake_node)
     builder.add_node("planner", planner_node)
     builder.add_node("approval", approval_node if require_approval else auto_approval_node)
     builder.add_node("executor", executor_agent_node)
@@ -225,7 +233,8 @@ def build_team(
     builder.add_node("reviewer", reviewer_node)
     builder.add_node("finish", finish_node)
 
-    builder.add_edge(START, "planner")
+    builder.add_edge(START, "intake")
+    builder.add_edge("intake", "planner")
     builder.add_edge("planner", "approval")
     builder.add_conditional_edges(
         "approval",

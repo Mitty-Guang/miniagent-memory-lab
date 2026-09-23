@@ -274,6 +274,13 @@ PAGE = """<!DOCTYPE html>
             </select></div>
           <div><label>最大步数</label><input id="maxSteps" type="number" value="20" min="1" max="50" disabled></div>
         </div>
+        <div class="row">
+          <div><label>运行时</label>
+            <select id="runtime">
+              <option value="handwritten" selected>手写循环（零依赖）</option>
+              <option value="langgraph" id="runtimeLanggraph">LangGraph 图（extras）</option>
+            </select></div>
+        </div>
         <div class="switch">
           <input type="checkbox" id="autoParams" checked onchange="toggleAuto()">
           <span>让模型自动选择预算 / 步数（推荐）</span>
@@ -401,6 +408,7 @@ async function runTask() {
     max_steps: parseInt($('maxSteps').value || '20', 10),
     auto_params: $('autoParams').checked,
     chat: $('chatMode').checked,
+    runtime: $('runtime').value,
   });
 }
 
@@ -528,6 +536,13 @@ function render(s) {
   pill.textContent = statusMap[s.status] || s.status;
   pill.className = 'chip state' + (s.status === 'done' ? ' done' : (s.status === 'error' ? ' error' : (s.status === 'running' ? ' running' : '')));
   $('elapsed').innerHTML = s.elapsed ? `耗时 <b>${s.elapsed}s</b>` : '';
+  // LangGraph 运行时可用性（未装 .venv312 时置灰）
+  const lgOption = $('runtimeLanggraph');
+  if (lgOption) {
+    const ok = s.langgraph_available !== false;
+    lgOption.disabled = !ok;
+    lgOption.textContent = ok ? 'LangGraph 图（extras）' : 'LangGraph 图（未装 .venv312）';
+  }
   $('chipChat').innerHTML = s.chat
     ? `连续对话 · 第 <b>${s.turns || 1}</b> 轮`
     : (s.session_id ? '单次运行' : '');
@@ -539,15 +554,18 @@ function render(s) {
 
   // 运行参数（模型自动判断 / 手动）
   const plan = s.auto_plan || {};
+  const runtimeLine = s.runtime === 'langgraph'
+    ? `<div class="kv"><span>运行时</span><b style="color:var(--accent)">LangGraph 图（extras 子进程）</b></div>`
+    : `<div class="kv"><span>运行时</span><b>手写循环（零依赖）</b></div>`;
   if (s.auto_params) {
-    $('autoPlan').innerHTML = plan.category
+    $('autoPlan').innerHTML = runtimeLine + (plan.category
       ? `<div class="kv"><span>类别（模型判断）</span><b>${esc(plan.category)}</b></div>
          <div class="kv"><span>预算 / 最大步数</span><b>${plan.budget} 字符 / ${plan.max_steps} 步</b></div>
          <div class="muted" style="margin-top:6px;font-size:12px">理由：${esc(plan.reason || '-')}</div>
          <div class="faint" style="margin-top:3px;font-size:11px">来源：${plan.source === 'llm' ? '模型估计（1 次额外调用）' : '规则兜底'}</div>`
-      : '<span class="muted">模型估计中…</span>';
+      : '<span class="muted">模型估计中…</span>');
   } else {
-    $('autoPlan').innerHTML = `<div class="kv"><span>预算 / 最大步数（手动）</span><b>${s.budget || '-'} 字符 / ${s.max_steps || '-'} 步</b></div>`;
+    $('autoPlan').innerHTML = runtimeLine + `<div class="kv"><span>预算 / 最大步数（手动）</span><b>${s.budget || '-'} 字符 / ${s.max_steps || '-'} 步</b></div>`;
   }
 
   const sel = s.selection || {};
@@ -598,7 +616,7 @@ function render(s) {
 
   const trace = s.trace || [];
   $('trace').innerHTML = trace.length ? trace.slice().reverse().map(e => {
-    const meta = { llm: 'LLM', tool: '工具', approval: '审批', memory_read: '记忆读', memory_write: '记忆写', auto_plan: '参数估计' }[e.event] || e.event;
+    const meta = { llm: 'LLM', tool: '工具', approval: '审批', memory_read: '记忆读', memory_write: '记忆写', auto_plan: '参数估计', runtime: '运行时' }[e.event] || e.event;
     const cls = e.event === 'llm' ? 'llm' : (e.event === 'tool' ? 'tool' : (e.event === 'approval' ? 'approval' : (e.event.startsWith('memory') ? 'memory' : '')));
     let detail = '';
     if (e.event === 'llm') detail = `tokens ${e.prompt_tokens}/${e.completion_tokens} · ${e.latency}s`;
@@ -607,6 +625,7 @@ function render(s) {
     else if (e.event === 'memory_read') detail = `命中 ${(e.hits || []).length} 条`;
     else if (e.event === 'memory_write') detail = String(e.text || '').slice(0, 48);
     else if (e.event === 'auto_plan') detail = `${e.category} · 预算 ${e.budget} · 步数 ${e.max_steps}`;
+    else if (e.event === 'runtime') detail = `${esc(e.name || '')} · ${esc(e.text || '')} · ${e.latency || ''}s`;
     return `<div class="tl"><span class="dot ${cls}"></span><span>${meta}</span><span class="meta">${esc(detail)}</span></div>`;
   }).join('') : '<div class="empty">暂无</div>';
 

@@ -89,7 +89,8 @@ def _read_memory(query: str = "", limit: int = 300) -> dict:
 
 class RunState:
     def __init__(
-        self, task, policy, budget, approval_mode, max_steps, auto_params=False, chat=False
+        self, task, policy, budget, approval_mode, max_steps, auto_params=False, chat=False,
+        runtime="handwritten",
     ):
         self.task = task
         self.policy = policy
@@ -98,6 +99,8 @@ class RunState:
         self.max_steps = max_steps
         self.auto_params = auto_params
         self.auto_plan = {}
+        self.runtime = runtime        # handwritten（零依赖主链路）| langgraph（extras 子进程）
+        self.langgraph_payload = {}
         self.chat = chat            # 连续对话：复用会话上下文
         self.turns = 0              # 当前会话第几轮
         self.session_id = ""
@@ -152,6 +155,9 @@ class RunState:
             "session_id": self.session_id,
             "answer": self.answer[:4000],
             "approval_mode": self.approval_mode,
+            "runtime": self.runtime,
+            "langgraph_available": langgraph_python() is not None,
+            "langgraph_payload": self.langgraph_payload,
             "task": self.task,
             "pending": self.pending,
             "llm": {},
@@ -220,6 +226,9 @@ class RunState:
                 }
                 for msg in self.agent.memory.messages[-80:]   # 连续对话下只回传最近 80 条
             ]
+        elif self.langgraph_payload:
+            # LangGraph 运行时的轨迹由 extras 子进程回传（role/content/tool_calls）
+            data["messages"] = self.langgraph_payload.get("messages", [])[-80:]
         return data
 
 
@@ -233,6 +242,41 @@ def last_answer(agent) -> str:
     return ""
 
 
+def langgraph_python():
+    """extras 的 LangGraph 运行时解释器（Python ≥3.11，interrupt 需要）；未安装返回 None。"""
+    candidate = HERE.parent / ".venv312" / "Scripts" / "python.exe"
+    return candidate if candidate.exists() else None
+
+
+async def run_langgraph_runtime(state: RunState) -> dict:
+    """以子进程方式跑 LangGraph 团队图：GUI 本体保持零框架依赖，框架依赖隔离在 .venv312。"""
+    python = langgraph_python()
+    if python is None:
+        raise RuntimeError("未找到 .venv312：请先创建 Python≥3.11 环境并安装 extras 依赖（见 docs/LANGGRAPH_NOTES.md）")
+    script = HERE.parent / "extras" / "langgraph_compare" / "gui_run.py"
+    proc = await asyncio.create_subprocess_exec(
+        str(python),
+        str(script),
+        "--task",
+        state.task,
+        "--max-steps",
+        str(state.max_steps),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        cwd=str(HERE.parent),
+    )
+    stdout, stderr = await proc.communicate()
+    for line in reversed(stdout.decode("utf-8", errors="replace").splitlines()):
+        line = line.strip()
+        if line.startswith("{"):
+            try:
+                return json.loads(line)
+            except json.JSONDecodeError:
+                continue
+    detail = (stderr.decode("utf-8", errors="replace") or "无输出").strip()[-200:]
+    raise RuntimeError(f"LangGraph 子进程无有效输出：{detail}")
+
+
 def run_worker(state: RunState):
     async def worker():
         workdir = tempfile.mkdtemp(prefix="gui_run_")
@@ -242,6 +286,24 @@ def run_worker(state: RunState):
             with STATE_LOCK:
                 session = STATE.get("chat")
             reuse = bool(state.chat and session and session.get("agent"))
+
+            # —— LangGraph 运行时：走 extras 子进程（零框架依赖的 GUI 本体不引入框架）——
+            if state.runtime == "langgraph":
+                state.session_id = f"gui-lg-{int(state.started_at)}"
+                state.turns = 1
+                payload = await run_langgraph_runtime(state)
+                state.langgraph_payload = payload
+                state.output = payload.get("final") or payload.get("error") or "(无输出)"
+                state.answer = state.output
+                state.trace.log(
+                    "runtime",
+                    {
+                        "name": "langgraph",
+                        "text": f"rounds={payload.get('rounds')} review={str(payload.get('review'))[:24]}",
+                        "latency": payload.get("seconds"),
+                    },
+                )
+                return
 
             if reuse:
                 # 连续对话：复用 agent 的短时记忆（上下文延续）。
@@ -357,6 +419,7 @@ class Handler(BaseHTTPRequestHandler):
                     "chat": bool(session),
                     "turns": session.get("turns", 0),
                     "session_id": session.get("session_id", ""),
+                    "langgraph_available": langgraph_python() is not None,
                 }
                 if isinstance(data, dict) and data.get("chat"):
                     data["session_totals"] = {
@@ -395,6 +458,7 @@ class Handler(BaseHTTPRequestHandler):
                 max_steps=int(payload.get("max_steps", 20)),
                 auto_params=bool(payload.get("auto_params")),
                 chat=bool(payload.get("chat")),
+                runtime=(payload.get("runtime") or "handwritten"),
             )
             with STATE_LOCK:
                 STATE["run"] = run

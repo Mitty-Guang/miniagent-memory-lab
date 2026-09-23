@@ -65,4 +65,23 @@ py -3.12 -m venv .venv312
 
 # ④ LangChain 集成：自研 LTM → BaseRetriever，LCEL 组 RAG 链
 .\.venv312\Scripts\python.exe extras\langgraph_compare\langchain_retriever.py
+
+# ⑤ GUI 运行时切换（:8901 页面"运行时"下拉：手写循环 / LangGraph 图）
+#    GUI 本体跑在零依赖的 .venv（3.10）；选中 LangGraph 时由 gui.py 以子进程调用
+#    extras/langgraph_compare/gui_run.py（走 .venv312），结果与轨迹回填到同一面板。
+.\.venv\Scripts\python.exe scripts\gui.py --port 8901
 ```
+
+## 5. GUI 运行时切换（同一任务、两套运行时）
+
+左侧「运行时」下拉：`手写循环（零依赖）` / `LangGraph 图（extras）`。未安装 `.venv312` 时选项自动置灰。
+
+实测同一任务「用 Python 计算 1 到 50 的和」：
+
+| 运行时 | 状态 | 消息数 | 输出 |
+| --- | --- | --- | --- |
+| 手写循环 | done | 4 | 1275 ✓ |
+| LangGraph 图（子进程） | done | 5 | 1275 ✓（plan → 自动放行 → executor → reviewer PASS，5.4s） |
+
+事件流里会出现 `运行时 · langgraph · rounds=1 · 5.4s`；轨迹面板显示图内消息
+（intake/planner/executor/tool/reviewer 全流程）。
