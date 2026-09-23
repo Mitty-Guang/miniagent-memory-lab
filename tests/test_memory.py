@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import asyncio
+import sqlite3
 from pathlib import Path
 
 from mini_agent.approval import ApprovalToolCollection
@@ -266,6 +267,41 @@ def test_web_tools():
     print("test_web_tools passed")
 
 
+def test_memory_browser():
+    """GUI 记忆浏览器的数据层：读取 / 过滤 / 删除（用临时库，不动真实记忆）。"""
+    import tempfile
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    sys.path.insert(0, str(scripts))
+    import gui  # noqa: E402  （gui.py 仅定义，不起服务）
+
+    tmp = Path(tempfile.mkdtemp(prefix="gui_mem_")) / "ltm.sqlite3"
+    original = gui.ltm_path
+    gui.ltm_path = lambda: tmp
+    try:
+        ltm = LongTermMemory(path=str(tmp))
+        ltm.add("用户的项目代号是 ORION", session_id="s1", kind="fact")
+        ltm.add("所有报告放在 reports 目录", session_id="s1", kind="fact")
+        ltm.close()
+
+        data = gui._read_memory()
+        assert data["total"] == 2, data
+        assert data["items"][0]["id"] == 2, data  # 按写入时间倒序
+        filtered = gui._read_memory("ORION")
+        assert filtered["total"] == 1 and "ORION" in filtered["items"][0]["text"], filtered
+        assert gui._read_memory("不存在的关键词")["total"] == 0
+
+        # 删除（模拟 /api/memory_delete 的 SQL 行为）
+        conn = sqlite3.connect(str(tmp))
+        deleted = conn.execute("DELETE FROM memories WHERE id = ?", (2,)).rowcount
+        conn.commit()
+        conn.close()
+        assert deleted == 1 and gui._read_memory()["total"] == 1
+    finally:
+        gui.ltm_path = original
+    print("test_memory_browser passed")
+
+
 if __name__ == "__main__":
     test_ltm_basic()
     test_trace_summary()
@@ -276,4 +312,5 @@ if __name__ == "__main__":
     test_sandbox()
     test_retrievers()
     test_web_tools()
-    print("\n✅ 所有离线测试通过（long-term memory / tracing / HITL / multi-agent / sandbox / retrieval / web）")
+    test_memory_browser()
+    print("\n✅ 所有离线测试通过（long-term memory / tracing / HITL / multi-agent / sandbox / retrieval / web / 记忆浏览器）")

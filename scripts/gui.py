@@ -5,7 +5,8 @@
 - 选择记忆策略（recent / relevance / impact）与上下文预算，实时看“本次选择”统计；
 - 工具审批（HITL）：自动放行 / 仅 bash 需审批 / 全部需审批，页面上点“批准/拒绝”
   （30 秒不操作自动放行）；
-- 实时面板：上下文选择、token 统计、工具调用、长期记忆读写、最终结果。
+- 实时面板：上下文选择、token 统计、工具调用、长期记忆读写、最终结果；
+- 记忆查看：本轮注入的历史记忆（含相关度分数）+ 记忆库浏览器（搜索 / 逐条删除 / 清空）。
 
 零依赖（Python 标准库 + 原生 JS），运行：
     .\\.venv\\Scripts\\python.exe gui.py --port 8901
@@ -22,9 +23,11 @@ import contextlib
 import io
 import json
 import os
+import sqlite3
 import tempfile
 import threading
 import time
+import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -38,6 +41,46 @@ APPROVAL_TIMEOUT = 30.0
 STATE_LOCK = threading.Lock()
 STATE = {"run": None}
 PORT = 8901
+
+
+def ltm_path() -> Path:
+    return HERE.parent / "results" / "gui_ltm.sqlite3"
+
+
+def _read_memory(query: str = "", limit: int = 300) -> dict:
+    """读取长期记忆库（记忆浏览器用）：按写入时间倒序，可选子串过滤。"""
+    path = ltm_path()
+    if not path.exists():
+        return {"total": 0, "items": []}
+    conn = sqlite3.connect(str(path))
+    try:
+        rows = conn.execute(
+            "SELECT id, text, session_id, task_id, kind, created_at "
+            "FROM memories ORDER BY id DESC"
+        ).fetchall()
+    finally:
+        conn.close()
+    items = [
+        {
+            "id": r[0],
+            "text": r[1],
+            "session_id": r[2],
+            "task_id": r[3],
+            "kind": r[4],
+            "created_at": r[5],
+        }
+        for r in rows
+    ]
+    if query:
+        needle = query.lower()
+        items = [
+            it
+            for it in items
+            if needle in (it["text"] or "").lower()
+            or needle in (it["session_id"] or "").lower()
+            or needle in (it["task_id"] or "").lower()
+        ]
+    return {"total": len(items), "items": items[:limit]}
 
 
 class RunState:
@@ -133,7 +176,15 @@ class RunState:
             }
         if self.agent is not None:
             data["selection"] = dict(self.agent.memory.last_selection)
-            data["retrieved"] = [(h.get("text") or "")[:120] for h in (self.agent.retrieved or [])]
+            data["retrieved"] = [
+                {
+                    "text": (h.get("text") or "")[:160],
+                    "score": h.get("score"),
+                    "kind": h.get("kind"),
+                    "session_id": h.get("session_id"),
+                }
+                for h in (self.agent.retrieved or [])
+            ]
             data["messages"] = [
                 {
                     "role": msg.role.value,
@@ -158,9 +209,9 @@ def run_worker(state: RunState):
                 **llm_kwargs(), trace=state.trace, max_retries=8, base_delay=3.0
             )
             # 长期记忆跨运行持久化（放在 results/ 下），演示“记住 → 换会话使用”
-            ltm_path = HERE.parent / "results" / "gui_ltm.sqlite3"
-            ltm_path.parent.mkdir(exist_ok=True)
-            ltm = LongTermMemory(path=str(ltm_path))
+            path = ltm_path()
+            path.parent.mkdir(exist_ok=True)
+            ltm = LongTermMemory(path=str(path))
             state.agent = MemoryAgent(
                 llm=state.llm,
                 ltm=ltm,
@@ -258,7 +309,7 @@ PAGE = """<!DOCTYPE html>
             <option value="impact">impact（决策影响）</option>
             <option value="all">all（不裁剪）</option>
           </select></div>
-        <div><label>预算（字符）</label><input id="budget" type="number" value="500" min="100" step="50"></div>
+        <div><label>预算（字符，跨会话建议 1200）</label><input id="budget" type="number" value="500" min="100" step="50"></div>
       </div>
       <div class="row">
         <div><label>工具审批</label>
@@ -267,7 +318,7 @@ PAGE = """<!DOCTYPE html>
             <option value="bash">仅 bash 需审批</option>
             <option value="all">全部需审批</option>
           </select></div>
-        <div><label>最大步数（难题可调高）</label><input id="maxSteps" type="number" value="20" min="1" max="50"></div>
+        <div><label>最大步数（联网研究 20+）</label><input id="maxSteps" type="number" value="20" min="1" max="50"></div>
       </div>
       <button class="primary" id="runBtn" onclick="runTask()">▶ 运行任务</button>
       <button class="primary" id="retryBtn" style="display:none;background:#f59e0b" onclick="retryLast()">↻ 重试上次任务</button>
@@ -275,7 +326,7 @@ PAGE = """<!DOCTYPE html>
 
     <div class="card"><h3>本次上下文选择</h3><div id="selection" class="muted">暂无</div></div>
     <div class="card"><h3>Token / 延迟</h3><div id="llm" class="muted">暂无</div></div>
-    <div class="card"><h3>长期记忆 <button style="float:right;font-size:11px;padding:2px 8px;background:#f3f4f6" onclick="clearLtm()">清空</button></h3><div id="ltm" class="muted">暂无</div></div>
+    <div class="card"><h3>长期记忆（本轮）<button style="float:right;font-size:11px;padding:2px 8px;background:#f3f4f6" onclick="clearLtm()">清空记忆库</button></h3><div id="ltm" class="muted">暂无</div></div>
   </div>
 
   <div>
@@ -288,6 +339,16 @@ PAGE = """<!DOCTYPE html>
     <div class="card"><h3>ReAct 轨迹（实时）</h3><div class="steps" id="steps"><div class="muted">点“运行任务”开始</div></div></div>
     <div class="card"><h3>事件流（tracing）</h3><div class="trace" id="trace"><div class="muted">暂无</div></div></div>
     <div class="card"><h3>最终结果</h3><div id="output" class="muted">暂无</div></div>
+    <div class="card">
+      <h3>记忆库浏览器（跨会话持久化）
+        <span style="float:right;font-weight:400">
+          <input id="memQuery" placeholder="搜索记忆内容…" style="width:190px;display:inline-block;padding:4px 8px;font-size:12px" onkeydown="if(event.key==='Enter')loadMemory()">
+          <button style="font-size:11px;padding:4px 10px;background:#e5e7eb" onclick="loadMemory()">搜索</button>
+          <button style="font-size:11px;padding:4px 10px;background:#e5e7eb" onclick="$('memQuery').value='';loadMemory()">重置</button>
+        </span>
+      </h3>
+      <div id="memList" class="steps" style="max-height:340px"><div class="muted">暂无</div></div>
+    </div>
   </div>
 </div>
 
@@ -335,7 +396,33 @@ async function decide(approved) {
 
 async function clearLtm() {
   await fetch('/api/clear_ltm', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
-  refresh();
+  refresh(); loadMemory();
+}
+
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts * 1000), p = (n) => String(n).padStart(2, '0');
+  return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+async function loadMemory() {
+  const q = $('memQuery').value.trim();
+  let data;
+  try { data = await (await fetch('/api/memory?q=' + encodeURIComponent(q))).json(); } catch (e) { return; }
+  const items = data.items || [];
+  $('memList').innerHTML = items.length ? items.map(it => `
+    <div class="msg" style="background:#fafafa">
+      <div class="who">#${it.id} · ${esc(it.kind || '')} · 会话 ${esc(it.session_id || '-')} · ${fmtTime(it.created_at)}
+        <button style="float:right;font-size:11px;padding:1px 8px;background:#fee2e2;color:#991b1b" onclick="deleteMemory(${it.id})">删除</button>
+      </div>
+      <div class="pre">${esc(it.text)}</div>
+    </div>`).join('') + `<div class="muted" style="margin-top:6px">共 ${data.total} 条${q ? `（匹配「${esc(q)}」）` : ''}</div>`
+    : '<div class="muted">没有匹配的记忆</div>';
+}
+
+async function deleteMemory(id) {
+  await fetch('/api/memory_delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id})});
+  loadMemory();
 }
 
 function startPolling() {
@@ -344,13 +431,16 @@ function startPolling() {
   refresh();
 }
 
+let lastStatus = '';
 async function refresh() {
   let s;
   try { s = await (await fetch('/api/state')).json(); } catch (e) { return; }
   render(s);
   if (s.status === 'done' || s.status === 'error' || s.status === 'idle') {
     clearInterval(polling); polling = null; $('runBtn').disabled = false;
+    if (lastStatus === 'running') loadMemory();  // 运行结束：刷新记忆库（本轮新写入）
   }
+  lastStatus = s.status;
 }
 
 function render(s) {
@@ -378,8 +468,13 @@ function render(s) {
   const writes = (s.trace || []).filter(e => e.event === 'memory_write');
   let ltmHtml = '';
   if (writes.length) ltmHtml += writes.map(e => `<div class="pre" style="font-size:12px">✍ ${esc(e.text || '')}</div>`).join('');
-  if ((s.retrieved || []).length) ltmHtml += `<div class="muted" style="margin-top:6px">📖 本任务读到 ${s.retrieved.length} 条历史记忆</div>`;
-  if (ltm.length) ltmHtml += `<div class="muted" style="margin-top:6px">记忆库共 ${ltm.length} 条</div>`;
+  const retrieved = s.retrieved || [];
+  if (retrieved.length) {
+    ltmHtml += `<div class="muted" style="margin-top:8px">📖 本轮注入 ${retrieved.length} 条历史记忆：</div>`;
+    ltmHtml += retrieved.map(h => `<div class="pre" style="font-size:11.5px;background:#f8fafc;border-radius:6px;padding:6px;margin-top:4px">`
+      + `<b>相关度 ${h.score == null ? '-' : h.score}</b> · ${esc(h.kind || '')} · ${esc(h.session_id || '-')}<br>${esc(h.text)}</div>`).join('');
+  }
+  if (ltm.length) ltmHtml += `<div class="muted" style="margin-top:6px">记忆库共 ${ltm.length} 条（见右下方浏览器）</div>`;
   $('ltm').innerHTML = ltmHtml || '<span class="muted">暂无</span>';
 
   const banner = $('approvalBanner');
@@ -418,6 +513,7 @@ function render(s) {
   $('retryBtn').style.display = (s.status === 'done' && s.output && s.output.includes('LLM调用失败')) ? 'block' : 'none';
 }
 refresh();
+loadMemory();
 </script>
 </body></html>"""
 
@@ -435,6 +531,14 @@ class Handler(BaseHTTPRequestHandler):
             with STATE_LOCK:
                 run = STATE["run"]
                 data = run.to_dict() if run else {"status": "idle"}
+            self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"))
+            return
+        if self.path.startswith("/api/memory"):
+            query = ""
+            if "?" in self.path:
+                parsed = urllib.parse.parse_qs(self.path.split("?", 1)[1])
+                query = (parsed.get("q") or [""])[0].strip()
+            data = _read_memory(query)
             self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"))
             return
         self._send(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
@@ -471,15 +575,25 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if self.path.startswith("/api/clear_ltm"):
-            import sqlite3
-
-            path = HERE.parent / "results" / "gui_ltm.sqlite3"
+            path = ltm_path()
             if path.exists():
                 conn = sqlite3.connect(str(path))
                 conn.execute("DELETE FROM memories")
                 conn.commit()
                 conn.close()
             self._send(200, b'{"ok":true}')
+            return
+
+        if self.path.startswith("/api/memory_delete"):
+            mem_id = int(payload.get("id") or 0)
+            path = ltm_path()
+            deleted = 0
+            if mem_id and path.exists():
+                conn = sqlite3.connect(str(path))
+                deleted = conn.execute("DELETE FROM memories WHERE id = ?", (mem_id,)).rowcount
+                conn.commit()
+                conn.close()
+            self._send(200, json.dumps({"ok": True, "deleted": deleted}).encode("utf-8"))
             return
 
         self._send(404, b'{"ok":false}')
