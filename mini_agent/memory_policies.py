@@ -226,8 +226,9 @@ class BudgetedMiniAgent(MiniAgent):
         max_steps: int = 10,
         policy: str = "all",
         budget_chars: int = DEFAULT_BUDGET_CHARS,
+        stop_check=None,
     ):
-        super().__init__(llm=llm, name=name, max_steps=max_steps)
+        super().__init__(llm=llm, name=name, max_steps=max_steps, stop_check=stop_check)
         self.memory = BudgetedMemory(
             policy=policy,
             budget_chars=budget_chars,

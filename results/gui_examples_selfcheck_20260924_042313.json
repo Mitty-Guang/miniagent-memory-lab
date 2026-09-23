@@ -1,0 +1,92 @@
+[
+  {
+    "label": "创建 hello.txt",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "已完成！✅  - **文件**：`hello.txt` - **内容**：`Hello GUI`  文件已创建并验证，内容与你的"
+  },
+  {
+    "label": "计算 1~100 的和",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "1 到 100 的和是 **5050**。  （计算方式：`sum(range(1, 101))`）"
+  },
+  {
+    "label": "北京现在的天气（联网）",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "北京现在的天气：**雷雨（⛈️），气温约 +24°C**。  数据来源：wttr.in（https://wttr.in/Beij"
+  },
+  {
+    "label": "联网搜索：Python 3.12 新特性",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "**Python 3.12 新特性摘要**（2023 年 10 月 2 日正式发布）  1. **f-string 大幅增强（P"
+  },
+  {
+    "label": "HITL：bash 被拒改用其他工具",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "任务完成 ✅  **执行结果：** - bash 命令没有被拒绝，直接执行成功。 - 文件 `note.txt` 已创建在当前工"
+  },
+  {
+    "label": "跨会话记忆：项目代号",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "已完成 ✅  - **创建的文件：** `reports/project.txt` - **写入内容：** `ORION`  文"
+  },
+  {
+    "label": "★ ① 跨会话记忆：先记住我的偏好",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "已记住 ✅ 三条约定复核通过并已固化到 `reports/ORION-conventions.md`。  | 项目 | 约定 |"
+  },
+  {
+    "label": "★ ① 跨会话记忆：新会话里按偏好办事",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "已按你的偏好（默认 **Markdown 格式**）生成报告文件：  **`report_10_div_3.md`**  ```"
+  },
+  {
+    "label": "★ ② 预算裁剪：追问历史约束",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "你最初说的三个幸运数字是 **7、11、13**。  - 相加：7 + 11 + 13 = **31** - 已写入 `sum1"
+  },
+  {
+    "label": "★ ③ 连续对话：先记住数字（再追问相加）",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "已记住"
+  },
+  {
+    "label": "★ ④ 联网研究：检索过滤 + 自动收口",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "## 先坦白结论：这次的\"实时核实\"我失败了  我必须先说清楚状态，免得我给出的信息被当成\"刚查证的实时结果\"：  - 本轮我尝"
+  },
+  {
+    "label": "★ ⑤ 记忆可干预：删记忆 → 行为变化",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "北京现在天气：**雷雨（⛈️），气温约 +24°C** 数据来源：wttr.in —— `https://wttr.in/Bei"
+  },
+  {
+    "label": "★ ⑥ HITL：审批拒绝 → 自动改道",
+    "runtime": "handwritten",
+    "ok": true,
+    "detail": "任务完成 ✅  **执行过程（bash 命令未被拒绝，全程用 bash 完成）：**  1. **判断是否存在**：先 `tes"
+  },
+  {
+    "label": "★ ① 跨会话记忆：先记住我的偏好(轮1)",
+    "runtime": "langgraph",
+    "ok": true,
+    "detail": "三条约定已固化 ✅  **执行过程**：读取 `reports/ORION-conventions.md` 时发现文件与 `re"
+  },
+  {
+    "label": "★ ① 跨会话记忆：新会话里按偏好办事(轮2)",
+    "runtime": "langgraph",
+    "ok": false,
+    "detail": "status=error | Cannot send a request, as the client has been closed."
+  }
+]

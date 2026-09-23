@@ -137,7 +137,7 @@ def final_answer_of(agent: MemoryAgent) -> str:
     return ""
 
 
-async def run_task(task: dict, policy: str, budget: int, max_steps: int, progress=None) -> dict:
+async def run_task(task: dict, policy: str, budget: int, max_steps: int, progress=None, stop_check=None) -> dict:
     """跑一个长周期任务。progress: 可选回调（字符串），用于 GUI 实时展示进度。"""
 
     def note(line: str) -> None:
@@ -164,9 +164,14 @@ async def run_task(task: dict, policy: str, budget: int, max_steps: int, progres
     checks = []
     answers = []
     error = ""
+    stopped = False
     agent = None
     try:
         for index, unit in enumerate(units):
+            if stop_check is not None and stop_check():
+                stopped = True
+                note("已中止：用户请求停止")
+                break
             if agent is None or cross_session:
                 agent = MemoryAgent(
                     llm=llm,
@@ -203,7 +208,8 @@ async def run_task(task: dict, policy: str, budget: int, max_steps: int, progres
         "level": task.get("level"),
         "needs_web": bool(task.get("needs_web")),
         "turns": len(units),
-        "success": bool(checks) and all(checks),
+        "success": bool(checks) and all(checks) and not stopped,
+        "stopped": stopped,
         "checks": checks,
         "steps": steps,
         "llm_calls": llm.calls,

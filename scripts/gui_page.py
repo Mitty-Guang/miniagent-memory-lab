@@ -340,6 +340,7 @@ PAGE = """<!DOCTYPE html>
           <span class="faint" id="composerHint">连续对话 · 上下文延续</span>
           <span style="flex:1"></span>
           <button class="btn-primary" id="runBtn" onclick="runTask()">▶ 发送</button>
+          <button class="btn-primary btn-warn" id="stopBtn" style="display:none" onclick="stopRun()">⏹ 中止</button>
           <button class="btn-primary btn-warn" id="retryBtn" style="display:none" onclick="retryLast()">↻ 重试</button>
         </div>
       </div>
@@ -365,6 +366,13 @@ PAGE = """<!DOCTYPE html>
       </h3>
       <div class="steps" id="memList" style="max-height:420px"><div class="empty">暂无</div></div>
     </div>
+    <div class="card">
+      <h3>运行日志<span class="spacer"></span>
+        <button class="btn-ghost btn-xs" onclick="loadLogs()">刷新</button>
+        <button class="btn-ghost btn-xs" onclick="downloadLogs()">下载</button>
+      </h3>
+      <pre id="logs" class="pre" style="max-height:320px;overflow:auto;padding:10px 12px;font-size:11.5px;background:var(--panel-2)">暂无</pre>
+    </div>
   </div>
 </div>
 
@@ -383,6 +391,41 @@ let polling = null;
 let lastBody = null;
 let lastStatus = '';
 const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* 局域网模式口令：从 URL ?token= 读取并记忆，所有 API 调用自动带上 */
+const TOKEN = new URLSearchParams(location.search).get('token') || localStorage.getItem('guiToken') || '';
+if (TOKEN) localStorage.setItem('guiToken', TOKEN);
+const apiUrl = (path) => TOKEN ? path + (path.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(TOKEN) : path;
+
+async function stopRun() {
+  const btn = $('stopBtn');
+  btn.disabled = true;
+  btn.textContent = '⏹ 中止中…';
+  try { await fetch(apiUrl('/api/stop'), {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'}); } catch (e) {}
+}
+
+let logPoll = 0;
+async function loadLogs() {
+  let data;
+  try { data = await (await fetch(apiUrl('/api/logs'))).json(); } catch (e) { return; }
+  const runLog = data.run || '';
+  const proc = (data.process || []).join('\n');
+  $('logs').textContent =
+    (runLog ? '—— 本轮运行日志 ——\n' + runLog + '\n\n' : '')
+    + '—— 进程日志（最近 500 行）——\n' + proc;
+}
+
+async function downloadLogs() {
+  try {
+    const data = await (await fetch(apiUrl('/api/logs'))).json();
+    const blob = new Blob([(data.run || '') + '\n\n===== 进程日志 =====\n' + (data.process || []).join('\n')],
+                          {type: 'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'miniagent_gui_log.txt';
+    a.click();
+  } catch (e) {}
+}
 
 /* ---------- 主题 ---------- */
 function toggleTheme() {
@@ -421,7 +464,7 @@ async function runTask() {
   });
 }
 
-async function newSession() {  await fetch('/api/new_session', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
+async function newSession() {  await fetch(apiUrl('/api/new_session', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
   $('chat').innerHTML = '<div class="empty">新会话已开始（上下文已清空），在下方输入框继续。</div>';
   $('trace').innerHTML = '<div class="empty">暂无</div>';
   $('output').innerHTML = '<span class="muted">暂无</span>';
@@ -439,7 +482,7 @@ async function submit(body) {
   lastBody = body;
   $('runBtn').disabled = true;
   $('retryBtn').style.display = 'none';
-  const r = await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const r = await fetch(apiUrl('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('runBtn').disabled = false; return; }
   $('task').value = '';   // 发送后清空输入框（对话习惯）；内容已存 lastBody 供重试
@@ -448,7 +491,7 @@ async function submit(body) {
 
 async function loadLhTasks() {
   try {
-    const data = await (await fetch('/api/lh_tasks')).json();
+    const data = await (await fetch(apiUrl('/api/lh_tasks')).json();
     const tasks = data.tasks || [];
     const sel = $('lhTask');
     sel.innerHTML = tasks.length
@@ -466,19 +509,19 @@ async function runLhTask() {
     policy: $('policy').value,
     budget: parseInt($('budget').value || '1200', 10),
   };
-  const r = await fetch('/api/lh_run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const r = await fetch(apiUrl('/api/lh_run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('lhBtn').disabled = false; return; }
   startPolling();
 }
 
 async function decide(approved) {
-  await fetch('/api/approve', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({approved})});
+  await fetch(apiUrl('/api/approve', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({approved})});
 }
 
 /* ---------- 记忆库 ---------- */
 async function clearLtm() {
-  await fetch('/api/clear_ltm', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
+  await fetch(apiUrl('/api/clear_ltm', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
   refresh(); loadMemory();
 }
 
@@ -491,7 +534,7 @@ function fmtTime(ts) {
 async function loadMemory() {
   const q = $('memQuery').value.trim();
   let data;
-  try { data = await (await fetch('/api/memory?q=' + encodeURIComponent(q))).json(); } catch (e) { return; }
+  try { data = await (await fetch(apiUrl('/api/memory?q=' + encodeURIComponent(q))).json(); } catch (e) { return; }
   const items = data.items || [];
   $('memList').innerHTML = items.length ? items.map(it => `
     <div class="mem">
@@ -505,7 +548,7 @@ async function loadMemory() {
 }
 
 async function deleteMemory(id) {
-  await fetch('/api/memory_delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id})});
+  await fetch(apiUrl('/api/memory_delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id})});
   loadMemory();
 }
 
@@ -518,7 +561,7 @@ function startPolling() {
 
 async function refresh() {
   let s;
-  try { s = await (await fetch('/api/state')).json(); } catch (e) { return; }
+  try { s = await (await fetch(apiUrl('/api/state')).json(); } catch (e) { return; }
   render(s);
   if (s.status === 'done' || s.status === 'error' || s.status === 'idle') {
     clearInterval(polling); polling = null; $('runBtn').disabled = false;
@@ -570,6 +613,15 @@ function render(s) {
   pill.textContent = statusMap[s.status] || s.status;
   pill.className = 'chip state' + (s.status === 'done' ? ' done' : (s.status === 'error' ? ' error' : (s.status === 'running' ? ' running' : '')));
   $('elapsed').innerHTML = s.elapsed ? `耗时 <b>${s.elapsed}s</b>` : '';
+  const stopBtn = $('stopBtn');
+  if (stopBtn) {
+    const running = s.status === 'running';
+    stopBtn.style.display = running ? 'inline-block' : 'none';
+    stopBtn.disabled = Boolean(s.stop_requested);
+    stopBtn.textContent = s.stop_requested ? '⏹ 中止中…' : '⏹ 中止';
+  }
+  if (s.stopped) { pill.textContent = '已中止'; pill.className = 'chip state error'; }
+  if (s.status === 'running' && (++logPoll % 6 === 0)) loadLogs();
   // LangGraph 运行时可用性（未装 .venv312 时置灰）
   const lgOption = $('runtimeLanggraph');
   if (lgOption) {

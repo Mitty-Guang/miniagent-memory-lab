@@ -17,7 +17,8 @@ class MiniAgent:
         llm: SimpleLLM,
         name: str = "MiniAgent",
         system_prompt: Optional[str] = None,
-        max_steps: int = 10
+        max_steps: int = 10,
+        stop_check=None,
     ):
         self.name = name
         self.llm = llm
@@ -26,6 +27,8 @@ class MiniAgent:
         self.state = AgentState.IDLE
         self.max_steps = max_steps
         self.current_step = 0
+        self.stop_check = stop_check   # 返回 True 时在"步与步之间"协作式中止
+        self.stopped = False
         
         # 默认系统提示词
         self.system_prompt = system_prompt or """
@@ -63,6 +66,10 @@ class MiniAgent:
         
         # 执行循环
         while self.state == AgentState.RUNNING and self.current_step < self.max_steps:
+            if self.stop_check is not None and self.stop_check():
+                self.stopped = True
+                print("⏹ 收到中止请求，停止执行")
+                break
             self.current_step += 1
             print(f"\n--- 第 {self.current_step} 步 ---")
 
@@ -151,6 +158,15 @@ class MiniAgent:
         
         # 执行所有工具调用
         for tool_call in last_message.tool_calls:
+            if self.stop_check is not None and self.stop_check():
+                self.stopped = True
+                self.memory.add_message(
+                    Message.tool_message(
+                        content="已中止：用户请求停止执行。",
+                        tool_call_id=tool_call["id"],
+                    )
+                )
+                break
             tool_id = tool_call["id"]
             function_name = tool_call["function"]["name"]
             
@@ -215,4 +231,6 @@ class MiniAgent:
                 f"- 备注: 达到步数上限（{self.max_steps} 步）仍未给出最终作答，"
                 "可调高步数或换个更具体的问法后重试\n"
             )
+        if self.stopped:
+            summary += f"- 备注: 已被用户中止（完成 {self.current_step} 步）\n"
         return summary

@@ -55,6 +55,7 @@ class TeamState(TypedDict, total=False):
     log: Annotated[List[str], lambda a, b: (a or []) + (b or [])]
 
     sensitive_tools: List[str]
+    memory_block: str    # planner 检索到的长期记忆（executor/reviewer 也可见）
 
 
 def _repair_dangling_tool_calls(messages: List[AnyMessage]) -> List[AnyMessage]:
@@ -162,7 +163,7 @@ def build_team(
         log_line = f"[planner] {len(plan.splitlines())} 步计划"
         if memory_block:
             log_line += f"（注入 {len(retrieved)} 条长期记忆）"
-        return {"plan": plan, "log": [log_line]}
+        return {"plan": plan, "memory_block": memory_block, "log": [log_line]}
 
     # —— 计划审批（interrupt）——
     async def approval_node(state: TeamState) -> Dict[str, Any]:
@@ -177,7 +178,7 @@ def build_team(
     async def executor_agent_node(state: TeamState) -> Dict[str, Any]:
         history = _repair_dangling_tool_calls(list(state.get("messages", []))[-max_steps * 3 :])
         prompt = [
-            SystemMessage(content=EXECUTOR_PROMPT),
+            SystemMessage(content=EXECUTOR_PROMPT + (state.get("memory_block") or "")),
             HumanMessage(content=f"任务：{state['task']}\n\n计划：\n{state.get('plan', '')}"),
         ]
         resp = await llm_with_tools.ainvoke(prompt + history)

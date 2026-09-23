@@ -56,7 +56,7 @@ def emit(event: dict) -> None:
     print(json.dumps(event, ensure_ascii=False), flush=True)
 
 
-async def run(task: str, max_steps: int, ltm_path: str = "") -> None:
+async def run(task: str, max_steps: int, ltm_path: str = "", thread_id: str = "", checkpoint_path: str = "") -> None:
     workdir = tempfile.mkdtemp(prefix="lg_gui_")
     os.chdir(workdir)
     started = time.time()
@@ -66,11 +66,20 @@ async def run(task: str, max_steps: int, ltm_path: str = "") -> None:
         sys.path.insert(0, str(HERE.parents[1]))
         from mini_agent.long_term_memory import LongTermMemory
 
+        os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")   # 国内镜像
+        retriever = None
+        try:
+            from mini_agent.retrieval import EmbeddingRetriever
+
+            retriever = EmbeddingRetriever()
+            print("[ltm] 检索器：EmbeddingRetriever", file=sys.stderr, flush=True)
+        except Exception as exc:
+            print(f"[ltm] EmbeddingRetriever 不可用（{exc}）；回退 TF-IDF", file=sys.stderr, flush=True)
         Path(ltm_path).parent.mkdir(parents=True, exist_ok=True)
-        ltm = LongTermMemory(path=ltm_path)
+        ltm = LongTermMemory(path=ltm_path, retriever=retriever)
     retrieved: list = []
     graph = build_team(
-        checkpointer=await make_checkpointer(),
+        checkpointer=await make_checkpointer(checkpoint_path),
         max_retries=1,
         max_steps=max_steps,
         require_approval=False,
@@ -79,7 +88,7 @@ async def run(task: str, max_steps: int, ltm_path: str = "") -> None:
         session_id=session_id,
         retrieved_sink=retrieved,
     )
-    config = {"configurable": {"thread_id": f"gui-{int(started)}"}}
+    config = {"configurable": {"thread_id": thread_id or f"gui-{int(started)}"}}
 
     # —— 流式：每个节点执行完输出一次（GUI 据此实时渲染轨迹）——
     async for chunk in graph.astream(
@@ -133,9 +142,11 @@ def main() -> None:
     parser.add_argument("--task", required=True)
     parser.add_argument("--max-steps", type=int, default=6)
     parser.add_argument("--ltm-path", default="", help="共享长期记忆库路径（与 GUI 同一个 SQLite）")
+    parser.add_argument("--thread-id", default="", help="多轮会话的 thread_id（配合 checkpointer）")
+    parser.add_argument("--checkpoint-path", default="", help="checkpointer 落盘路径（跨轮/跨进程）")
     args = parser.parse_args()
     try:
-        asyncio.run(run(args.task, args.max_steps, args.ltm_path))
+        asyncio.run(run(args.task, args.max_steps, args.ltm_path, args.thread_id, args.checkpoint_path))
     except Exception as exc:  # 错误也按协议输出，便于 GUI 展示
         emit({"type": "final", "final": "", "error": f"{type(exc).__name__}: {exc}"[:300], "messages": []})
 
