@@ -117,13 +117,19 @@ def build_team(
     max_steps: int = 6,
     require_approval: bool = True,
     sensitive_tools: Optional[List[str]] = None,
+    ltm=None,
+    session_id: str = "",
+    retrieved_sink: Optional[list] = None,
 ):
     """构建 supervisor 图。
 
     require_approval=False 时跳过计划审批（纯性能对照用）；
-    sensitive_tools 默认 {"bash_execute"}（工具级 interrupt 审批）。
+    sensitive_tools 默认 {"bash_execute"}（工具级 interrupt 审批）；
+    ltm 传入 LongTermMemory 时：planner 检索历史记忆注入提示词、finish 写回本轮摘要
+    （与主项目 MemoryAgent 的"写 → 读 → 用"链路对齐）。
     """
     sensitive = set(sensitive_tools if sensitive_tools is not None else {"bash_execute"})
+    retrieved: List[dict] = retrieved_sink if retrieved_sink is not None else []
     llm = get_llm()
     llm_with_tools = llm.bind_tools(TOOLS)
     tool_map = {t.name: t for t in TOOLS}
@@ -137,11 +143,26 @@ def build_team(
 
     # —— planner ——
     async def planner_node(state: TeamState) -> Dict[str, Any]:
+        memory_block = ""
+        if ltm is not None:
+            hits = ltm.search(state["task"], k=3, exclude_session=session_id or None)
+            retrieved.clear()
+            retrieved.extend(hits)
+            if hits:
+                memory_block = "\n\n[长期记忆] 与此任务相关的历史记忆：\n" + "\n".join(
+                    f"- {h['text']}" for h in hits
+                )
         resp = await llm.ainvoke(
-            [SystemMessage(content=PLANNER_PROMPT), HumanMessage(content=state["task"])]
+            [
+                SystemMessage(content=PLANNER_PROMPT + memory_block),
+                HumanMessage(content=state["task"]),
+            ]
         )
         plan = (resp.content or "").strip()
-        return {"plan": plan, "log": [f"[planner] {len(plan.splitlines())} 步计划"]}
+        log_line = f"[planner] {len(plan.splitlines())} 步计划"
+        if memory_block:
+            log_line += f"（注入 {len(retrieved)} 条长期记忆）"
+        return {"plan": plan, "log": [log_line]}
 
     # —— 计划审批（interrupt）——
     async def approval_node(state: TeamState) -> Dict[str, Any]:
@@ -242,7 +263,16 @@ def build_team(
                 break
         if not state.get("approved"):
             final = f"已取消执行（人工拒绝）。计划为：\n{state.get('plan', '')}"
-        return {"final": final or state.get("plan", ""), "log": ["[finish] 结束"]}
+        final = final or state.get("plan", "")
+        log_line = "[finish] 结束"
+        if ltm is not None and final and "LLM调用失败" not in final:
+            memory_id = ltm.add(
+                f"任务：{state['task'][:120]}；结果：{final.strip()[:160]}",
+                session_id=session_id,
+                kind="summary",
+            )
+            log_line += f"（已写入长期记忆 #{memory_id}）"
+        return {"final": final, "log": [log_line]}
 
     builder = StateGraph(TeamState)
     builder.add_node("intake", intake_node)

@@ -105,6 +105,9 @@ class RunState:
         self.lh_task_id = ""
         self.lh_progress = []
         self.lh_checks = []
+        self.lg_messages = []         # LangGraph 运行时：流式消息（同进程/子进程通用）
+        self.lg_retrieved = []        # LangGraph 运行时：注入的长期记忆
+        self.lg_mode = ""             # in-process / subprocess
         self.chat = chat            # 连续对话：复用会话上下文
         self.turns = 0              # 当前会话第几轮
         self.session_id = ""
@@ -161,11 +164,21 @@ class RunState:
             "approval_mode": self.approval_mode,
             "runtime": self.runtime,
             "langgraph_available": langgraph_python() is not None,
+            "lg_mode": self.lg_mode,
             "langgraph_payload": self.langgraph_payload,
             "lh_active": self.lh_active,
             "lh_task_id": self.lh_task_id,
             "lh_progress": self.lh_progress[-40:],
             "lh_checks": self.lh_checks,
+            "lg_retrieved": [
+                {
+                    "text": (h.get("text") or "")[:160],
+                    "score": h.get("score"),
+                    "kind": h.get("kind"),
+                    "session_id": h.get("session_id"),
+                }
+                for h in (self.lg_retrieved or [])
+            ],
             "task": self.task,
             "pending": self.pending,
             "llm": {},
@@ -234,9 +247,9 @@ class RunState:
                 }
                 for msg in self.agent.memory.messages[-80:]   # 连续对话下只回传最近 80 条
             ]
-        elif self.langgraph_payload:
-            # LangGraph 运行时的轨迹由 extras 子进程回传（role/content/tool_calls）
-            data["messages"] = self.langgraph_payload.get("messages", [])[-80:]
+        elif self.lg_messages or self.langgraph_payload:
+            # LangGraph 运行时的轨迹：优先用流式消息（边跑边显示），结束后用完整版覆盖
+            data["messages"] = (self.lg_messages or self.langgraph_payload.get("messages", []))[-80:]
         return data
 
 
@@ -256,8 +269,88 @@ def langgraph_python():
     return candidate if candidate.exists() else None
 
 
-async def run_langgraph_runtime(state: RunState) -> dict:
-    """以子进程方式跑 LangGraph 团队图：GUI 本体保持零框架依赖，框架依赖隔离在 .venv312。"""
+def _lg_import():
+    """惰性导入 extras 的 LangGraph 图模块（同进程运行用；缺依赖返回 None）。"""
+    try:
+        import importlib
+
+        extras = HERE.parent / "extras" / "langgraph_compare"
+        if str(extras) not in sys.path:
+            sys.path.insert(0, str(extras))
+        return importlib.import_module("multi_agent_graph")
+    except Exception as exc:
+        print(f"[lg] 同进程导入失败（将回退子进程）: {exc}", flush=True)
+        return None
+
+
+def _lg_serialize(message) -> dict:
+    """把 LangChain 消息转成 GUI 轨迹格式（与环境无关）。"""
+    kind = type(message).__name__
+    role = {"HumanMessage": "user", "ToolMessage": "tool", "SystemMessage": "system"}.get(kind, "assistant")
+    return {
+        "role": role,
+        "content": str(getattr(message, "content", "") or "")[:1500],
+        "tool_calls": [call.get("name") for call in (getattr(message, "tool_calls", None) or [])],
+    }
+
+
+async def run_langgraph_inprocess(state: RunState, ltm) -> dict:
+    """同进程跑 LangGraph 团队图：真·实时流式 + 与手写运行时**共享同一个记忆库**。
+
+    说明：同进程路径关闭 interrupt（仅 3.10 环境不支持异步 interrupt；需要 HITL 时用 .venv312 子进程）。
+    """
+    lag = _lg_import()
+    if lag is None:
+        raise RuntimeError("当前环境缺少 LangGraph/LangChain")
+    graph = lag.build_team(
+        checkpointer=await lag.make_checkpointer(),
+        max_retries=1,
+        max_steps=state.max_steps,
+        require_approval=False,
+        sensitive_tools=[],
+        ltm=ltm,
+        session_id=state.session_id,
+        retrieved_sink=state.lg_retrieved,
+    )
+    config = {"configurable": {"thread_id": f"gui-{int(state.started_at)}"}}
+    started = time.time()
+    async for chunk in graph.astream(
+        {"task": state.task, "rounds": 0}, config=config, stream_mode="updates"
+    ):
+        for node, update in (chunk or {}).items():
+            detail = str(node)
+            if isinstance(update, dict):
+                for message in update.get("messages") or []:
+                    state.lg_messages.append(_lg_serialize(message))
+                if update.get("rounds") is not None:
+                    detail += f" · rounds={update['rounds']}"
+                if update.get("steps") is not None:
+                    detail += f" · steps={update['steps']}"
+            state.trace.log(
+                "lg_node",
+                {"name": str(node), "text": detail, "latency": round(time.time() - started, 1)},
+            )
+    snapshot = await graph.aget_state(config)
+    values = dict(snapshot.values) if snapshot else {}
+    return {
+        "final": str(values.get("final") or ""),
+        "plan": str(values.get("plan") or ""),
+        "review": str(values.get("review") or ""),
+        "rounds": int(values.get("rounds") or 0),
+        "seconds": round(time.time() - started, 2),
+        "log": list(values.get("log") or []),
+        "messages": [_lg_serialize(m) for m in (values.get("messages") or [])],
+    }
+
+
+async def run_langgraph_runtime(state: RunState, ltm_path_value: str = "") -> dict:
+    """以子进程方式跑 LangGraph 团队图，并**流式**读取节点进展（GUI 实时渲染）。
+
+    gui_run.py 每完成一个节点就输出一行 JSON；这里逐行读取：
+    - type=node：把新增消息追加到 state.lg_messages（对话面板实时显示）、
+      并写一条 trace 事件（事件流实时显示节点名/轮次）；
+    - type=final：完整载荷（含 final/plan/review/log/全部消息）。
+    """
     python = langgraph_python()
     if python is None:
         raise RuntimeError("未找到 .venv312：请先创建 Python≥3.11 环境并安装 extras 依赖（见 docs/LANGGRAPH_NOTES.md）")
@@ -269,20 +362,53 @@ async def run_langgraph_runtime(state: RunState) -> dict:
         state.task,
         "--max-steps",
         str(state.max_steps),
+        *(["--ltm-path", ltm_path_value] if ltm_path_value else []),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         cwd=str(HERE.parent),
     )
-    stdout, stderr = await proc.communicate()
-    for line in reversed(stdout.decode("utf-8", errors="replace").splitlines()):
-        line = line.strip()
-        if line.startswith("{"):
-            try:
-                return json.loads(line)
-            except json.JSONDecodeError:
-                continue
-    detail = (stderr.decode("utf-8", errors="replace") or "无输出").strip()[-200:]
-    raise RuntimeError(f"LangGraph 子进程无有效输出：{detail}")
+
+    payload: dict = {}
+    stderr_chunks: list = []
+    assert proc.stdout is not None
+    while True:
+        line = await proc.stdout.readline()
+        if not line:
+            break
+        text = line.decode("utf-8", errors="replace").strip()
+        if not text.startswith("{"):
+            continue
+        try:
+            event = json.loads(text)
+        except json.JSONDecodeError:
+            continue
+        if event.get("type") == "node":
+            node = str(event.get("node") or "?")
+            for message in event.get("messages") or []:
+                state.lg_messages.append(message)
+            detail = node
+            if event.get("rounds") is not None:
+                detail += f" · rounds={event['rounds']}"
+            if event.get("steps") is not None:
+                detail += f" · steps={event['steps']}"
+            state.trace.log("lg_node", {"name": node, "text": detail, "latency": event.get("seconds")})
+        else:
+            payload = event
+            for message in event.get("messages") or []:
+                state.lg_messages.append(message)
+
+    if proc.stderr is not None:
+        stderr_chunks.append((await proc.stderr.read()).decode("utf-8", errors="replace"))
+    await proc.wait()
+
+    if not payload:
+        detail = ("".join(stderr_chunks) or "无输出").strip()[-200:]
+        raise RuntimeError(f"LangGraph 子进程无有效输出：{detail}")
+    if payload.get("messages"):
+        state.lg_messages = list(payload["messages"])   # 用完整版覆盖流式截断版
+    if payload.get("retrieved"):
+        state.lg_retrieved = list(payload["retrieved"])
+    return payload
 
 
 def _lh_module():
@@ -359,18 +485,34 @@ def run_worker(state: RunState):
                 session = STATE.get("chat")
             reuse = bool(state.chat and session and session.get("agent"))
 
-            # —— LangGraph 运行时：走 extras 子进程（零框架依赖的 GUI 本体不引入框架）——
+            # —— LangGraph 运行时：优先同进程（实时流式 + 共享记忆库），缺依赖回退 .venv312 子进程 ——
             if state.runtime == "langgraph":
                 state.session_id = f"gui-lg-{int(state.started_at)}"
                 state.turns = 1
-                payload = await run_langgraph_runtime(state)
+                path = ltm_path()
+                path.parent.mkdir(exist_ok=True)
+                ltm = LongTermMemory(path=str(path))
+                try:
+                    if _lg_import() is not None:
+                        state.lg_mode = "in-process"
+                        state.trace.log("lg_node", {"name": "runtime", "text": "同进程（共享记忆库）"})
+                        payload = await run_langgraph_inprocess(state, ltm)
+                    else:
+                        state.lg_mode = "subprocess"
+                        state.trace.log("lg_node", {"name": "runtime", "text": "子进程 .venv312"})
+                        payload = await run_langgraph_runtime(state, str(path))
+                    state.ltm_rows = ltm.all()
+                finally:
+                    with contextlib.suppress(Exception):
+                        ltm.close()
                 state.langgraph_payload = payload
+                state.lg_retrieved = list(state.lg_retrieved)
                 state.output = payload.get("final") or payload.get("error") or "(无输出)"
                 state.answer = state.output
                 state.trace.log(
                     "runtime",
                     {
-                        "name": "langgraph",
+                        "name": f"langgraph/{state.lg_mode}",
                         "text": f"rounds={payload.get('rounds')} review={str(payload.get('review'))[:24]}",
                         "latency": payload.get("seconds"),
                     },

@@ -66,22 +66,29 @@ py -3.12 -m venv .venv312
 # ④ LangChain 集成：自研 LTM → BaseRetriever，LCEL 组 RAG 链
 .\.venv312\Scripts\python.exe extras\langgraph_compare\langchain_retriever.py
 
-# ⑤ GUI 运行时切换（:8901 页面"运行时"下拉：手写循环 / LangGraph 图）
-#    GUI 本体跑在零依赖的 .venv（3.10）；选中 LangGraph 时由 gui.py 以子进程调用
-#    extras/langgraph_compare/gui_run.py（走 .venv312），结果与轨迹回填到同一面板。
-.\.venv\Scripts\python.exe scripts\gui.py --port 8901
+# ⑤ GUI（推荐用 .venv312 启动：LangGraph 同进程运行，实时流式 + 共享记忆库）
+.\.venv312\Scripts\python.exe scripts\gui.py --port 8901
+#    - 运行时下拉可选「手写循环」或「LangGraph 图」；
+#    - LangGraph 图同进程运行（v3.12 支持 interrupt，后续可开工具级审批），
+#      轨迹逐节点实时显示、与手写路径共享同一个长期记忆库（读+写）；
+#    - 若在 3.10 环境启动 GUI，则自动回退到 .venv312 子进程（流式 JSON 行），功能等价但多一层进程。
 ```
 
 ## 5. GUI 运行时切换（同一任务、两套运行时）
 
-左侧「运行时」下拉：`手写循环（零依赖）` / `LangGraph 图（extras）`。未安装 `.venv312` 时选项自动置灰。
+左侧「运行时」下拉：`手写循环（零依赖）` / `LangGraph 图（extras）`。
 
-实测同一任务「用 Python 计算 1 到 50 的和」：
+**运行方式（2026-09-24 起）**：GUI 建议直接用 `.venv312` 启动 —— LangGraph 走**同进程**：
 
-| 运行时 | 状态 | 消息数 | 输出 |
-| --- | --- | --- | --- |
-| 手写循环 | done | 4 | 1275 ✓ |
-| LangGraph 图（子进程） | done | 5 | 1275 ✓（plan → 自动放行 → executor → reviewer PASS，5.4s） |
+| 能力 | 手写循环 | LangGraph 图（同进程） |
+| --- | --- | --- |
+| 轨迹实时显示 | ✅ | ✅（逐节点 `astream` 流式） |
+| 长期记忆 | ✅ 读+写 | ✅ **同一个库**（planner 注入、finish 回写） |
+| 人工审批（interrupt） | approval_fn 回调 | 需要时可开（Python 3.12 已支持） |
+| 依赖 | 零框架依赖 | 需 langchain/langgraph（.venv312） |
 
-事件流里会出现 `运行时 · langgraph · rounds=1 · 5.4s`；轨迹面板显示图内消息
-（intake/planner/executor/tool/reviewer 全流程）。
+实测同一任务「用 Python 计算 1 到 50 的和」：手写 3.6s / LangGraph 5.4s，均通过；
+LangGraph 运行中消息数采样 `[1,5,12,15,16,17,21]`（流式可见），记忆库新增条目 ✓。
+
+> 兼容说明：在 3.10 的 `.venv` 里启动 GUI 时，LangGraph 自动回退到 `.venv312` 子进程
+> （`gui_run.py` 逐行输出 JSON 事件），功能等价，只是多一层进程。
