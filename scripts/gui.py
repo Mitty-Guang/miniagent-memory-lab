@@ -154,7 +154,9 @@ def run_worker(state: RunState):
         old_cwd = os.getcwd()
         os.chdir(workdir)
         try:
-            state.llm = CountingLLM(**llm_kwargs(), trace=state.trace)
+            state.llm = CountingLLM(
+                **llm_kwargs(), trace=state.trace, max_retries=8, base_delay=3.0
+            )
             # 长期记忆跨运行持久化（放在 results/ 下），演示“记住 → 换会话使用”
             ltm_path = HERE.parent / "results" / "gui_ltm.sqlite3"
             ltm_path.parent.mkdir(exist_ok=True)
@@ -176,6 +178,11 @@ def run_worker(state: RunState):
         except Exception as exc:
             state.error = str(exc)
         finally:
+            try:
+                if state.llm is not None:
+                    await state.llm.client.close()
+            except Exception:
+                pass
             os.chdir(old_cwd)
             state.status = "error" if state.error else "done"
             state.finished_at = time.time()
@@ -261,6 +268,7 @@ PAGE = """<!DOCTYPE html>
         <div><label>最大步数</label><input id="maxSteps" type="number" value="10" min="1" max="20"></div>
       </div>
       <button class="primary" id="runBtn" onclick="runTask()">▶ 运行任务</button>
+      <button class="primary" id="retryBtn" style="display:none;background:#f59e0b" onclick="retryLast()">↻ 重试上次任务</button>
     </div>
 
     <div class="card"><h3>本次上下文选择</h3><div id="selection" class="muted">暂无</div></div>
@@ -299,8 +307,20 @@ async function runTask() {
     approval_mode: $('approval').value,
     max_steps: parseInt($('maxSteps').value || '10', 10),
   };
+  await submit(body);
+}
+
+async function retryLast() {
+  if (!lastBody) { return; }
+  await submit(lastBody);
+}
+
+let lastBody = null;
+async function submit(body) {
   if (!body.task) { alert('请填写任务'); return; }
+  lastBody = body;
   $('runBtn').disabled = true;
+  $('retryBtn').style.display = 'none';
   const r = await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('runBtn').disabled = false; return; }
@@ -370,7 +390,8 @@ function render(s) {
   $('steps').innerHTML = steps.length ? steps.map(m => {
     const who = {user:'🧑 用户', assistant:'🤖 模型', tool:'🔧 工具结果', system:'📌 系统(长期记忆)'}[m.role] || m.role;
     const calls = (m.tool_calls && m.tool_calls.length) ? `<div class="muted">→ 调用工具: ${esc(m.tool_calls.join(', '))}</div>` : '';
-    return `<div class="msg ${m.role}"><div class="who">${who}</div>${calls}<div class="pre">${esc(m.content)}</div></div>`;
+    const content = m.content ? esc(m.content) : '<span class="muted">(空)</span>';
+    return `<div class="msg ${m.role}"><div class="who">${who}</div>${calls}<div class="pre">${content}</div></div>`;
   }).join('') : '<div class="muted">暂无</div>';
 
   const trace = s.trace || [];
@@ -389,9 +410,10 @@ function render(s) {
     ? `<span style="color:#b91c1c">错误: ${esc(s.error)}</span>`
     : (s.output
         ? (s.output.includes('LLM调用失败')
-            ? `<span style="color:#b91c1c">⚠ 接口异常（重试已耗尽）：${esc(s.output)}<br>请再点一次「运行任务」重试</span>`
+            ? `<span style="color:#b91c1c">⚠ 接口异常：${esc(s.output)}<br>可点上方橙色「重试上次任务」</span>`
             : esc(s.output))
         : '<span class="muted">暂无</span>');
+  $('retryBtn').style.display = (s.status === 'done' && s.output && s.output.includes('LLM调用失败')) ? 'block' : 'none';
 }
 refresh();
 </script>

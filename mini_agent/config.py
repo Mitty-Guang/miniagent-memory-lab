@@ -1,5 +1,6 @@
 """配置加载：从 .env 读取 API 配置（不依赖第三方库）。"""
 import asyncio
+import contextlib
 import os
 import time
 
@@ -33,15 +34,19 @@ async def warmup_async(attempts: int = 8, delay: float = 3.0, trace=None) -> boo
     返回是否预热成功；失败也继续跑（后续任务自带重试）。
     """
     llm = CountingLLM(**llm_kwargs(), max_retries=1, trace=trace)
-    for index in range(attempts):
-        response = await llm.chat([{"role": "user", "content": "ping"}])
-        content = response.content or ""
-        if "LLM调用失败" not in content:
-            print(f"[warmup] ok（第 {index + 1} 次尝试）", flush=True)
-            return True
-        await asyncio.sleep(delay)
-    print(f"[warmup] failed（{attempts} 次尝试均失败，继续运行）", flush=True)
-    return False
+    try:
+        for index in range(attempts):
+            response = await llm.chat([{"role": "user", "content": "ping"}])
+            content = response.content or ""
+            if "LLM调用失败" not in content:
+                print(f"[warmup] ok（第 {index + 1} 次尝试）", flush=True)
+                return True
+            await asyncio.sleep(delay)
+        print(f"[warmup] failed（{attempts} 次尝试均失败，继续运行）", flush=True)
+        return False
+    finally:
+        with contextlib.suppress(Exception):
+            await llm.client.close()
 
 
 def warmup(attempts: int = 8, delay: float = 3.0, trace=None) -> bool:
@@ -90,6 +95,7 @@ class CountingLLM(SimpleLLM):
             request_params["tool_choice"] = "auto"
 
         response = None
+        last_error = ""
         for attempt in range(self.max_retries):
             self.calls += 1
             for msg in messages:
@@ -102,7 +108,12 @@ class CountingLLM(SimpleLLM):
             try:
                 response = await self.client.chat.completions.create(**request_params)
             except Exception as exc:
+                last_error = str(exc)
                 print(f"[llm-retry] 第 {attempt + 1} 次异常: {exc}", flush=True)
+                if self.trace is not None:
+                    self.trace.log(
+                        "llm_error", {"attempt": attempt + 1, "error": last_error[:200]}
+                    )
                 await asyncio.sleep(min(self.base_delay * (2**attempt), 16.0))
                 continue
 
@@ -144,4 +155,6 @@ class CountingLLM(SimpleLLM):
                 )
             return result
 
-        return LLMResponse(content=f"LLM调用失败: 重试 {self.max_retries} 次后仍失败")
+        return LLMResponse(
+            content=f"LLM调用失败: 重试 {self.max_retries} 次后仍失败（最后错误: {last_error[:150]}）"
+        )

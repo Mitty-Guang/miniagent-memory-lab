@@ -92,6 +92,7 @@ async def run_agent_task(
     success = True
     error = ""
     last_agent = None
+    clients: List[object] = []
 
     start = time.time()
     try:
@@ -102,6 +103,7 @@ async def run_agent_task(
         for index, unit in enumerate(units):
             if not shared_session or agent is None:
                 llm = CountingLLM(**llm_kwargs(), trace=trace)
+                clients.append(llm)
                 agent = MemoryAgent(
                     llm=llm,
                     ltm=ltm,
@@ -145,6 +147,11 @@ async def run_agent_task(
     except Exception as exc:
         error = str(exc)
         success = False
+
+    # 显式关闭 HTTP 客户端，避免事件循环结束后被 GC 产生噪音
+    for client in clients:
+        with contextlib.suppress(Exception):
+            await client.client.close()
     elapsed = time.time() - start
 
     ltm_writes = (ltm.count() - ltm_before) if ltm is not None else 0
