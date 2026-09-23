@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-09-24T02:37:38.469935",
+  "policy": "relevance",
+  "budget": 1200,
+  "rows": [
+    {
+      "task_id": "lh_web_research_uncertainty",
+      "family": "联网研究",
+      "level": "L3",
+      "needs_web": true,
+      "turns": 1,
+      "success": false,
+      "checks": [
+        false
+      ],
+      "steps": 20,
+      "llm_calls": 20,
+      "prompt_tokens": 45450,
+      "completion_tokens": 9172,
+      "seconds": 120.1,
+      "error": "",
+      "final_answer": "由于本次会话的联网抓取预算已用尽，我无法再打开新页面逐条核实。为不编造来源、也不拖延，我直接给出可落盘的 `research.md` 全文（内容基于模型内部知识 + 官方来源指引，**所有日期敏感信息已单独归入「无法核实」一节**）。\n\n```markdown\n# 诺坎普球场（Spotify Camp Nou）参观 / 比赛开放情况调研\n\n> 调研方式说明：本次调研尝试联网核查，但会话内的网页抓取配额耗尽，未能逐页打开并摘录正文。\n> 因此本文严格区分两类内容：\n> - **已核实的事实**：结构性、非时效性、且可由下列官方来源直接查证的事实（但仍建议按第 4 节自行复核）。\n> - **无法",
+      "workdir": "C:\\Users\\MITTYG~1\\AppData\\Local\\Temp\\lh_lh_web_research_uncertainty_2s_6s_ko"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{"id": "lh_sales_report", "family": "数据管道", "level": "L1", "needs_web": false, "max_steps": 14, "budget": 1200,
+ "setup": [
+   {"path": "sales_a.csv", "content": "product,qty,unit_price\nwidget,3,100\ngadget,2,250\n"},
+   {"path": "sales_b.csv", "content": "product,qty,unit_price\nwidget,5,100\ngizmo,1,300\n"},
+   {"path": "sales_c.csv", "content": "product,qty,unit_price\ngadget,4,250\ngizmo,2,300\n"}
+ ],
+ "turns": [
+   {"prompt": "当前目录有 3 个销售明细 CSV（sales_a/b/c.csv，字段 product,qty,unit_price）。请：① 合并三份数据；② 按产品汇总总金额（qty×unit_price 求和）；③ 把汇总写成 summary.md（Markdown 表格，含每个产品的名称与总金额）；④ 把全部产品的总金额（保留两位小数）写入 total.txt。",
+    "check": "file_has('summary.md','widget') and file_has('summary.md','gadget') and file_has('summary.md','gizmo') and file_text('total.txt').strip()=='3200.00'"}
+ ]}
+
+{"id": "lh_data_clean", "family": "数据清洗", "level": "L1", "needs_web": false, "max_steps": 14, "budget": 1200,
+ "setup": [
+   {"path": "messy.csv", "content": "id,date,amount\n1,2026/01/05,100\n1,2026/01/05,100\n2,2026.01.06,200\n3,,300\n4,2026-01-07,\n5,2026/01/08,500\n"}
+ ],
+ "turns": [
+   {"prompt": "messy.csv 有质量问题（完整重复行、字段缺失、日期格式不统一）。请：① 输出去重后的 clean.csv（表头不变，只去掉完全重复的行）；② 把缺失字段统一填成 N/A（日期与金额都算字段）；③ 把日期统一成 YYYY-MM-DD 格式（注意 2026/01/05 与 2026.01.06 这类写法）；④ 写 issues.md 报告问题计数：重复行数、缺失字段数、日期需转换的行数（用「重复」「缺失」「日期」作为关键词）。",
+    "check": "file_has('clean.csv','N/A') and count_rows('clean.csv')==5 and file_has('issues.md','重复') and file_has('issues.md','缺失') and file_has('issues.md','日期') and file_has('clean.csv','2026-01-05') and file_has('clean.csv','2026-01-06')"}
+ ]}
+
+{"id": "lh_json_merge_recover", "family": "容错处理", "level": "L1", "needs_web": false, "max_steps": 14, "budget": 1200,
+ "setup": [
+   {"path": "part1.json", "content": "{\"a\": 1, \"b\": 2}"},
+   {"path": "part2.json", "content": "{\"c\": 3, \"d\": 4}"},
+   {"path": "broken.json", "content": "{\"e\": 5, \"f\": }"}
+ ],
+ "turns": [
+   {"prompt": "当前目录有 part1.json、part2.json（合法）与 broken.json（损坏）。请：① 把合法文件合并成 merged.json（保留全部键值）；② 坏文件不要让它中断任务：把文件名与错误类型记录到 errors.md（至少包含文件名与「JSON」字样）；③ 最后在回答里说明合并了哪些键。",
+    "check": "json_has('merged.json',{'a':1,'b':2,'c':3,'d':4}) and file_has('errors.md','broken.json') and file_has('errors.md','JSON')"}
+ ]}
+
+{"id": "lh_wordfreq_code", "family": "代码实现", "level": "L1", "needs_web": false, "max_steps": 16, "budget": 1400,
+ "setup": [
+   {"path": "words.txt", "content": "apple banana apple cherry banana apple\n"}
+ ],
+ "turns": [
+   {"prompt": "请实现 wordfreq.py：读取同目录 words.txt，按空白切词统计词频，输出 out.json（JSON 对象，键=单词、值=出现次数，且按次数从高到低排列）。写完后必须实际运行 wordfreq.py 生成 out.json，并回读验证内容。",
+    "check": "json_has('out.json',{'apple':3,'banana':2,'cherry':1})"}
+ ]}
+
+{"id": "lh_project_3turns", "family": "多轮项目", "level": "L2", "needs_web": false, "max_steps": 12, "budget": 1400,
+ "setup": [],
+ "turns": [
+   {"prompt": "先定规范：项目代号 NEBULA；所有报告放在 reports/ 目录；金额一律保留两位小数。请确认你记住了。",
+    "check": "answer_has('NEBULA')"},
+   {"prompt": "按规范生成 Q3 报告：三条金额 1000、2500、3300，请计算总额并写入 reports/q3.md（表格 + 总额，注意规范里的目录与小数要求）。",
+    "check": "file_has('reports/q3.md','6800.00')"},
+   {"prompt": "需求变更：把报告里的总额上调 10%（仍保留两位小数），更新 reports/q3.md，并在报告里保留项目代号。",
+    "check": "file_has('reports/q3.md','7480.00') and file_has('reports/q3.md','NEBULA')"}
+ ]}
+
+{"id": "lh_conditional_pipeline", "family": "条件分支", "level": "L1", "needs_web": false, "max_steps": 12, "budget": 1200,
+ "setup": [
+   {"path": "data.json", "content": "{\"n\": 137}"}
+ ],
+ "turns": [
+   {"prompt": "读取 data.json 里的 n：如果 n > 100，创建 big.txt 内容写 \"big-<n>\"；否则创建 small.txt 内容写 \"small-<n>\"。然后把 n 的平方写入 square.txt（只写数字）。完成后告诉我创建了哪个文件。",
+    "check": "file_text('big.txt').strip()=='big-137' and file_text('square.txt').strip()=='18769'"}
+ ]}
+
+{"id": "lh_bugfix_selftest", "family": "缺陷修复", "level": "L2", "needs_web": false, "max_steps": 14, "budget": 1400,
+ "setup": [
+   {"path": "calc.py", "content": "def add(a, b):\n    return str(a + b)  # 有 bug：返回字符串\n"},
+   {"path": "test_calc.py", "content": "from calc import add\nassert add(2, 3) == 5, f'add 返回类型/值不对: {add(2,3)!r}'\nprint('OK')\n"}
+ ],
+ "turns": [
+   {"prompt": "calc.py 的 add(a,b) 有 bug（返回值类型不对），导致 test_calc.py 失败。请修复 calc.py，让 `python test_calc.py` 输出 OK（不要改动 test_calc.py 的断言语义）。",
+    "check": "py_ok('test_calc.py','OK')"},
+   {"prompt": "继续：在 calc.py 里新增 multiply(a,b)（返回 int），并让 test_calc.py 也覆盖 multiply（在文件末尾追加断言：multiply(3,4)==12，并保持原有 add 断言不变），最后运行测试确认输出 OK。",
+    "check": "py_ok('test_calc.py','OK') and file_has('calc.py','multiply')"}
+ ]}
+
+{"id": "lh_web_research_uncertainty", "family": "联网研究", "level": "L3", "needs_web": true, "max_steps": 20, "budget": 1400,
+ "setup": [],
+ "turns": [
+   {"prompt": "请联网调研「诺坎普球场（Spotify Camp Nou）目前的参观/比赛开放情况」，把结果写成 research.md：① 至少 2 条来源链接；② 明确区分「已核实的事实」与「无法核实的点」（后者必须单独一节，标题含「不确定」或「无法核实」）；③ 给出结论与建议。不要编造来源。",
+    "check": "file_has('research.md','诺坎普') and link_count('research.md')>=2 and (file_has('research.md','不确定') or file_has('research.md','无法核实')) and len(file_text('research.md'))>=300"}
+ ]}
+
+{"id": "lh_weather_pipeline", "family": "联网+数据处理", "level": "L2", "needs_web": true, "max_steps": 14, "budget": 1200,
+ "setup": [],
+ "turns": [
+   {"prompt": "请抓取 https://wttr.in/Beijing?format=j1 的 JSON，从当日数据里计算最高温与最低温（摄氏度），把结果写入 weather.md：包含「最高」「最低」两个数字、单位 °C、数据来源 URL 与抓取时间。",
+    "check": "file_has('weather.md','最高') and file_has('weather.md','最低') and file_has('weather.md','°C') and file_has('weather.md','wttr.in')"}
+ ]}
