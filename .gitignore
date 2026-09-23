@@ -189,3 +189,8 @@ results/search_cache/
 
 # extras 专用 venv（Python 3.12+，用于 LangGraph interrupt）
 .venv312/
+
+# SQLite 运行时产物（checkpointer 等）
+*.sqlite-shm
+*.sqlite-wal
+results/lg_team_checkpoints.sqlite
