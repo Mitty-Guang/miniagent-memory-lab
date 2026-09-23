@@ -51,7 +51,7 @@
 - 按 `impact_key`（角色 + 是否含数字）聚合为**决策影响先验表** `results/impact_priors.json`，
   供在线 `impact` 策略使用。
 
-### 2.4 评测框架（`task_suite.py` / `runner.py` / `evaluate.py` / `run_experiments.py`）
+### 2.4 评测框架（`task_suite.py` / `runner.py` / `evaluate.py` / `scripts/run_experiments.py`）
 
 - 6 个可确定性判分的小任务（计算 / 文件写入 / 多步读写 / JSON 处理）；
 - 每个任务在独立临时目录中执行（工具用相对路径，隔离副作用）；
@@ -67,7 +67,7 @@
   解决“孤儿 tool 消息”和“不完整工具调用组”两类 API 400 错误；
 - 失败样本不污染统计：干预失败打标并剔除，全量失败的任务跳过分析；
 - 任务间加 1s 间隔，降低限流风险；
-- 离线单测 `test_policies.py`：二元组相似度、孤儿修复、不完整组丢弃、
+- 离线单测 `tests/test_policies.py`：二元组相似度、孤儿修复、不完整组丢弃、
   预算约束、组原子性、全量不裁剪。
 
 ### 2.6 长期记忆层（2026-09-23 新增）
@@ -99,7 +99,7 @@
 
 `mini_agent/approval.py`：`ApprovalToolCollection` 在工具执行前调用审批回调，
 拒绝时把结构化原因回填给模型（模型会改用其他工具，而不是流程中断）。
-`demo_hitl.py` 演示：bash 被拒 → 模型自动改用 file_editor 完成同一任务。
+`scripts/demo_hitl.py` 演示：bash 被拒 → 模型自动改用 file_editor 完成同一任务。
 
 ### 2.9 Tracing 与 token/成本统计（2026-09-23 新增）
 
@@ -109,7 +109,7 @@
 
 ### 2.10 预算扫描实验（2026-09-23 新增）
 
-`run_sweep.py`：预算 × 策略网格（默认 300/500/800/1200 × recent/relevance/impact），
+`scripts/run_sweep.py`：预算 × 策略网格（默认 300/500/800/1200 × recent/relevance/impact），
 输出各格的成功率、平均步数、累计 token/字符，落盘 `results/sweep_*.json`。
 
 ### 2.11 执行沙箱与权限（2026-09-23 新增）
@@ -131,27 +131,27 @@
 
 ### 2.13 跨模型对照（2026-09-23 新增）
 
-`compare_models.py`：同一批任务、同一策略下顺序切换 `MODEL_NAME`
+`scripts/compare_models.py`：同一批任务、同一策略下顺序切换 `MODEL_NAME`
 （如 `deepseek-flash` vs `deepseek-v4-pro`），比较成功率与成本。
 
 ## 3. 如何运行
 
 ```powershell
 # 离线单测（不消耗 API；两套：短期选择 + 长期记忆/HITL/tracing）
-.\.venv\Scripts\python.exe test_policies.py
-.\.venv\Scripts\python.exe test_memory.py
+.\.venv\Scripts\python.exe tests\test_policies.py
+.\.venv\Scripts\python.exe tests\test_memory.py
 
 # 冒烟测试：单阶段 + 跨会话任务（验证长期记忆与 token 链路）
-.\.venv\Scripts\python.exe smoke_test.py
+.\.venv\Scripts\python.exe scripts\smoke_test.py
 
 # HITL 演示：危险工具先拒后放，模型自适应改用其他工具
-.\.venv\Scripts\python.exe demo_hitl.py
+.\.venv\Scripts\python.exe scripts\demo_hitl.py
 
 # 一键实验：离线影响分析 + 四策略评测
-.\.venv\Scripts\python.exe run_experiments.py
+.\.venv\Scripts\python.exe scripts\run_experiments.py
 
 # 预算扫描：多预算 × 多策略的成功率/成本曲线
-.\.venv\Scripts\python.exe run_sweep.py
+.\.venv\Scripts\python.exe scripts\run_sweep.py
 ```
 
 配置：复制 `.env` 并填入任意 OpenAI 兼容服务（本机已配置 DeepSeek 官方 API + `deepseek-flash`）。

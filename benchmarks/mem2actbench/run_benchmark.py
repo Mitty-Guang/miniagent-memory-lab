@@ -34,7 +34,7 @@ for path in (str(REPO),):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from config import CountingLLM, llm_kwargs, warmup_async  # noqa: E402
+from mini_agent.config import CountingLLM, llm_kwargs, warmup_async  # noqa: E402
 from mini_agent.long_term_memory import LongTermMemory  # noqa: E402
 
 DATA_DIR = HERE / "data" / "repo" / "Mem2ActBench"

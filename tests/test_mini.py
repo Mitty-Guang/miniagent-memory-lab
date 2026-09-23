@@ -1,6 +1,12 @@
 """
 MiniAgent 简单测试
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import asyncio
 from mini_agent import MiniAgent
 from mini_agent.tools import PythonExecutor, FileEditor, BashExecutor

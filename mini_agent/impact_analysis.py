@@ -17,7 +17,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from config import CountingLLM, llm_kwargs
+from mini_agent.config import CountingLLM, llm_kwargs
 from mini_agent.memory_policies import (
     bigrams,
     impact_key,
@@ -25,15 +25,15 @@ from mini_agent.memory_policies import (
     repair_orphans,
     to_openai_messages,
 )
-from runner import log_progress, run_agent_task
-from task_suite import TASKS
+from mini_agent.runner import log_progress, run_agent_task
+from mini_agent.task_suite import TASKS
 
 FINAL_SYSTEM_PROMPT = (
     "你是任务复盘助手：请基于给定的对话历史，直接给出该任务的最终答案，"
     "不要调用任何工具。"
 )
 
-RESULTS_DIR = Path("results")
+RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
 def answer_similarity(a: str, b: str) -> float:
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, default=0, help="只跑前 N 个任务（0=全部）")
     parser.add_argument("--budget", type=int, default=1200)
     args = parser.parse_args()
-    from config import warmup
+    from mini_agent.config import warmup
 
     warmup()
     asyncio.run(run(limit=args.limit, budget_chars=args.budget))

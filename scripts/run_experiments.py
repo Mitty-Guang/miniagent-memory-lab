@@ -4,12 +4,18 @@
     .\\.venv\\Scripts\\python.exe run_experiments.py            # 全部任务
     .\\.venv\\Scripts\\python.exe run_experiments.py --limit 3  # 快速验证
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import argparse
 import asyncio
 
-import evaluate
-import impact_analysis
-from config import warmup_async
+from mini_agent import evaluate
+from mini_agent import impact_analysis
+from mini_agent.config import warmup_async
 
 
 async def main(limit: int = 0, budget: int = 1200, skip_impact: bool = False):

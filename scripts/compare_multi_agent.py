@@ -6,6 +6,12 @@
 指标：成功率（同一套确定性判分）、LLM 调用数、Prompt tokens、耗时、审查轮数。
 两个实现使用同一模型、同一记忆策略与预算、同一工具集，唯一变量是「单 Agent vs 多 Agent」。
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import argparse
 import asyncio
 import contextlib
@@ -18,12 +24,12 @@ import time
 from pathlib import Path
 from typing import Dict, List
 
-from config import CountingLLM, llm_kwargs, warmup_async
-from evaluate import load_priors
+from mini_agent.config import CountingLLM, llm_kwargs, warmup_async
+from mini_agent.evaluate import load_priors
 from mini_agent.long_term_memory import LongTermMemory
 from mini_agent.multi_agent import MultiAgentTeam
-from runner import run_agent_task
-from task_suite import TASKS
+from mini_agent.runner import run_agent_task
+from mini_agent.task_suite import TASKS
 
 RESULTS_DIR = Path("results")
 

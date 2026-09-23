@@ -6,6 +6,12 @@
 说明：模型通过环境变量 MODEL_NAME 切换（config.llm_kwargs 每次调用时读取），
 因此同一个进程内可以顺序跑多个模型。
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import argparse
 import asyncio
 import datetime
@@ -14,11 +20,11 @@ import os
 from pathlib import Path
 from typing import Dict, List
 
-from config import warmup_async
-from runner import run_agent_task
-from task_suite import TASKS
+from mini_agent.config import warmup_async
+from mini_agent.runner import run_agent_task
+from mini_agent.task_suite import TASKS
 
-RESULTS_DIR = Path("results")
+RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
 async def run(models: List[str], limit: int, budget: int, policy: str) -> Dict:

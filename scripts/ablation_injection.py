@@ -10,6 +10,12 @@
   - system_prompt：把记忆块拼进本次运行的系统提示词；
 - 每格重复 --repeat 次，降低单次波动。
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import argparse
 import asyncio
 import datetime
@@ -17,13 +23,13 @@ import json
 from pathlib import Path
 from typing import Dict, List
 
-from config import warmup_async
-from evaluate import load_priors
-from runner import run_agent_task
-from task_suite import TASKS
+from mini_agent.config import warmup_async
+from mini_agent.evaluate import load_priors
+from mini_agent.runner import run_agent_task
+from mini_agent.task_suite import TASKS
 
 MODES = ["message", "system_prompt"]
-RESULTS_DIR = Path("results")
+RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
 def summarize(rows: List[Dict], mode: str) -> Dict:

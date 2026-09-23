@@ -10,6 +10,12 @@
     .\\.venv\\Scripts\\python.exe monitor.py --port 9000
 停止：Ctrl+C（或结束该 python 进程）
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import argparse
 import html
 import re
@@ -19,8 +25,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-PROGRESS = HERE / "progress.log"
-RESULTS = HERE / "results"
+PROGRESS = HERE.parent / "progress.log"
+RESULTS = HERE.parent / "results"
 
 PLAN_BUDGETS = [300, 500, 800, 1200]
 PLAN_POLICIES = ["recent", "relevance", "impact"]
@@ -32,7 +38,7 @@ LINE_RE = re.compile(
 
 
 def plan_task_ids():
-    from task_suite import TASKS
+    from mini_agent.task_suite import TASKS
 
     return [t["id"] for t in TASKS]
 

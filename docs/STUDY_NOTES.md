@@ -113,7 +113,7 @@ MiniAgent.run() ── while state == RUNNING and step < max_steps ──┐
 
 ### 4.5 踩过的坑：冷启动首个请求失败
 新进程的第一次 LLM 调用有概率失败（超时/网络），而上游把异常吞成一条文本，
-表现为“任务 1 步完成、成功率 0%”，一次浪费 144 秒。解决：`run_experiments.py`
+表现为“任务 1 步完成、成功率 0%”，一次浪费 144 秒。解决：`scripts/run_experiments.py`
 启动时先做一次预热调用（warmup），并给失败调用加可见的指数退避重试日志。
 
 ### 4.6 踩过的坑：失败样本污染统计

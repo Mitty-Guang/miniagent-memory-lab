@@ -4,6 +4,12 @@
     .\\.venv\\Scripts\\python.exe run_sweep.py
     .\\.venv\\Scripts\\python.exe run_sweep.py --budgets 300,600 --policies relevance,impact --limit 6
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import argparse
 import asyncio
 import json
@@ -11,13 +17,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
-from evaluate import load_priors
-from runner import run_agent_task
-from task_suite import TASKS
+from mini_agent.evaluate import load_priors
+from mini_agent.runner import run_agent_task
+from mini_agent.task_suite import TASKS
 
 POLICIES = ["recent", "relevance", "impact"]
 BUDGETS = [300, 500, 800, 1200]
-RESULTS_DIR = Path("results")
+RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
 def aggregate(records: List[Dict]) -> Dict:
@@ -39,7 +45,7 @@ async def run(
     limit: int = 0,
     sleep: float = 0.3,
 ) -> Dict:
-    from config import warmup_async
+    from mini_agent.config import warmup_async
 
     await warmup_async()
     tasks = TASKS[:limit] if limit else TASKS

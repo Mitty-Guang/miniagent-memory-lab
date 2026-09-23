@@ -10,6 +10,12 @@
 零依赖（Python 标准库 + 原生 JS），运行：
     .\\.venv\\Scripts\\python.exe gui.py --port 8901
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import argparse
 import asyncio
 import contextlib
@@ -22,7 +28,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from config import CountingLLM, llm_kwargs
+from mini_agent.config import CountingLLM, llm_kwargs
 from mini_agent.long_term_memory import LongTermMemory
 from mini_agent.memory_agent import MemoryAgent
 from mini_agent.tracing import TraceLogger
@@ -150,7 +156,7 @@ def run_worker(state: RunState):
         try:
             state.llm = CountingLLM(**llm_kwargs(), trace=state.trace)
             # 长期记忆跨运行持久化（放在 results/ 下），演示“记住 → 换会话使用”
-            ltm_path = HERE / "results" / "gui_ltm.sqlite3"
+            ltm_path = HERE.parent / "results" / "gui_ltm.sqlite3"
             ltm_path.parent.mkdir(exist_ok=True)
             ltm = LongTermMemory(path=str(ltm_path))
             state.agent = MemoryAgent(
@@ -439,7 +445,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/clear_ltm"):
             import sqlite3
 
-            path = HERE / "results" / "gui_ltm.sqlite3"
+            path = HERE.parent / "results" / "gui_ltm.sqlite3"
             if path.exists():
                 conn = sqlite3.connect(str(path))
                 conn.execute("DELETE FROM memories")

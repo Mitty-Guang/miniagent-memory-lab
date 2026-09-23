@@ -1,6 +1,12 @@
 """
 MiniAgent 主运行文件
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import asyncio
 import os
 from mini_agent import MiniAgent

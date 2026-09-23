@@ -14,13 +14,13 @@ import time
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
-from config import CountingLLM, llm_kwargs
+from mini_agent.config import CountingLLM, llm_kwargs
 from mini_agent.long_term_memory import LongTermMemory
 from mini_agent.memory_agent import MemoryAgent
 from mini_agent.schema import Message, Role
 from mini_agent.tracing import TraceLogger
 
-PROGRESS_PATH = Path(__file__).resolve().parent / "progress.log"
+PROGRESS_PATH = Path(__file__).resolve().parents[1] / "progress.log"
 
 
 def log_progress(line: str) -> None:

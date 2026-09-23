@@ -15,7 +15,7 @@
 | 长期记忆 | SQLite 记忆库：任务摘要写入 + 跨会话检索注入；检索器**可插拔**（TF-IDF 默认 / 字符 Jaccard / fastembed 向量检索） |
 | 决策影响分析 | leave-one-out 反事实重放 → 每条消息的决策影响先验（驱动 impact 策略） |
 | 评测框架 | 21 个确定性任务（6 单步 + 8 多步 + **4 跨会话** + **3 同一会话多轮**）；4 档预算 × 3 策略网格；成功率/步数/调用数/token/耗时 |
-| HITL 审批 | 工具执行前人工审批；拒绝时回填原因、模型自动改道（`demo_hitl.py`） |
+| HITL 审批 | 工具执行前人工审批；拒绝时回填原因、模型自动改道（`scripts/demo_hitl.py`） |
 | 执行沙箱 | 子进程 Python 执行 + 路径白名单 + 命令黑名单 + 超时（`mini_agent/sandbox.py`） |
 | 可观测性 | `TraceLogger`：LLM / 工具 / 审批 / 记忆读写事件 + token / 延迟统计 |
 | 可视化 | 交互式 GUI（实时轨迹 / 上下文选择 / 审批按钮 / token 面板）+ 实验监控面板 |
@@ -34,29 +34,29 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 
 ```powershell
 # 离线单测（不消耗 API）
-.\.venv\Scripts\python.exe test_policies.py
-.\.venv\Scripts\python.exe test_memory.py
+.\.venv\Scripts\python.exe tests\test_policies.py
+.\.venv\Scripts\python.exe tests\test_memory.py
 
 # 冒烟测试：单阶段 + 跨会话任务（验证长期记忆/token 链路）
-.\.venv\Scripts\python.exe smoke_test.py
+.\.venv\Scripts\python.exe scripts\smoke_test.py
 
 # HITL 演示：危险工具先拒后放，模型自适应改用其他工具
-.\.venv\Scripts\python.exe demo_hitl.py
+.\.venv\Scripts\python.exe scripts\demo_hitl.py
 
 # 一键实验：离线影响分析 + 四策略评测
-.\.venv\Scripts\python.exe run_experiments.py
+.\.venv\Scripts\python.exe scripts\run_experiments.py
 
 # 预算扫描：多预算 × 多策略的成功率/成本曲线
-.\.venv\Scripts\python.exe run_sweep.py
+.\.venv\Scripts\python.exe scripts\run_sweep.py
 
 # 单 Agent vs 多 Agent 对照
-.\.venv\Scripts\python.exe compare_multi_agent.py --limit 8 --budget 800
+.\.venv\Scripts\python.exe scripts\compare_multi_agent.py --limit 8 --budget 800
 
 # 跨模型对照（flash vs pro）
-.\.venv\Scripts\python.exe compare_models.py --models deepseek-flash,deepseek-v4-pro --limit 6
+.\.venv\Scripts\python.exe scripts\compare_models.py --models deepseek-flash,deepseek-v4-pro --limit 6
 
 # 记忆注入方式消融（system_prompt vs 独立 system 消息）
-.\.venv\Scripts\python.exe ablation_injection.py --repeat 2 --budget 800 --policy impact
+.\.venv\Scripts\python.exe scripts\ablation_injection.py --repeat 2 --budget 800 --policy impact
 
 # MCP：把沙箱工具暴露为标准 MCP 工具（需 extras/mcp/requirements-extras.txt）
 .\.venv\Scripts\python.exe extras\mcp\client_demo.py
@@ -65,8 +65,8 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 .\.venv\Scripts\python.exe benchmarks\mem2actbench\run_benchmark.py --limit 40 --top-k 3
 
 # 可视化
-.\.venv\Scripts\python.exe gui.py            # 交互式 Demo: http://127.0.0.1:8901
-.\.venv\Scripts\python.exe monitor.py        # 实验监控: http://127.0.0.1:8899
+.\.venv\Scripts\python.exe scripts\gui.py            # 交互式 Demo: http://127.0.0.1:8901
+.\.venv\Scripts\python.exe scripts\monitor.py        # 实验监控: http://127.0.0.1:8899
 ```
 
 > 可选向量检索：`pip install fastembed` 后把 `LongTermMemory(retriever=EmbeddingRetriever())`
@@ -111,28 +111,22 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 
 ```
 .
-├── mini_agent/              # 核心：ReAct 循环 / 工具 / 分层记忆 / HITL / tracing / 多 Agent
-├── task_suite.py            # 18 个确定性判分任务（含跨会话双阶段）
-├── runner.py                # 任务运行器（多阶段 / 长期记忆 / trace / 审批）
-├── evaluate.py              # 四策略评测
-├── impact_analysis.py       # 离线决策影响分析（先验表）
-├── run_sweep.py             # 预算扫描
-├── compare_multi_agent.py   # 单 Agent vs 多 Agent
-├── ablation_injection.py    # 记忆注入方式消融
-├── gui.py / monitor.py      # 交互式 Demo / 实验监控（零依赖）
-├── test_policies.py         # 离线单测：短期记忆选择
-├── test_memory.py           # 离线单测：长期记忆 / tracing / HITL / 多 Agent
-├── extras/langgraph_compare/# LangGraph 版实现与对照实验
-├── SECONDARY_DEV.md         # 改动说明 + 实验协议 + 完整结果
-└── STUDY_NOTES.md           # 源码精读 + 踩坑记录 + 面试问答
+├── mini_agent/              # 核心包：ReAct 循环 / 工具 / 分层记忆 / HITL / 沙箱 / tracing / 多 Agent
+│   └── config.py runner.py task_suite.py evaluate.py impact_analysis.py   # 评测管线模块
+├── scripts/                 # 入口脚本：评测 / 对照实验 / GUI / 监控 / 演示
+├── tests/                   # 离线测试（不消耗 API）
+├── benchmarks/mem2actbench/ # 公开基准适配器（Mem2ActBench，ACL 2026）
+├── extras/                  # langgraph_compare（LangGraph 对照）、mcp（MCP 接入）
+├── docs/                    # 改动说明 + 源码深读 + 上游文档
+└── results/                 # 实验数据（JSON）
 ```
 
 ## 文档
 
-- **[SECONDARY_DEV.md](SECONDARY_DEV.md)**：相对上游做了什么、如何复现、全部实验数据；
-- **[STUDY_NOTES.md](STUDY_NOTES.md)**：架构讲解、踩过的坑（工具调用组原子性 / 冷启动 / 失败样本污染 / ToolNode config）、20 组面试问答。
+- **[SECONDARY_DEV.md](docs/SECONDARY_DEV.md)**：相对上游做了什么、如何复现、全部实验数据；
+- **[STUDY_NOTES.md](docs/STUDY_NOTES.md)**：架构讲解、踩过的坑（工具调用组原子性 / 冷启动 / 失败样本污染 / ToolNode config）、20 组面试问答。
 
 ## 许可与致谢
 
 本项目基于 [Jacob-liu1996/miniagent](https://github.com/Jacob-liu1996/miniagent) 开发，
-保留其原始 [MIT License](LICENSE)；上游 README 见 [UPSTREAM_README.md](UPSTREAM_README.md)。
+保留其原始 [MIT License](LICENSE)；上游 README 见 [UPSTREAM_README.md](docs/UPSTREAM_README.md)。

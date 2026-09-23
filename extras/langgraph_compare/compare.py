@@ -29,9 +29,9 @@ for path in (str(HERE), str(REPO)):
 from langchain_core.messages import HumanMessage  # noqa: E402
 
 from agent_graph import build_memory_agent  # noqa: E402
-from config import warmup_async  # noqa: E402
-from runner import run_agent_task  # noqa: E402
-from task_suite import TASKS  # noqa: E402
+from mini_agent.config import warmup_async  # noqa: E402
+from mini_agent.runner import run_agent_task  # noqa: E402
+from mini_agent.task_suite import TASKS  # noqa: E402
 
 RESULTS_DIR = REPO / "results"
 

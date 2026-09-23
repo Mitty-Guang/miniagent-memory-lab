@@ -3,6 +3,12 @@
 运行：
     .\\.venv\\Scripts\\python.exe debug_xs.py
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import asyncio
 import contextlib
 import io
@@ -10,11 +16,11 @@ import os
 import tempfile
 from pathlib import Path
 
-from config import CountingLLM, llm_kwargs
+from mini_agent.config import CountingLLM, llm_kwargs
 from mini_agent.long_term_memory import LongTermMemory
 from mini_agent.memory_agent import MemoryAgent
 from mini_agent.schema import Role
-from task_suite import TASKS
+from mini_agent.task_suite import TASKS
 
 
 async def main():

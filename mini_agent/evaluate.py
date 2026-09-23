@@ -11,11 +11,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from runner import run_agent_task
-from task_suite import TASKS
+from mini_agent.runner import run_agent_task
+from mini_agent.task_suite import TASKS
 
 POLICIES = ["all", "recent", "relevance", "impact"]
-RESULTS_DIR = Path("results")
+RESULTS_DIR = Path(__file__).resolve().parents[1] / "results"
 
 
 def load_priors(path: str = "results/impact_priors.json") -> Dict[str, float]:

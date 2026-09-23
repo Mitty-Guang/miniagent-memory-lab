@@ -3,9 +3,15 @@
 用法：
     .\\.venv\\Scripts\\python.exe check_api.py
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import asyncio
 
-from config import CountingLLM, llm_kwargs
+from mini_agent.config import CountingLLM, llm_kwargs
 
 
 async def main():

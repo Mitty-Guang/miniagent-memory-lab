@@ -3,11 +3,17 @@
 运行：
     .\\.venv\\Scripts\\python.exe smoke_test.py
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import asyncio
 
-from config import warmup_async
-from runner import run_agent_task
-from task_suite import TASKS
+from mini_agent.config import warmup_async
+from mini_agent.runner import run_agent_task
+from mini_agent.task_suite import TASKS
 
 
 async def main():

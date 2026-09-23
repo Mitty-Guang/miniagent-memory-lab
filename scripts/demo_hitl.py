@@ -8,10 +8,16 @@
 2. 模型据此改用 file_editor 完成同一任务（自适应而不是崩溃）；
 3. 全过程写入 results/hitl_trace.jsonl（可用 trace.summary() 汇总）。
 """
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import asyncio
 from pathlib import Path
 
-from config import CountingLLM, llm_kwargs
+from mini_agent.config import CountingLLM, llm_kwargs
 from mini_agent.long_term_memory import LongTermMemory
 from mini_agent.memory_agent import MemoryAgent
 from mini_agent.tracing import TraceLogger
