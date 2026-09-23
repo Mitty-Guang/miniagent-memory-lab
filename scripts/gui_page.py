@@ -300,6 +300,15 @@ PAGE = """<!DOCTYPE html>
     </div>
 
     <div class="card">
+      <h3>长周期任务（Harness 模式）<span class="spacer faint" style="font-weight:400">预置文件 + 多轮 + 确定性判分</span></h3>
+      <div class="body">
+        <select id="lhTask"><option value="">加载中…</option></select>
+        <button class="btn-primary" id="lhBtn" style="margin-top:8px" onclick="runLhTask()">▶ 运行长周期任务</button>
+        <div id="lhResult" class="faint" style="font-size:11.5px;margin-top:8px">选择任务后运行；逐轮判分与进度见下方</div>
+      </div>
+    </div>
+
+    <div class="card">
       <h3>本次上下文选择</h3>
       <div class="body" id="selection"><span class="muted">暂无</span></div>
     </div>
@@ -412,8 +421,7 @@ async function runTask() {
   });
 }
 
-async function newSession() {
-  await fetch('/api/new_session', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
+async function newSession() {  await fetch('/api/new_session', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
   $('chat').innerHTML = '<div class="empty">新会话已开始（上下文已清空），在下方输入框继续。</div>';
   $('trace').innerHTML = '<div class="empty">暂无</div>';
   $('output').innerHTML = '<span class="muted">暂无</span>';
@@ -435,6 +443,32 @@ async function submit(body) {
   const j = await r.json();
   if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('runBtn').disabled = false; return; }
   $('task').value = '';   // 发送后清空输入框（对话习惯）；内容已存 lastBody 供重试
+  startPolling();
+}
+
+async function loadLhTasks() {
+  try {
+    const data = await (await fetch('/api/lh_tasks')).json();
+    const tasks = data.tasks || [];
+    const sel = $('lhTask');
+    sel.innerHTML = tasks.length
+      ? tasks.map(t => `<option value="${esc(t.id)}">${esc(t.id)} · ${esc(t.family)}/${esc(t.level)}${t.needs_web ? ' · 联网' : ''} · ${t.units} 段</option>`).join('')
+      : '<option value="">（未找到任务集）</option>';
+  } catch (e) { /* 忽略 */ }
+}
+
+async function runLhTask() {
+  const taskId = $('lhTask').value;
+  if (!taskId) { alert('请选择长周期任务'); return; }
+  $('lhBtn').disabled = true;
+  const body = {
+    task_id: taskId,
+    policy: $('policy').value,
+    budget: parseInt($('budget').value || '1200', 10),
+  };
+  const r = await fetch('/api/lh_run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const j = await r.json();
+  if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('lhBtn').disabled = false; return; }
   startPolling();
 }
 
@@ -569,6 +603,18 @@ function render(s) {
   }
 
   const sel = s.selection || {};
+  // 长周期任务（Harness 模式）状态
+  if (s.lh_active) {
+    const marks = (s.lh_checks || []).map(c => c ? '✅' : '❌').join(' ');
+    const lines = (s.lh_progress || []).slice().reverse().slice(0, 8)
+      .map(t => `<div class="pre" style="font-size:11.5px">${esc(t)}</div>`).join('');
+    $('lhResult').innerHTML = `<div class="kv"><span>任务</span><b>${esc(s.lh_task_id)}</b></div>`
+      + (marks ? `<div class="kv"><span>逐轮判分</span><b>${marks}</b></div>` : '')
+      + `<div style="margin-top:6px">${lines || '<span class="muted">进行中…</span>'}</div>`;
+    $('lhBtn').disabled = s.status === 'running';
+  } else {
+    $('lhBtn').disabled = false;
+  }
   $('selection').innerHTML = sel.total_messages
     ? `<div class="kv"><span>策略 / 预算</span><b>${esc(sel.policy)} / ${sel.budget_chars} 字符</b></div>
        <div class="kv"><span>消息数（选中/总）</span><b>${sel.selected_messages} / ${sel.total_messages}</b></div>
@@ -644,5 +690,6 @@ function render(s) {
 toggleAuto();
 refresh();
 loadMemory();
+loadLhTasks();
 </script>
 </body></html>"""

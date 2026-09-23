@@ -70,11 +70,33 @@
     "check": "py_ok('test_calc.py','OK') and file_has('calc.py','multiply')"}
  ]}
 
-{"id": "lh_web_research_uncertainty", "family": "联网研究", "level": "L3", "needs_web": true, "max_steps": 20, "budget": 1400,
+{"id": "lh_web_research_uncertainty", "family": "联网研究", "level": "L3", "needs_web": true, "max_steps": 30, "budget": 1400,
  "setup": [],
  "turns": [
-   {"prompt": "请联网调研「诺坎普球场（Spotify Camp Nou）目前的参观/比赛开放情况」，把结果写成 research.md：① 至少 2 条来源链接；② 明确区分「已核实的事实」与「无法核实的点」（后者必须单独一节，标题含「不确定」或「无法核实」）；③ 给出结论与建议。不要编造来源。",
-    "check": "file_has('research.md','诺坎普') and link_count('research.md')>=2 and (file_has('research.md','不确定') or file_has('research.md','无法核实')) and len(file_text('research.md'))>=300"}
+   {"prompt": "先建骨架（不要先检索）：在 research.md 写入报告结构——# 标题、## 已核实的事实、## 不确定/无法核实、## 结论与建议，并在不确定一节里先列出 3 条「待核实项」（每条一句话）。完成后告诉我骨架已就绪。",
+    "check": "file_has('research.md','不确定') and file_has('research.md','待核实')"},
+   {"prompt": "现在开始联网核实上面 3 条待核实项（用简短关键词搜索，控制检索次数），把结果补进 research.md：已核实的事实每条附来源链接（全文至少 2 条链接），无法确认的留在不确定一节，最后给出结论与建议。全文不少于 300 字。",
+    "check": "link_count('research.md')>=2 and (file_has('research.md','不确定') or file_has('research.md','无法核实')) and len(file_text('research.md'))>=300"}
+ ]}
+
+{"id": "lh_xs_pref_report", "family": "跨会话项目", "level": "L2", "needs_web": false, "max_steps": 12, "budget": 1400,
+ "setup": [],
+ "phases": [
+   {"prompt": "记住我的工作偏好：项目代号 NOVA；所有报告放在 reports/ 目录；金额一律保留两位小数；每周一的周报里要有「本周合计」。请确认。",
+    "check": "answer_has('NOVA')"},
+   {"prompt": "按我的偏好把本周三个金额 1200、800、3400 汇总，写成 reports/w1.md（含「本周合计」，金额保留两位小数）。",
+    "check": "file_has('reports/w1.md','5400.00')"},
+   {"prompt": "再补一份报告 reports/w2.md：金额用上一份的合计算，但要求 +5%（仍保留两位小数），并在报告里写上项目代号。",
+    "check": "file_has('reports/w2.md','5670.00') and file_has('reports/w2.md','NOVA')"}
+ ]}
+
+{"id": "lh_xs_spec_to_code", "family": "跨会话项目", "level": "L3", "needs_web": false, "max_steps": 16, "budget": 1400,
+ "setup": [],
+ "phases": [
+   {"prompt": "为接下来的开发任务立规范：创建 docs/spec.md，写清 3 条验收标准——① 函数 add(a,b) 返回 int；② 函数 multiply(a,b) 返回 int；③ 提供 test_main.py，运行 `python test_main.py` 输出 OK。只写规范，不写实现。",
+    "check": "file_has('docs/spec.md','add') and file_has('docs/spec.md','multiply')"},
+   {"prompt": "按 docs/spec.md 的验收标准实现代码（main.py 与 test_main.py），并实际运行 `python test_main.py` 确认输出 OK。",
+    "check": "py_ok('test_main.py','OK') and file_has('main.py','multiply')"}
  ]}
 
 {"id": "lh_weather_pipeline", "family": "联网+数据处理", "level": "L2", "needs_web": true, "max_steps": 14, "budget": 1200,

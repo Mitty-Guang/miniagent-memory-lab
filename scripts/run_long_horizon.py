@@ -137,7 +137,16 @@ def final_answer_of(agent: MemoryAgent) -> str:
     return ""
 
 
-async def run_task(task: dict, policy: str, budget: int, max_steps: int) -> dict:
+async def run_task(task: dict, policy: str, budget: int, max_steps: int, progress=None) -> dict:
+    """跑一个长周期任务。progress: 可选回调（字符串），用于 GUI 实时展示进度。"""
+
+    def note(line: str) -> None:
+        if progress is not None:
+            try:
+                progress(line)
+            except Exception:
+                pass
+
     workdir = tempfile.mkdtemp(prefix=f"lh_{task['id']}_")
     for item in task.get("setup") or []:
         path = Path(workdir) / item["path"]
@@ -149,23 +158,26 @@ async def run_task(task: dict, policy: str, budget: int, max_steps: int) -> dict
     llm = CountingLLM(**llm_kwargs(), trace=TraceLogger(), max_retries=6, base_delay=2.0)
     ltm = LongTermMemory(path=str(Path(workdir) / "ltm.sqlite3"))
     started = time.time()
-    units = task["turns"]
+    units = task.get("turns") or task.get("phases") or []
+    cross_session = bool(task.get("phases"))   # phases：每阶段新会话、共享长期记忆
     steps = 0
     checks = []
     answers = []
     error = ""
     agent = None
     try:
-        agent = MemoryAgent(
-            llm=llm,
-            ltm=ltm,
-            session_id=f"{task['id']}#session",
-            policy=policy,
-            budget_chars=budget,
-            max_steps=task.get("max_steps") or max_steps,
-        )
         for index, unit in enumerate(units):
-            print(f"  · 轮 {index + 1}/{len(units)}: {unit['prompt'][:46]}...", flush=True)
+            if agent is None or cross_session:
+                agent = MemoryAgent(
+                    llm=llm,
+                    ltm=ltm,
+                    session_id=f"{task['id']}#{'session' if not cross_session else f'phase{index}'}",
+                    policy=policy,
+                    budget_chars=budget,
+                    max_steps=task.get("max_steps") or max_steps,
+                )
+            print(f"  · {'阶段' if cross_session else '轮'} {index + 1}/{len(units)}: {unit['prompt'][:46]}...", flush=True)
+            note(f"{'阶段' if cross_session else '轮'} {index + 1}/{len(units)} 开始：{unit['prompt'][:40]}")
             await agent.run(unit["prompt"])
             steps += agent.current_step
             answer = final_answer_of(agent)
@@ -173,6 +185,7 @@ async def run_task(task: dict, policy: str, budget: int, max_steps: int) -> dict
             ok = evaluate(unit["check"], workdir, answer)
             checks.append(ok)
             print(f"    判分: {'✅' if ok else '❌'}", flush=True)
+            note(f"{'阶段' if cross_session else '轮'} {index + 1} 判分：{'✅ 通过' if ok else '❌ 未通过'}")
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"[:200]
         checks.append(False)

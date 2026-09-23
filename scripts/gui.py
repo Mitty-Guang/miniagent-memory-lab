@@ -101,6 +101,10 @@ class RunState:
         self.auto_plan = {}
         self.runtime = runtime        # handwritten（零依赖主链路）| langgraph（extras 子进程）
         self.langgraph_payload = {}
+        self.lh_active = False        # 长周期任务（Harness 模式）
+        self.lh_task_id = ""
+        self.lh_progress = []
+        self.lh_checks = []
         self.chat = chat            # 连续对话：复用会话上下文
         self.turns = 0              # 当前会话第几轮
         self.session_id = ""
@@ -158,6 +162,10 @@ class RunState:
             "runtime": self.runtime,
             "langgraph_available": langgraph_python() is not None,
             "langgraph_payload": self.langgraph_payload,
+            "lh_active": self.lh_active,
+            "lh_task_id": self.lh_task_id,
+            "lh_progress": self.lh_progress[-40:],
+            "lh_checks": self.lh_checks,
             "task": self.task,
             "pending": self.pending,
             "llm": {},
@@ -275,6 +283,70 @@ async def run_langgraph_runtime(state: RunState) -> dict:
                 continue
     detail = (stderr.decode("utf-8", errors="replace") or "无输出").strip()[-200:]
     raise RuntimeError(f"LangGraph 子进程无有效输出：{detail}")
+
+
+def _lh_module():
+    """惰性导入长周期 runner（scripts/run_long_horizon.py）。"""
+    sys.path.insert(0, str(HERE))
+    import run_long_horizon as lh
+
+    return lh
+
+
+def load_lh_tasks() -> list:
+    try:
+        tasks = _lh_module().load_tasks()
+    except Exception as exc:
+        print(f"[lh] 任务加载失败: {exc}", flush=True)
+        return []
+    return [
+        {
+            "id": t["id"],
+            "family": t.get("family", ""),
+            "level": t.get("level", ""),
+            "needs_web": bool(t.get("needs_web")),
+            "units": len(t.get("turns") or t.get("phases") or []),
+        }
+        for t in tasks
+    ]
+
+
+def run_lh_worker(state: RunState, task: dict) -> None:
+    """长周期任务：直接复用 harness（预置文件 + 多轮/跨会话 + 确定性判分），进度回填面板。"""
+
+    async def worker():
+        try:
+            lh = _lh_module()
+            state.trace.log("runtime", {"name": "long-horizon", "text": f"task={task['id']}"})
+
+            def progress(line: str) -> None:
+                state.lh_progress.append(line)
+                if len(state.lh_progress) > 200:
+                    state.lh_progress = state.lh_progress[-200:]
+
+            row = await lh.run_task(
+                task, state.policy, state.budget, state.max_steps, progress=progress
+            )
+            state.lh_checks = list(row.get("checks") or [])
+            marks = " / ".join("✅" if c else "❌" for c in state.lh_checks)
+            state.output = (
+                f"长周期任务：{row['task_id']}（{row['family']} / {row['level']}）\n"
+                f"结果：{'✅ 通过' if row['success'] else '❌ 未通过'}（逐轮判分：{marks}）\n"
+                f"步数 {row['steps']} ｜ LLM 调用 {row['llm_calls']} ｜ {row['seconds']}s\n"
+                f"工作目录：{row['workdir']}\n\n最终回答：\n{row['final_answer']}"
+            )
+            state.answer = state.output
+            state.trace.log(
+                "tool",
+                {"name": f"lh:{row['task_id']}", "success": bool(row["success"])},
+            )
+        except Exception as exc:
+            state.error = f"{type(exc).__name__}: {exc}"
+        finally:
+            state.status = "error" if state.error else "done"
+            state.finished_at = time.time()
+
+    asyncio.run(worker())
 
 
 def run_worker(state: RunState):
@@ -438,6 +510,9 @@ class Handler(BaseHTTPRequestHandler):
             data = _read_memory(query)
             self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"))
             return
+        if self.path.startswith("/api/lh_tasks"):
+            self._send(200, json.dumps({"tasks": load_lh_tasks()}, ensure_ascii=False).encode("utf-8"))
+            return
         self._send(200, PAGE.encode("utf-8"), "text/html; charset=utf-8")
 
     def do_POST(self):
@@ -476,6 +551,36 @@ class Handler(BaseHTTPRequestHandler):
                     asyncio.run(session["llm"].client.close())
                 with contextlib.suppress(Exception):
                     session["agent"].ltm.close()
+            self._send(200, b'{"ok":true}')
+            return
+
+        if self.path.startswith("/api/lh_run"):
+            task_id = (payload.get("task_id") or "").strip()
+            try:
+                tasks = _lh_module().load_tasks()
+            except Exception as exc:
+                self._send(400, json.dumps({"ok": False, "error": f"任务加载失败: {exc}"}).encode("utf-8"))
+                return
+            task = next((t for t in tasks if t["id"] == task_id), None)
+            if task is None:
+                self._send(400, b'{"ok":false,"error":"unknown task_id"}')
+                return
+            run = RunState(
+                task=task_id,
+                policy=payload.get("policy", "relevance"),
+                budget=int(payload.get("budget", task.get("budget", 1200))),
+                approval_mode="auto",
+                max_steps=int(payload.get("max_steps") or task.get("max_steps") or 14),
+                auto_params=False,
+                chat=False,
+                runtime="long_horizon",
+            )
+            run.lh_active = True
+            run.lh_task_id = task_id
+            run.lh_progress = [f"任务已启动：{task_id}（{task.get('family')} / {task.get('level')}）"]
+            with STATE_LOCK:
+                STATE["run"] = run
+            threading.Thread(target=run_lh_worker, args=(run, task), daemon=True).start()
             self._send(200, b'{"ok":true}')
             return
 
