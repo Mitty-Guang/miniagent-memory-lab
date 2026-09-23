@@ -5,7 +5,7 @@
 - **SSRF 防护**：拒绝内网 / 回环 / 链路本地 / 保留地址（含云元数据 169.254.169.254），
   且解析域名后逐个 IP 校验（防 DNS 指向内网）；
 - **可选 allowlist 模式**：`WEB_ACCESS=allowlist`（可配 `WEB_ALLOWED_DOMAINS=a.com,b.com`）；
-- 超时 12s、返回体积截断 4000 字符、剥离 HTML 标签/脚本。
+- 超时 20s、返回体积截断 4000 字符、剥离 HTML 标签/脚本。
 
 诚实边界：这是"工具级"防护；生产环境还应叠加出网代理、审计日志、限流与内容安全策略，
 并把 http_get 纳入人工审批（本项目 HITL 已支持按工具审批）。
@@ -76,7 +76,7 @@ class HttpGetTool(BaseTool):
         "properties": {"url": {"type": "string", "description": "要抓取的完整 URL"}},
         "required": ["url"],
     }
-    timeout: int = 12
+    timeout: int = 20
     max_chars: int = 4000
     access_mode: str = ""          # 空则读环境变量 WEB_ACCESS（默认 open）
     allowed_domains: List[str] = []
@@ -122,7 +122,14 @@ class HttpGetTool(BaseTool):
         try:
             text = await asyncio.to_thread(self._fetch, url)
         except Exception as exc:
-            return ToolResult(success=False, error=f"请求失败: {exc}")
+            # 超时重试一次（弱网常见），其余错误直接返回
+            if "timed out" in str(exc).lower():
+                try:
+                    text = await asyncio.to_thread(self._fetch, url)
+                except Exception as exc2:
+                    return ToolResult(success=False, error=f"请求失败: {exc2}")
+            else:
+                return ToolResult(success=False, error=f"请求失败: {exc}")
 
         text = re.sub(
             r"<script.*?</script>|<style.*?</style>", " ", text, flags=re.S | re.I
@@ -143,8 +150,88 @@ def _clean_html(fragment: str, limit: int = 240) -> str:
     return text[:limit]
 
 
+def _query_tokens(query: str) -> List[str]:
+    """提取相关性 token：中文 2-gram + 英文词（>=2 字符，纯数字不计）。"""
+    tokens: List[str] = []
+    for run in re.findall(r"[\u4e00-\u9fff]+", query):
+        if len(run) == 1:
+            tokens.append(run)
+        for i in range(len(run) - 1):
+            tokens.append(run[i : i + 2])
+    tokens += [
+        word.lower() for word in re.findall(r"[A-Za-z][A-Za-z0-9]{1,}", query)
+    ]
+    return list(dict.fromkeys(tokens))
+
+
+def _relevance_score(item: Dict[str, str], tokens: List[str]) -> int:
+    text = (item.get("title", "") + " " + item.get("snippet", "")).lower()
+    return sum(1 for token in tokens if token in text)
+
+
+def _sort_by_relevance(
+    results: List[Dict[str, str]], tokens: List[str]
+) -> List[Dict[str, str]]:
+    """按相关性稳定排序；存在相关结果时剔除 0 分噪声。"""
+    scored = [
+        (_relevance_score(item, tokens), index, item)
+        for index, item in enumerate(results)
+    ]
+    scored.sort(key=lambda row: (-row[0], row[1]))
+    relevant = [item for score, _, item in scored if score > 0]
+    return relevant or [item for _, _, item in scored]
+
+
+_QUERY_SUFFIXES = (
+    "开放时间",
+    "怎么样",
+    "怎么去",
+    "有哪些",
+    "是什么",
+    "参观",
+    "介绍",
+    "攻略",
+    "门票",
+    "交通",
+    "价格",
+    "地址",
+    "推荐",
+    "新闻",
+    "最新",
+    "时间",
+)
+
+
+def _strip_query_suffix(text: str) -> str:
+    """剥离常见查询后缀词（参观/攻略/开放时间…），仅在缩短重试时使用。"""
+    for suffix in sorted(_QUERY_SUFFIXES, key=len, reverse=True):
+        if text.endswith(suffix) and len(text) - len(suffix) >= 2:
+            return text[: -len(suffix)]
+    return text
+
+
+def _shorten_query(query: str) -> str:
+    """把长查询缩为核心词：多段时取最长汉字段，纯英文取前两个词。"""
+    parts = query.split()
+    if len(parts) >= 2:
+        cjk = [p for p in parts if re.search(r"[\u4e00-\u9fff]", p)]
+        if cjk:
+            candidates = [_strip_query_suffix(p) for p in cjk]
+            return max(candidates, key=lambda p: len(re.findall(r"[\u4e00-\u9fff]", p)))
+        return " ".join(parts[:2])
+    runs = re.findall(r"[\u4e00-\u9fff]+", query)
+    if runs and len(runs[0]) >= 6:
+        core = _strip_query_suffix(runs[0])
+        return core[:4] if len(core) >= 6 else core
+    return ""
+
+
 class WebSearchTool(BaseTool):
-    """联网搜索（Bing HTML 版，零依赖）：给模型一个"先搜索再抓取"的入口。"""
+    """联网搜索（Bing RSS 版，零依赖）：给模型一个"先搜索再抓取"的入口。
+
+    稳定性处理：RSS 解析失败回退 HTML；结果按相关性过滤（中文 2-gram / 英文词匹配），
+    若整体不相关则自动缩短关键词重搜一次（应对引擎对长短语错误分词的情况）。
+    """
 
     name: str = "web_search"
     description: str = (
@@ -200,18 +287,77 @@ class WebSearchTool(BaseTool):
             )
         return results
 
+    def parse_rss(self, xml_text: str) -> List[Dict[str, str]]:
+        """解析 Bing 的 RSS 输出（比 HTML 更稳、更干净）。"""
+        import xml.etree.ElementTree as ET
+
+        try:
+            root = ET.fromstring(xml_text)
+        except ET.ParseError:
+            return []
+        results: List[Dict[str, str]] = []
+        for item in root.iter("item"):
+            link = (item.findtext("link") or "").strip()
+            if not link:
+                continue
+            results.append(
+                {
+                    "url": link,
+                    "title": _clean_html(item.findtext("title") or "", 160),
+                    "snippet": _clean_html(item.findtext("description") or "", 240),
+                }
+            )
+        return results
+
+    async def _search_once(self, query: str) -> List[Dict[str, str]]:
+        """执行一次搜索：优先 RSS（结构稳定），失败或为空则回退 HTML 解析。"""
+        quoted = urllib.parse.quote(query)
+        rss_url = f"https://cn.bing.com/search?format=rss&q={quoted}"
+        html_url = f"https://cn.bing.com/search?setlang=zh-cn&q={quoted}"
+        try:
+            page = await asyncio.to_thread(self._fetch, rss_url)
+            results = self.parse_rss(page)
+            if results:
+                return results
+        except Exception:
+            pass
+        page = await asyncio.to_thread(self._fetch, html_url)
+        return self.parse_results(page)
+
     async def execute(self, query: str, max_results: int = 0, **kwargs) -> ToolResult:
         limit = max_results or self.max_results
-        url = "https://cn.bing.com/search?setlang=zh-cn&q=" + urllib.parse.quote(query)
+        query = " ".join((query or "").split())
+        if not query:
+            return ToolResult(success=False, error="搜索关键词不能为空")
+
+        tokens = _query_tokens(query)
+        note = ""
         try:
-            page = await asyncio.to_thread(self._fetch, url)
+            results = _sort_by_relevance(await self._search_once(query), tokens)
         except Exception as exc:
             return ToolResult(success=False, error=f"搜索请求失败: {exc}")
-        results = self.parse_results(page)[:limit]
+
+        # 结果整体不相关时（长短语常被引擎错误分词），自动缩短关键词重搜一次
+        if results and _relevance_score(results[0], tokens) == 0:
+            fallback = _shorten_query(query)
+            if fallback and fallback != query:
+                try:
+                    alt = await self._search_once(fallback)
+                except Exception:
+                    alt = []
+                alt_tokens = _query_tokens(fallback)
+                alt = _sort_by_relevance(alt, alt_tokens)
+                if alt and _relevance_score(alt[0], alt_tokens) > 0:
+                    results = alt
+                    note = f"（原查询结果不相关，已自动改用「{fallback}」重搜）"
+
+        results = results[:limit]
         if not results:
             return ToolResult(success=False, error="搜索没有返回可解析的结果（页面结构可能变化）")
         lines = []
         for index, item in enumerate(results, 1):
             lines.append(f"{index}. {item['title']}\n   链接: {item['url']}\n   摘要: {item['snippet']}")
         lines.append("（以上摘要通常已足够作答；仅在需要正文时用 http_get 打开具体链接）")
+        if note:
+            lines.insert(0, note)
         return ToolResult(success=True, output="\n".join(lines))

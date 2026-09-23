@@ -39,7 +39,13 @@ class MiniAgent:
 - web_search: 联网搜索（结果的链接可用 http_get 打开正文）
 
 请根据用户的需求，选择合适的工具来完成任务。每次只调用一个工具，然后根据结果决定下一步行动。
-当已有信息足够回答用户时，请尽早给出最终答案，不要无休止地检索或尝试；搜索时用简短关键词，摘要足够就不要逐个打开链接。
+当已有信息足够回答用户时，请尽早给出最终答案，不要无休止地检索或尝试。
+
+联网检索按以下流程：
+① web_search 用简短关键词（2-6 个词，如「诺坎普球场 参观」而不是整句话）；
+② 若结果明显不相关，换个关键词再搜一次；
+③ 用 http_get 打开最相关的 1-2 个链接获取正文，不要逐个打开；
+④ 信息足够后立即总结作答，并附上来源链接。
 """
     
     async def run(self, user_input: str) -> str:
@@ -57,6 +63,21 @@ class MiniAgent:
         while self.state == AgentState.RUNNING and self.current_step < self.max_steps:
             self.current_step += 1
             print(f"\n--- 第 {self.current_step} 步 ---")
+
+            # 预算感知：步数将尽时督促收口，避免耗尽预算却没有最终答案
+            remaining = self.max_steps - self.current_step
+            if remaining == 2:
+                self.memory.add_message(
+                    Message.user_message(
+                        "提醒：只剩 2 步工具调用预算。若信息已大致够用，请立即总结作答，不要再打开新链接。"
+                    )
+                )
+            elif remaining == 0:
+                self.memory.add_message(
+                    Message.user_message(
+                        "这是最后一步：请直接基于已有信息给出最终答案，不要再调用任何工具。"
+                    )
+                )
             
             # Think: 思考下一步行动
             should_continue = await self.think()
@@ -162,13 +183,23 @@ class MiniAgent:
         
         # 提取关键信息
         user_requests = [msg.content for msg in messages if msg.role == Role.USER]
-        assistant_responses = [msg.content for msg in messages if msg.role == Role.ASSISTANT and msg.content]
-        
+        assistant_messages = [
+            msg for msg in messages if msg.role == Role.ASSISTANT and msg.content
+        ]
+        last = assistant_messages[-1] if assistant_messages else None
+        # 最后一条助手消息仍带工具调用 => 未给出最终作答（通常是步数耗尽）
+        unfinished = bool(last and last.tool_calls)
+
         summary = f"""
 任务执行摘要:
 - 用户请求: {user_requests[0] if user_requests else '未知'}
 - 执行步数: {self.current_step}
 - 最终状态: {self.state.value}
-- 主要响应: {assistant_responses[-1] if assistant_responses else '无响应'}
+- 主要响应: {last.content if last else '无响应'}
 """
+        if unfinished:
+            summary += (
+                f"- 备注: 达到步数上限（{self.max_steps} 步）仍未给出最终作答，"
+                "可调高步数或换个更具体的问法后重试\n"
+            )
         return summary

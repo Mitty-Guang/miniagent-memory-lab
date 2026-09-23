@@ -267,7 +267,7 @@ PAGE = """<!DOCTYPE html>
             <option value="bash">仅 bash 需审批</option>
             <option value="all">全部需审批</option>
           </select></div>
-        <div><label>最大步数</label><input id="maxSteps" type="number" value="10" min="1" max="20"></div>
+        <div><label>最大步数（难题可调高）</label><input id="maxSteps" type="number" value="20" min="1" max="50"></div>
       </div>
       <button class="primary" id="runBtn" onclick="runTask()">▶ 运行任务</button>
       <button class="primary" id="retryBtn" style="display:none;background:#f59e0b" onclick="retryLast()">↻ 重试上次任务</button>
@@ -307,7 +307,7 @@ async function runTask() {
     policy: $('policy').value,
     budget: parseInt($('budget').value || '500', 10),
     approval_mode: $('approval').value,
-    max_steps: parseInt($('maxSteps').value || '10', 10),
+    max_steps: parseInt($('maxSteps').value || '20', 10),
   };
   await submit(body);
 }
@@ -454,7 +454,7 @@ class Handler(BaseHTTPRequestHandler):
                 policy=payload.get("policy", "relevance"),
                 budget=int(payload.get("budget", 500)),
                 approval_mode=payload.get("approval_mode", "auto"),
-                max_steps=int(payload.get("max_steps", 10)),
+                max_steps=int(payload.get("max_steps", 20)),
             )
             with STATE_LOCK:
                 STATE["run"] = run

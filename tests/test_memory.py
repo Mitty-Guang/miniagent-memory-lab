@@ -234,6 +234,34 @@ def test_web_tools():
     parsed = WebSearchTool().parse_results(sample)
     assert len(parsed) == 2 and parsed[0]["url"] == "https://a.com", parsed
     assert "标题A" in parsed[0]["title"], parsed
+
+    # RSS 解析（Bing format=rss 的结构）
+    rss = (
+        "<rss><channel><item><title>标题R</title>"
+        "<link>https://r.example/a</link><description>摘要R</description></item></channel></rss>"
+    )
+    parsed_rss = WebSearchTool().parse_rss(rss)
+    assert parsed_rss and parsed_rss[0]["url"] == "https://r.example/a", parsed_rss
+    assert "摘要R" in parsed_rss[0]["snippet"], parsed_rss
+
+    # 相关性过滤 + 自动缩短查询
+    from mini_agent.web import (
+        _query_tokens,
+        _relevance_score,
+        _shorten_query,
+        _sort_by_relevance,
+    )
+
+    assert _shorten_query("诺坎普球场 参观") == "诺坎普球场", _shorten_query("诺坎普球场 参观")
+    assert _shorten_query("诺坎普球场参观") == "诺坎普球场", _shorten_query("诺坎普球场参观")
+    assert _shorten_query("Camp Nou visit") == "Camp Nou", _shorten_query("Camp Nou visit")
+    tokens = _query_tokens("诺坎普球场 参观")
+    junk = {"title": "诺（汉字）_百度百科", "url": "https://x", "snippet": "诺，应也"}
+    good = {"title": "诺坎普 - 百度百科", "url": "https://y", "snippet": "Spotify Camp Nou 球场"}
+    assert _relevance_score(junk, tokens) == 0, _relevance_score(junk, tokens)
+    ranked = _sort_by_relevance([junk, good], tokens)
+    assert ranked and ranked[0]["title"].startswith("诺坎普"), ranked
+    assert len(ranked) == 1, ranked  # 0 分噪声被剔除
     assert is_allowed("https://sub.wttr.in/x") and not is_allowed("https://example.com")
     print("test_web_tools passed")
 
