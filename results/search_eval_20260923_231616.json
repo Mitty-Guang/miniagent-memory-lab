@@ -1,0 +1,128 @@
+{
+  "timestamp": "2026-09-23 23:10:31",
+  "limit": 3,
+  "cache": true,
+  "runs": [
+    {
+      "backend": "openwebsearch",
+      "heuristics": false,
+      "summary": {
+        "n": 8,
+        "hit@k": 50.0,
+        "auto_corrected": 0.0,
+        "avg_seconds": 42.64,
+        "cache_hits": 0,
+        "paid_calls": 8,
+        "by_category": {
+          "泛词口语": "4/8 (50%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "今年是什么年、今年是什么生肖年-华易黄历网 - k366",
+            "日历网"
+          ],
+          "seconds": 42.65,
+          "error": ""
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "影院热映大片_热映电影票房_高清电影影视大全-猫眼电影",
+            "豆瓣电影排行榜"
+          ],
+          "seconds": 42.64,
+          "error": ""
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "我（汉语汉字）_百度百科",
+            "我（2000年张国荣演唱的流行歌曲）_百度百科"
+          ],
+          "seconds": 42.65,
+          "error": ""
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站"
+          ],
+          "seconds": 42.66,
+          "error": ""
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "新手盒子官网 wclbox · 为热爱的游戏，打开新世界",
+            "魔兽世界插件库 · 泰坦重铸 - 新手盒子"
+          ],
+          "seconds": 42.65,
+          "error": ""
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "有（汉语文字）_百度百科",
+            "有道翻译_文本、文档、网页、在线即时翻译"
+          ],
+          "seconds": 42.62,
+          "error": ""
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "帮_百度百科",
+            "帮的意思,帮的解释,帮的拼音,帮的部首,帮的笔顺-汉语国学"
+          ],
+          "seconds": 42.63,
+          "error": ""
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "今年是什么年、今年是什么生肖年-华易黄历网 - k366",
+            "日历网"
+          ],
+          "seconds": 42.64,
+          "error": ""
+        }
+      ]
+    }
+  ]
+}

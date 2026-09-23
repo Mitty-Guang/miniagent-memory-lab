@@ -183,3 +183,6 @@ results/hitl_trace.jsonl
 
 benchmarks/mem2actbench/data/
 mcp_demo.txt
+
+# 搜索缓存（评估用，避免重复消耗 API 额度）
+results/search_cache/

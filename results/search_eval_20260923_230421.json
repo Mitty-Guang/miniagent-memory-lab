@@ -1,0 +1,642 @@
+{
+  "timestamp": "2026-09-23 22:48:20",
+  "limit": 3,
+  "runs": [
+    {
+      "backend": "openwebsearch",
+      "heuristics": false,
+      "summary": {
+        "n": 30,
+        "hit@k": 0.0,
+        "auto_corrected": 0.0,
+        "avg_seconds": 15.01,
+        "by_category": {
+          "单实体": "0/8 (0%)",
+          "垂直领域": "0/7 (0%)",
+          "时效性": "0/7 (0%)",
+          "泛词口语": "0/8 (0%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.03,
+          "error": "timed out"
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.02,
+          "error": "timed out"
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.02,
+          "error": "timed out"
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.02,
+          "error": "timed out"
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        }
+      ]
+    },
+    {
+      "backend": "openwebsearch",
+      "heuristics": true,
+      "summary": {
+        "n": 30,
+        "hit@k": 0.0,
+        "auto_corrected": 0.0,
+        "avg_seconds": 15.01,
+        "by_category": {
+          "单实体": "0/8 (0%)",
+          "垂直领域": "0/7 (0%)",
+          "时效性": "0/7 (0%)",
+          "泛词口语": "0/8 (0%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.02,
+          "error": "timed out"
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.02,
+          "error": "timed out"
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.01,
+          "error": "timed out"
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.02,
+          "error": "timed out"
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 15.0,
+          "error": "timed out"
+        }
+      ]
+    }
+  ]
+}

@@ -8,7 +8,12 @@
 python scripts/eval_search.py --backends bing_rss --heuristics both      # 免费，直连
 python scripts/eval_search.py --backends tavily --heuristics both        # 免费额度（1000 credits/月）
 $env:HTTPS_PROXY="http://127.0.0.1:7890"; python scripts/eval_search.py --backends duckduckgo
+# Open-WebSearch（需 Node ≥20）：npx --yes open-websearch@latest serve
+$env:OPEN_WEBSEARCH_URL="http://127.0.0.1:3210"; python scripts/eval_search.py --backends openwebsearch --heuristics off --category 泛词口语
 ```
+
+**额度保护（重要）**：评估脚本默认启用**磁盘缓存**（`results/search_cache/`，TTL 6h）——同一查询重复运行
+不再打到后端，`实际调用` 列显示真实消耗；`--no-cache` 可强制重跑。跑付费后端前脚本会打印预估调用次数。
 
 ## 1. 评估设置
 
@@ -27,8 +32,16 @@ $env:HTTPS_PROXY="http://127.0.0.1:7890"; python scripts/eval_search.py --backen
 | Bing RSS（爬取） | 启发式**开** | **66.7%** | 23.3% | 0.76s | ¥0 | ✅ |
 | DuckDuckGo（爬取） | 启发式关 | 6.7%* | 0.0% | 1.57s | ¥0 | ❌ 28/30 被风控（空结果） |
 | DuckDuckGo（爬取） | 启发式开 | 0.0%* | 0.0% | 1.47s | ¥0 | ❌ |
-| Tavily（agent-native） | 启发式**关** | **100%** | 0.0% | 2.84s | 免费额度内 | ✅ 国内直连 |
+| Open-WebSearch（本地 daemon，多引擎） | 启发式关 | 50.0%† | 0.0% | **42.6s** | ¥0 | ⚠️ 需 Node ≥20；无代理时多引擎≈Bing |
+| **Tavily（agent-native）** | 启发式**关** | **100%** | 0.0% | 2.84s | 免费额度内 | ✅ 国内直连 |
 | Tavily（agent-native） | 启发式开 | 96.7% | 0.0% | 3.71s | 同上 | ✅ |
+
+\* DDG 只有前 2 条查询返回了结果，其余 28 条被限流返回空页——数字不代表检索质量，代表**稳定性**。
+† Open-WebSearch 只跑了「泛词口语」8 条子集（多引擎每条约 43s，全量会拖很久）：50% 与 Bing 单引擎持平，
+但延迟高 200 倍——无代理环境下 baidu/sogou/ddg 拿不到内容，聚合只是拖长了耗时。
+
+**最终选择（2026-09-23）**：本机 `.env` 设 `WEB_SEARCH_BACKEND=tavily`（GUI/Agent 走 Tavily，质量最高）；
+仓库默认仍是 `bing_rss`（零 key 可跑）；Open-WebSearch 保留为可选后端（需 Node ≥20，建议配代理再评估）。
 
 \* DDG 只有前 2 条查询返回了结果，其余 28 条被限流返回空页——数字不代表检索质量，代表**稳定性**。
 
@@ -67,9 +80,9 @@ $env:HTTPS_PROXY="http://127.0.0.1:7890"; python scripts/eval_search.py --backen
 
 ## 5. 下一步（按收益排序）
 
-1. **Node 升级到 20+** → 跑 `openwebsearch` 对照（免 key 多引擎，含百度/搜狗，国内更稳）；
-2. 用 Tavily 的 `include_raw_content` 替代 `http_get` 抓 JS 页面（解决官网 403/渲染问题，`docs/ISSUES.md` T9）；
+1. ✅ **Node 升级到 20+**：已完成（winget 装 Node 24.19.0 LTS）；Open-WebSearch 已实测——**无代理环境下不划算**（多引擎 42.6s/条、质量与 Bing 单引擎持平），故不作为默认；
+2. **Tavily 已设为本机默认后端**（`.env: WEB_SEARCH_BACKEND=tavily`）：后续可开 `include_raw_content` 替代 `http_get` 抓 JS 页面（解决官网 403/渲染问题，`docs/ISSUES.md` T9）；
 3. 端到端评估：把本评估集的查询变成任务，比较"任务成功率 / 步数 / token 成本"，而不只是检索命中；
-4. 回归机制：把 `scripts/eval_search.py` 接进改动后的例行检查（当前命中率作为基线）。
+4. 回归机制：把 `scripts/eval_search.py` 接进改动后的例行检查（当前命中率作为基线，缓存保证零额度消耗）。
 
 原始数据：`results/search_eval_*.json`

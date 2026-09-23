@@ -363,9 +363,78 @@ class WebSearchTool(BaseTool):
     max_results: int = 5
     backend: str = ""        # 空则读环境变量 WEB_SEARCH_BACKEND（bing_rss 默认 / duckduckgo / tavily / openwebsearch）
     heuristics: Optional[bool] = None  # None=按后端自动（爬取类开、API 类关）；False 时只做原始检索（A/B 用）
+    cache: bool = False      # True 时启用磁盘缓存（评估/回归用，避免重复消耗 API 额度）
+    cache_dir: str = ""      # 空则用 WEB_SEARCH_CACHE_DIR 或 results/search_cache
+    cache_ttl: int = 6 * 3600  # 缓存有效期（秒）
+    cache_hits: int = 0      # 本次会话命中缓存的次数（评估脚本用于估算额度消耗）
 
     def _backend(self) -> str:
         return (self.backend or os.getenv("WEB_SEARCH_BACKEND", "bing_rss")).strip().lower()
+
+    def _timeout(self) -> int:
+        """按后端设置超时：多引擎聚合（openwebsearch）与 API 类需要更长时间。"""
+        backend = self._backend()
+        if backend in {"openwebsearch", "open-websearch", "ows"}:
+            return int(os.getenv("OPEN_WEBSEARCH_TIMEOUT", "45"))
+        if backend == "tavily":
+            return int(os.getenv("TAVILY_TIMEOUT", "25"))
+        return self.timeout
+
+    def _cache_enabled(self) -> bool:
+        if self.cache:
+            return True
+        return os.getenv("WEB_SEARCH_CACHE", "").strip().lower() in {"1", "true", "on", "yes"}
+
+    def _cache_dir(self):
+        from pathlib import Path
+
+        if self.cache_dir:
+            return Path(self.cache_dir)
+        return Path(os.getenv("WEB_SEARCH_CACHE_DIR", "results/search_cache"))
+
+    def _cache_file(self, query: str):
+        import hashlib
+        from pathlib import Path
+
+        key = "|".join(
+            [
+                self._backend(),
+                query,
+                os.getenv("OPEN_WEBSEARCH_ENGINES", ""),
+                str(max(self.max_results, 5)),
+            ]
+        )
+        digest = hashlib.sha1(key.encode("utf-8")).hexdigest()[:16]
+        return Path(self._cache_dir()) / f"{digest}.json"
+
+    def _cache_read(self, query: str):
+        import json as _json
+        import time as _time
+
+        path = self._cache_file(query)
+        if not path.exists():
+            return None
+        try:
+            payload = _json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return None
+        if _time.time() - float(payload.get("ts", 0)) > self.cache_ttl:
+            return None
+        return payload.get("results")
+
+    def _cache_write(self, query: str, results: List[Dict[str, str]]) -> None:
+        import json as _json
+        import time as _time
+
+        path = self._cache_file(query)
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(
+                _json.dumps({"ts": _time.time(), "results": results}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
 
     def _use_heuristics(self, override: Optional[bool] = None) -> bool:
         """启发式（相关性过滤/自动重搜/平台词兜底）默认只对爬取类后端启用。
@@ -379,7 +448,7 @@ class WebSearchTool(BaseTool):
             return bool(self.heuristics)
         return self._backend() in {"bing_rss", "bing"}
 
-    def _fetch(self, url: str) -> str:
+    def _fetch(self, url: str, timeout: Optional[int] = None) -> str:
         request = urllib.request.Request(
             url,
             headers={
@@ -389,7 +458,7 @@ class WebSearchTool(BaseTool):
                 )
             },
         )
-        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+        with urllib.request.urlopen(request, timeout=timeout or self._timeout()) as response:
             return response.read(600_000).decode("utf-8", errors="replace")
 
     def parse_results(self, page_html: str) -> List[Dict[str, str]]:
@@ -488,7 +557,9 @@ class WebSearchTool(BaseTool):
         page = await asyncio.to_thread(self._fetch, url)
         return self.parse_ddg(page)
 
-    def _post_json(self, url: str, payload: Dict, headers: Optional[Dict] = None) -> str:
+    def _post_json(
+        self, url: str, payload: Dict, headers: Optional[Dict] = None, timeout: Optional[int] = None
+    ) -> str:
         body = json.dumps(payload).encode("utf-8")
         request = urllib.request.Request(
             url,
@@ -500,7 +571,7 @@ class WebSearchTool(BaseTool):
             },
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+        with urllib.request.urlopen(request, timeout=timeout or self._timeout()) as response:
             return response.read(600_000).decode("utf-8", errors="replace")
 
     async def _tavily_search_once(self, query: str) -> List[Dict[str, str]]:
@@ -526,7 +597,7 @@ class WebSearchTool(BaseTool):
             "include_answer": False,
         }
         page = await asyncio.to_thread(
-            self._post_json, "https://api.tavily.com/search", payload
+            self._post_json, "https://api.tavily.com/search", payload, None, self._timeout()
         )
         data = json.loads(page)
         results: List[Dict[str, str]] = []
@@ -546,12 +617,14 @@ class WebSearchTool(BaseTool):
         启动：`npx --yes open-websearch@latest serve`（默认 http://127.0.0.1:3000）
         可用环境变量：OPEN_WEBSEARCH_URL、OPEN_WEBSEARCH_ENGINES（如 bing,baidu,duckduckgo）
         """
-        base = os.getenv("OPEN_WEBSEARCH_URL", "http://127.0.0.1:3000").rstrip("/")
+        base = os.getenv("OPEN_WEBSEARCH_URL", "http://127.0.0.1:3210").rstrip("/")
         payload: Dict = {"query": query, "limit": max(self.max_results, 5)}
         engines = os.getenv("OPEN_WEBSEARCH_ENGINES", "").strip()
         if engines:
             payload["engines"] = [e.strip() for e in engines.split(",") if e.strip()]
-        page = await asyncio.to_thread(self._post_json, f"{base}/search", payload)
+        page = await asyncio.to_thread(
+            self._post_json, f"{base}/search", payload, None, self._timeout()
+        )
         data = json.loads(page)
         items = data.get("results") or data.get("data") or []
         if isinstance(items, dict):   # 兼容 {"results": {"bing": [...]}} 形式
@@ -584,6 +657,18 @@ class WebSearchTool(BaseTool):
         return results
 
     async def _search_once(self, query: str) -> List[Dict[str, str]]:
+        """带磁盘缓存的检索入口（缓存原始结果，启发式开关共享同一份，避免重复消耗额度）。"""
+        if self._cache_enabled():
+            cached = self._cache_read(query)
+            if cached is not None:
+                self.cache_hits += 1
+                return cached
+            results = await self._dispatch_search(query)
+            self._cache_write(query, results)
+            return results
+        return await self._dispatch_search(query)
+
+    async def _dispatch_search(self, query: str) -> List[Dict[str, str]]:
         backend = self._backend()
         if backend in {"duckduckgo", "ddg"}:
             return await self._ddg_search_once(query)

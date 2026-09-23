@@ -59,11 +59,14 @@ Tavily 在**难检索/多跳**任务上更强（任务完成 51% vs 38%；多跳
 
 | 阶段 | 做法 | 状态 |
 | --- | --- | --- |
-| 现状（零成本、国内直连） | Bing RSS 解析 + 相关性过滤 + 自动缩短 + **平台词前置**兜底 | ✅ 已实现（`bing_rss`） |
-| Agent-native 检索 | Tavily（免费额度 1000 credits/月，`include_answer`/`include_raw_content`） | ✅ 已实现（`tavily`），实测 hit@3 100% |
-| 免费多引擎聚合 | Open-WebSearch 本地 daemon（免 key，bing/baidu/ddg/sogou 聚合） | ⚠️ 后端已实现（`openwebsearch`），daemon 需 Node ≥20.18.1 |
-| 免费兜底 | DuckDuckGo HTML（无需 key） | ⚠️ 已实现（`duckduckgo`），但实测 28/30 被风控 → 只能作兜底 |
+| 现状（零成本、国内直连） | Bing RSS 解析 + 相关性过滤 + 自动缩短 + **平台词前置**兜底 | ✅ 已实现（`bing_rss`，仓库默认，零 key） |
+| Agent-native 检索 | Tavily（免费额度 1000 credits/月，`include_answer`/`include_raw_content`） | ✅ 已实现（`tavily`）→ **本机默认**，实测 hit@3 100% |
+| 免费多引擎聚合 | Open-WebSearch 本地 daemon（免 key，bing/baidu/ddg/sogou 聚合） | ⚠️ 已实现（`openwebsearch`）并实测：无代理时多引擎 42.6s/条、质量与 Bing 持平 → 不划算，保留为可选 |
+| 免费兜底 | DuckDuckGo HTML（无需 key） | ⚠️ 已实现（`duckduckgo`），实测 28/30 被风控 → 仅作兜底 |
 | 工具变多时 | 复用现有 `retrieval.py`（TF-IDF / bigram / embedding）做 **tool retrieval** | 📋 规划 |
+
+切换方式：`WEB_SEARCH_BACKEND=bing_rss|tavily|duckduckgo|openwebsearch`（写在 `.env`，仓库不落 key）。
+评估脚本默认启用磁盘缓存（`results/search_cache/`），重复查询零额度消耗。
 
 **实测数据见 [`docs/SEARCH_EVAL.md`](SEARCH_EVAL.md)**（30 条分层评估集：Bing RSS 53.3%→66.7%（启发式）、
 Tavily 100%、DDG 受风控影响）。启发式默认只对爬取类后端启用（`WebSearchTool._use_heuristics`）。
