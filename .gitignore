@@ -194,3 +194,7 @@ results/search_cache/
 *.sqlite-shm
 *.sqlite-wal
 results/lg_team_checkpoints.sqlite
+
+# LangGraph 运行时检查点/日志
+results/gui_lg_checkpoints.sqlite*
+results/logs/
