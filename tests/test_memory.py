@@ -209,6 +209,35 @@ def test_retrievers():
     print("test_retrievers passed")
 
 
+def test_web_tools():
+    from mini_agent.web import HttpGetTool, WebSearchTool, is_allowed, is_private_host
+
+    # SSRF 防护：内网/回环/元数据地址必须被拦截
+    for host in ("127.0.0.1", "169.254.169.254", "10.1.2.3", "192.168.1.1", "::1"):
+        assert is_private_host(host), host
+    assert not is_private_host("8.8.8.8"), "8.8.8.8 应为公网"
+
+    # 白名单模式：未列出的域名被拒；内网地址被拒（两种模式都拒绝）
+    tool = HttpGetTool(access_mode="allowlist", allowed_domains=["wttr.in"])
+    blocked = asyncio.run(tool.execute(url="https://example.com/x"))
+    assert not blocked.success and "白名单" in blocked.error, blocked
+    private = asyncio.run(tool.execute(url="http://127.0.0.1:8080/"))
+    assert not private.success and "SSRF" in private.error, private
+    bad_scheme = asyncio.run(tool.execute(url="file:///etc/passwd"))
+    assert not bad_scheme.success and "http" in bad_scheme.error, bad_scheme
+
+    # 搜索结果解析（离线：构造 Bing 风格 HTML）
+    sample = (
+        '<li class="b_algo"><h2><a href="https://a.com">标题A</a></h2><p>摘要 A</p></li>'
+        '<li class="b_algo"><h2><a href="https://b.com">标题B</a></h2><p>摘要 B</p></li>'
+    )
+    parsed = WebSearchTool().parse_results(sample)
+    assert len(parsed) == 2 and parsed[0]["url"] == "https://a.com", parsed
+    assert "标题A" in parsed[0]["title"], parsed
+    assert is_allowed("https://sub.wttr.in/x") and not is_allowed("https://example.com")
+    print("test_web_tools passed")
+
+
 if __name__ == "__main__":
     test_ltm_basic()
     test_trace_summary()
@@ -218,4 +247,5 @@ if __name__ == "__main__":
     asyncio.run(test_multi_agent_retry())
     test_sandbox()
     test_retrievers()
-    print("\n✅ 所有离线测试通过（long-term memory / tracing / HITL / multi-agent / sandbox / retrieval）")
+    test_web_tools()
+    print("\n✅ 所有离线测试通过（long-term memory / tracing / HITL / multi-agent / sandbox / retrieval / web）")

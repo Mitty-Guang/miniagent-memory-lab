@@ -171,6 +171,12 @@ class ToolCollection:
         self.register_tool(PythonExecutor())
         self.register_tool(FileEditor())
         self.register_tool(BashExecutor())
+
+        # 联网工具（允许公网 + SSRF 防护；搜索 + 抓取）；延迟导入避免循环依赖
+        from mini_agent.web import HttpGetTool, WebSearchTool
+
+        self.register_tool(HttpGetTool())
+        self.register_tool(WebSearchTool())
     
     def register_tool(self, tool: BaseTool):
         """注册工具"""

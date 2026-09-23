@@ -10,7 +10,8 @@
 
 | 模块 | 说明 |
 | --- | --- |
-| 基础 Agent | ReAct 循环（Thought → Action → Observation）、Function Calling（Python / 文件 / bash 工具）、异常重试、max_steps 保险丝 |
+| 基础 Agent | ReAct 循环（Thought → Action → Observation）、Function Calling（Python / 文件 / bash / 联网工具）、异常重试、max_steps 保险丝 |
+| 联网工具 | `web_search`（Bing 搜索）+ `http_get`（公网抓取）：默认允许公网，内置 **SSRF 防护**（拒绝内网/本机/保留地址），可切换白名单模式（`WEB_ACCESS`） |
 | 短期记忆 | 固定预算消息选择：`all / recent / relevance / impact` 四策略；**工具调用组原子化**选择；必保任务与最新状态 |
 | 长期记忆 | SQLite 记忆库：任务摘要写入 + 跨会话检索注入；检索器**可插拔**（TF-IDF 默认 / 字符 Jaccard / fastembed 向量检索） |
 | 决策影响分析 | leave-one-out 反事实重放 → 每条消息的决策影响先验（驱动 impact 策略） |

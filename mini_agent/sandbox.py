@@ -168,8 +168,12 @@ class SandboxedBashExecutor(BaseTool):
 
 
 def build_sandboxed_tools(root: str, timeout: int = DEFAULT_TIMEOUT) -> List[BaseTool]:
+    from mini_agent.web import HttpGetTool, WebSearchTool
+
     return [
         SandboxedPythonExecutor(root=root, timeout=timeout),
         SandboxedFileEditor(root=root),
         SandboxedBashExecutor(root=root),
+        HttpGetTool(),
+        WebSearchTool(),
     ]

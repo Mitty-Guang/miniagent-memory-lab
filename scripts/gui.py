@@ -243,6 +243,8 @@ PAGE = """<!DOCTYPE html>
         <option value="">（选择后自动填入下方）</option>
         <option value="创建 hello.txt，内容为 Hello GUI。完成后告诉我。">创建 hello.txt</option>
         <option value="用 Python 计算 1 到 100 的和，直接告诉我结果。">计算 1~100 的和</option>
+        <option value="用 http_get 查询 https://wttr.in/Beijing?format=3 ，告诉我北京现在的天气。">北京现在的天气（联网）</option>
+        <option value="搜索「Python 3.12 新特性」，给我三条摘要。">联网搜索：Python 3.12 新特性</option>
         <option value="用 bash 命令创建一个文件 note.txt，内容为 HITL-OK；如果命令被拒绝，请改用其他工具完成。">HITL：bash 被拒改用其他工具</option>
         <option value="创建 reports/project.txt，内容写我的项目代号。完成后告诉我。">跨会话记忆：项目代号</option>
       </select>
