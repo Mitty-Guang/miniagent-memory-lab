@@ -65,17 +65,19 @@ class MiniAgent:
             print(f"\n--- 第 {self.current_step} 步 ---")
 
             # 预算感知：步数将尽时督促收口，避免耗尽预算却没有最终答案
+            # 说明：用 user 角色注入（部分接口要求 system 只能在开头），但加【系统提醒】标记，
+            # 前端据此渲染为系统提示而非"用户提问"（用户反馈过这个显示问题）。
             remaining = self.max_steps - self.current_step
             if remaining == 2:
                 self.memory.add_message(
                     Message.user_message(
-                        "提醒：只剩 2 步工具调用预算。若信息已大致够用，请立即总结作答，不要再打开新链接。"
+                        "【系统提醒】只剩 2 步工具调用预算。若信息已大致够用，请立即总结作答，不要再打开新链接。"
                     )
                 )
             elif remaining == 0:
                 self.memory.add_message(
                     Message.user_message(
-                        "这是最后一步：请直接基于已有信息给出最终答案，不要再调用任何工具。"
+                        "【系统提醒】这是最后一步：请直接基于已有信息给出最终答案，不要再调用任何工具。"
                     )
                 )
             

@@ -151,7 +151,10 @@ def _clean_html(fragment: str, limit: int = 240) -> str:
 
 
 def _query_tokens(query: str) -> List[str]:
-    """提取相关性 token：中文 2-gram + 英文词（>=2 字符，纯数字不计）。"""
+    """提取相关性 token：中文 2-gram + 英文词（>=2 字符，纯数字不计）。
+
+    会剔除弱词/虚词 token（今年、推荐、的、了…），避免"弱词命中"造成的相关性误判。
+    """
     tokens: List[str] = []
     for run in re.findall(r"[\u4e00-\u9fff]+", query):
         if len(run) == 1:
@@ -161,7 +164,20 @@ def _query_tokens(query: str) -> List[str]:
     tokens += [
         word.lower() for word in re.findall(r"[A-Za-z][A-Za-z0-9]{1,}", query)
     ]
-    return list(dict.fromkeys(tokens))
+    tokens = list(dict.fromkeys(tokens))
+
+    weak = [w for w in (*_QUERY_PREFIXES, *_QUERY_SUFFIXES) if w]
+    kept: List[str] = []
+    for token in tokens:
+        if token.isascii():
+            kept.append(token)
+            continue
+        if any(ch in _FUNCTION_CHARS for ch in token):        # 含"的/了/是"等虚词
+            continue
+        if any(token in w or w in token for w in weak):       # 属于弱词（或弱词的一部分）
+            continue
+        kept.append(token)
+    return kept or tokens   # 全是弱词时退回原集合，避免空集
 
 
 def _relevance_score(item: Dict[str, str], tokens: List[str]) -> int:
@@ -181,6 +197,87 @@ def _sort_by_relevance(
     relevant = [item for score, _, item in scored if score > 0]
     return relevant or [item for _, _, item in scored]
 
+
+def _item_text(item: Dict[str, str]) -> str:
+    return (item.get("title", "") + " " + item.get("snippet", "")).lower()
+
+
+def _is_relevant(item: Dict[str, str], tokens: List[str]) -> bool:
+    """整体相关性判断（决定是否触发自动重搜）。
+
+    注意：token 已剔除弱词/虚词（今年、推荐、的…），因此"命中 ≥1"即可——
+    「今年的北京实习推荐」的生肖黄历页在弱词过滤后命中 0，会被正确判为不相关。
+    """
+    text = _item_text(item)
+    return any(token in text for token in tokens)
+
+
+# 垂直领域：(触发词, 平台词, 话题词)
+# 泛词检索会退化成百科/黄历（实测「北京实习」→ 北京市百科），加平台词并前置能落到真实列表页
+# （实测「实习僧 北京」→ 国家大学生就业服务平台岗位页；平台词放后面无效）。
+VERTICAL_HINTS = (
+    (("实习", "校招", "招聘", "求职"), "实习僧", ("实习", "招聘", "岗位", "校招")),
+    (("租房", "房源", "房租"), "贝壳租房", ("租房", "房源", "租金")),
+    (("机票", "航班"), "航班动态", ("航班", "机票", "起飞")),
+    (("股票", "股价", "基金"), "东方财富", ("股价", "行情", "股票")),
+    (("论文", "文献", "综述"), "知网", ("论文", "文献", "期刊")),
+    (("天气",), "天气预报", ("天气", "气温", "降雨")),
+)
+
+
+def _vertical_hint(query: str) -> str:
+    for keywords, hint, _ in VERTICAL_HINTS:
+        if any(keyword in query for keyword in keywords) and hint not in query:
+            return hint
+    return ""
+
+
+def _vertical_expected(query: str) -> tuple:
+    """命中垂直领域时返回 (平台词, 话题词)；话题词用于验收兜底结果（防"命中地名"式假相关）。"""
+    for keywords, hint, expected in VERTICAL_HINTS:
+        if any(keyword in query for keyword in keywords):
+            return hint, expected
+    return "", ()
+
+
+def _accept_fallback(item: Dict[str, str], tokens: List[str], expected: tuple) -> bool:
+    """验收兜底查询的结果：配置了话题词时要求命中话题词，否则退回普通相关性判断。"""
+    if expected:
+        text = _item_text(item)
+        return any(token in text for token in expected)
+    return _is_relevant(item, tokens)
+
+
+_QUERY_PREFIXES = (
+    "今年的",
+    "今年",
+    "今天的",
+    "今天",
+    "现在的",
+    "现在",
+    "最新的",
+    "最新",
+    "请问",
+    "帮我",
+    "我想",
+    "想知道",
+    "查一下",
+    "查询",
+    "搜索",
+    "了解一下",
+    "有没有",
+)
+
+
+def _strip_query_prefix(text: str) -> str:
+    """剥离口语化前缀（今年/现在/帮我…），仅在缩短重试时使用。"""
+    for prefix in sorted(_QUERY_PREFIXES, key=len, reverse=True):
+        if text.startswith(prefix) and len(text) - len(prefix) >= 2:
+            return text[len(prefix) :]
+    return text
+
+
+_FUNCTION_CHARS = set("的了是在和与有我你他它这那")
 
 _QUERY_SUFFIXES = (
     "开放时间",
@@ -216,12 +313,12 @@ def _shorten_query(query: str) -> str:
     if len(parts) >= 2:
         cjk = [p for p in parts if re.search(r"[\u4e00-\u9fff]", p)]
         if cjk:
-            candidates = [_strip_query_suffix(p) for p in cjk]
+            candidates = [_strip_query_suffix(_strip_query_prefix(p)) for p in cjk]
             return max(candidates, key=lambda p: len(re.findall(r"[\u4e00-\u9fff]", p)))
         return " ".join(parts[:2])
     runs = re.findall(r"[\u4e00-\u9fff]+", query)
     if runs and len(runs[0]) >= 6:
-        core = _strip_query_suffix(runs[0])
+        core = _strip_query_suffix(_strip_query_prefix(runs[0]))
         return core[:4] if len(core) >= 6 else core
     return ""
 
@@ -337,8 +434,10 @@ class WebSearchTool(BaseTool):
         except Exception as exc:
             return ToolResult(success=False, error=f"搜索请求失败: {exc}")
 
-        # 结果整体不相关时（长短语常被引擎错误分词），自动缩短关键词重搜一次
-        if results and _relevance_score(results[0], tokens) == 0:
+        # 结果整体不相关时（长短语常被引擎错误分词），自动缩短关键词重搜一次；
+        # 仍不相关则用"平台词 + 核心词"再试一次（泛词检索退化的兜底）。
+        hint, expected = _vertical_expected(query)
+        if results and not _is_relevant(results[0], tokens):
             fallback = _shorten_query(query)
             if fallback and fallback != query:
                 try:
@@ -347,9 +446,23 @@ class WebSearchTool(BaseTool):
                     alt = []
                 alt_tokens = _query_tokens(fallback)
                 alt = _sort_by_relevance(alt, alt_tokens)
-                if alt and _relevance_score(alt[0], alt_tokens) > 0:
+                if alt and _accept_fallback(alt[0], alt_tokens, expected):
                     results = alt
                     note = f"（原查询结果不相关，已自动改用「{fallback}」重搜）"
+                elif hint:
+                    hinted = f"{hint} {fallback}"
+                    try:
+                        alt2 = await self._search_once(hinted)
+                    except Exception:
+                        alt2 = []
+                    alt2_tokens = _query_tokens(hinted)
+                    alt2 = _sort_by_relevance(alt2, alt2_tokens)
+                    if alt2 and _accept_fallback(alt2[0], alt2_tokens, expected):
+                        results = alt2
+                        note = (
+                            f"（原查询结果不相关，已自动改用「{hinted}」重搜；"
+                            "泛词检索建议加平台词并前置，如「实习僧 北京」）"
+                        )
 
         results = results[:limit]
         if not results:

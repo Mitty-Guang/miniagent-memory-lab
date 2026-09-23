@@ -153,6 +153,45 @@ PAGE = """<!DOCTYPE html>
   .dot.approval { background:var(--warn); } .dot.memory { background:var(--ok); }
   .tl .meta { margin-left:auto; color:var(--faint); font-family:var(--mono); font-size:11px; text-align:right; }
 
+  /* 对话界面 */
+  .chat-card { display:flex; flex-direction:column; }
+  .chat {
+    flex:1; overflow:auto; padding:14px 16px; display:flex; flex-direction:column; gap:9px;
+    min-height:340px; max-height:62vh; background:var(--panel);
+  }
+  .bubble {
+    max-width:78%; border-radius:14px; padding:9px 13px; font-size:12.8px; line-height:1.6;
+    white-space:pre-wrap; word-break:break-word;
+  }
+  .bubble.user {
+    align-self:flex-end; background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff; border-bottom-right-radius:5px;
+  }
+  .bubble.assistant {
+    align-self:flex-start; background:var(--panel-2); border:1px solid var(--border);
+    border-bottom-left-radius:5px;
+  }
+  .bubble.system {
+    align-self:center; max-width:92%; background:transparent; border:1px dashed var(--border);
+    color:var(--muted); font-size:11.5px; border-radius:10px;
+  }
+  .turnsep { align-self:center; color:var(--faint); font-size:11px; letter-spacing:.3px; }
+  .toolrow { align-self:flex-start; max-width:86%; display:flex; flex-wrap:wrap; gap:5px; }
+  details.obs {
+    align-self:flex-start; max-width:86%; background:var(--panel-2); border:1px solid var(--border);
+    border-radius:10px; padding:6px 10px; font-size:11.5px;
+  }
+  details.obs summary { cursor:pointer; color:var(--muted); }
+  details.obs .pre { font-family:var(--mono); font-size:11px; margin-top:6px; max-height:240px; overflow:auto; }
+  .typing { align-self:flex-start; display:flex; gap:5px; padding:10px 14px; background:var(--panel-2); border:1px solid var(--border); border-radius:14px; }
+  .typing i { width:6px; height:6px; border-radius:50%; background:var(--faint); animation:blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay:.2s; } .typing i:nth-child(3) { animation-delay:.4s; }
+  @keyframes blink { 0%,100%{opacity:.25} 50%{opacity:1} }
+  .composer { border-top:1px solid var(--border); padding:10px 12px; background:var(--panel-2); }
+  .composer textarea { height:64px; background:var(--panel); }
+  .composer-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
+  .composer .btn-primary { width:auto; margin:0; padding:8px 20px; }
+
   /* 结果 */
   #output { white-space:pre-wrap; word-break:break-word; }
 
@@ -184,7 +223,8 @@ PAGE = """<!DOCTYPE html>
     </div>
   </div>
   <div class="chips">
-    <span class="chip state" id="status">空闲</span>
+    <span class="chip" id="status">空闲</span>
+    <span class="chip" id="chipChat"></span>
     <span class="chip" id="elapsed"></span>
     <span class="chip" id="chipLlm"></span>
     <span class="chip" id="chipTok"></span>
@@ -201,16 +241,21 @@ PAGE = """<!DOCTYPE html>
       <div class="body">
         <label>示例任务</label>
         <select id="example" onchange="pickExample()">
-          <option value="">（选择后自动填入下方）</option>
+          <option value="">（选择后自动填入下方输入框）</option>
           <option value="创建 hello.txt，内容为 Hello GUI。完成后告诉我。">创建 hello.txt</option>
           <option value="用 Python 计算 1 到 100 的和，直接告诉我结果。">计算 1~100 的和</option>
           <option value="用 http_get 查询 https://wttr.in/Beijing?format=3 ，告诉我北京现在的天气。">北京现在的天气（联网）</option>
           <option value="搜索「Python 3.12 新特性」，给我三条摘要。">联网搜索：Python 3.12 新特性</option>
           <option value="用 bash 命令创建一个文件 note.txt，内容为 HITL-OK；如果命令被拒绝，请改用其他工具完成。">HITL：bash 被拒改用其他工具</option>
           <option value="创建 reports/project.txt，内容写我的项目代号。完成后告诉我。">跨会话记忆：项目代号</option>
+          <option value="记住：我的项目代号是 ORION，报告统一放在 reports 目录下，数字保留两位小数。">★ ① 跨会话记忆：先记住我的偏好</option>
+          <option value="按我的偏好把 10÷3 的结果写成报告文件。">★ ① 跨会话记忆：新会话里按偏好办事</option>
+          <option value="我最初说的三个幸运数字是多少？把它们相加写入 sum13.txt。">★ ② 预算裁剪：追问历史约束</option>
+          <option value="创建三个文件 f1.txt=5、f2.txt=10、f3.txt=15，计算平均值写入 avg.txt。">★ ③ 影响度策略：切 impact 看选中消息</option>
+          <option value="查一下诺坎普球场现在能不能参观，并给出从市中心过去的交通建议（附来源）。">★ ④ 联网研究：检索过滤 + 自动收口</option>
+          <option value="用 http_get 查北京天气并告诉我；跑完可在右下记忆库删掉这条再重跑对比。">★ ⑤ 记忆可干预：删记忆 → 行为变化</option>
+          <option value="用 bash 删除 note.txt（不存在就先创建再删）；如果命令被拒绝，请改用其他工具完成。">★ ⑥ HITL：审批拒绝 → 自动改道</option>
         </select>
-        <label>任务内容</label>
-        <textarea id="task">创建 hello.txt，内容为 Hello GUI。完成后告诉我。</textarea>
         <div class="row">
           <div><label>记忆策略</label>
             <select id="policy">
@@ -234,8 +279,12 @@ PAGE = """<!DOCTYPE html>
           <input type="checkbox" id="autoParams" checked onchange="toggleAuto()">
           <span>让模型自动选择预算 / 步数（推荐）</span>
         </div>
-        <button class="btn-primary" id="runBtn" onclick="runTask()">▶ 运行任务</button>
-        <button class="btn-primary btn-warn" id="retryBtn" style="display:none" onclick="retryLast()">↻ 重试上次任务</button>
+        <div class="switch">
+          <input type="checkbox" id="chatMode" checked>
+          <span>连续对话（保持上下文，可多轮追问）</span>
+          <button class="btn-ghost btn-xs" style="margin-left:auto" onclick="newSession()">新会话</button>
+        </div>
+        <div class="faint" style="font-size:11px;margin-top:6px">在中间「会话」面板底部输入并发送（Ctrl+Enter）</div>
       </div>
     </div>
 
@@ -262,14 +311,26 @@ PAGE = """<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- 中栏：轨迹 + 结果 -->
+  <!-- 中栏：会话（连续对话） + 摘要 -->
   <div class="col mid">
-    <div class="card">
-      <h3>ReAct 轨迹（实时）<span class="spacer faint" style="font-weight:400">推理 → 工具 → 观察</span></h3>
-      <div class="steps" id="steps"><div class="empty">点「运行任务」开始</div></div>
+    <div class="card chat-card">
+      <h3>会话 <span class="spacer"></span>
+        <span class="faint" style="font-weight:400" id="chatMeta">单次运行</span>
+      </h3>
+      <div class="chat" id="chat"><div class="empty">在下方输入框开始；勾选左侧「连续对话」可多轮追问，上下文会延续。</div></div>
+      <div class="composer">
+        <textarea id="task" placeholder="输入任务或追问…（Ctrl+Enter 发送）"
+                  onkeydown="if(event.ctrlKey&&event.key==='Enter')runTask()">创建 hello.txt，内容为 Hello GUI。完成后告诉我。</textarea>
+        <div class="composer-row">
+          <span class="faint" id="composerHint">连续对话 · 上下文延续</span>
+          <span style="flex:1"></span>
+          <button class="btn-primary" id="runBtn" onclick="runTask()">▶ 发送</button>
+          <button class="btn-primary btn-warn" id="retryBtn" style="display:none" onclick="retryLast()">↻ 重试</button>
+        </div>
+      </div>
     </div>
     <div class="card">
-      <h3>最终结果</h3>
+      <h3>本轮摘要 / 最终结果</h3>
       <div class="body" id="output"><span class="muted">暂无</span></div>
     </div>
   </div>
@@ -340,7 +401,17 @@ async function runTask() {
     approval_mode: $('approval').value,
     max_steps: parseInt($('maxSteps').value || '20', 10),
     auto_params: $('autoParams').checked,
+    chat: $('chatMode').checked,
   });
+}
+
+async function newSession() {
+  await fetch('/api/new_session', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
+  $('chat').innerHTML = '<div class="empty">新会话已开始（上下文已清空），在下方输入框继续。</div>';
+  $('trace').innerHTML = '<div class="empty">暂无</div>';
+  $('output').innerHTML = '<span class="muted">暂无</span>';
+  $('ltm').innerHTML = '<span class="muted">暂无</span>';
+  refresh(); loadMemory();
 }
 
 async function retryLast() {
@@ -356,6 +427,7 @@ async function submit(body) {
   const r = await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('runBtn').disabled = false; return; }
+  $('task').value = '';   // 发送后清空输入框（对话习惯）；内容已存 lastBody 供重试
   startPolling();
 }
 
@@ -414,12 +486,52 @@ async function refresh() {
   lastStatus = s.status;
 }
 
+function renderChat(s) {
+  const box = $('chat');
+  const steps = s.messages || [];
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  const parts = [];
+  let turn = 0;
+  for (const m of steps) {
+    if (m.role === 'user') {
+      const text = String(m.content || '');
+      if (text.startsWith('【系统提醒】')) {
+        // 预算收口等系统注入的提醒：按系统样式展示，且不计入对话轮次
+        parts.push(`<div class="bubble system">⚙ ${esc(text.replace('【系统提醒】', ''))}</div>`);
+        continue;
+      }
+      turn += 1;
+      parts.push(`<div class="turnsep">${s.chat ? `第 ${turn} 轮` : '任务'}</div>`);
+      parts.push(`<div class="bubble user">${esc(text)}</div>`);
+    } else if (m.role === 'assistant') {
+      if (m.content) parts.push(`<div class="bubble assistant">${esc(m.content)}</div>`);
+      if (m.tool_calls && m.tool_calls.length) {
+        parts.push(`<div class="toolrow">${m.tool_calls.map(n => `<span class="toolchip">→ ${esc(n)}</span>`).join('')}</div>`);
+      }
+    } else if (m.role === 'tool') {
+      const text = m.content || '(空)';
+      const short = text.length > 80 ? text.slice(0, 80) + '…' : text;
+      parts.push(`<details class="obs"><summary>观察结果 · ${esc(short)}</summary><div class="pre">${esc(text)}</div></details>`);
+    } else if (m.role === 'system') {
+      parts.push(`<div class="bubble system">📌 长期记忆注入<br>${esc(m.content)}</div>`);
+    }
+  }
+  if (s.status === 'running') {
+    parts.push(`<div class="typing"><i></i><i></i><i></i></div>`);
+  }
+  box.innerHTML = parts.length ? parts.join('') : '<div class="empty">在下方输入框开始；勾选左侧「连续对话」可多轮追问，上下文会延续。</div>';
+  if (nearBottom || s.status === 'running') box.scrollTop = box.scrollHeight;
+}
+
 function render(s) {
   const statusMap = { idle: '空闲', running: '运行中', done: '完成', error: '出错' };
   const pill = $('status');
   pill.textContent = statusMap[s.status] || s.status;
   pill.className = 'chip state' + (s.status === 'done' ? ' done' : (s.status === 'error' ? ' error' : (s.status === 'running' ? ' running' : '')));
   $('elapsed').innerHTML = s.elapsed ? `耗时 <b>${s.elapsed}s</b>` : '';
+  $('chipChat').innerHTML = s.chat
+    ? `连续对话 · 第 <b>${s.turns || 1}</b> 轮`
+    : (s.session_id ? '单次运行' : '');
   $('progress').className = s.status === 'running' ? 'on' : '';
 
   const llm = s.llm || {};
@@ -447,9 +559,14 @@ function render(s) {
     : '<span class="muted">暂无</span>';
 
   $('llm').innerHTML = llm.calls
-    ? `<div class="kv"><span>LLM 调用</span><b>${llm.calls}</b></div>
+    ? `<div class="kv"><span>LLM 调用（本轮）</span><b>${llm.calls}</b></div>
        <div class="kv"><span>Prompt / Completion tokens</span><b>${llm.prompt_tokens} / ${llm.completion_tokens}</b></div>
        <div class="kv"><span>平均延迟</span><b>${llm.latency_avg} s</b></div>`
+      + ((s.session_totals && s.session_totals.calls)
+          ? `<div class="kv" style="border-top:1px dashed var(--border);margin-top:6px;padding-top:6px">
+               <span>会话累计（${s.session_totals.turns} 轮）</span>
+               <b>${s.session_totals.calls} 次 · ${s.session_totals.prompt_tokens}/${s.session_totals.completion_tokens}</b></div>`
+          : '')
     : '<span class="muted">暂无</span>';
 
   const ltm = s.ltm || [];
@@ -474,13 +591,11 @@ function render(s) {
   } else { banner.style.display = 'none'; }
 
   const steps = s.messages || [];
-  $('steps').innerHTML = steps.length ? steps.map(m => {
-    const who = {user:'🧑 用户', assistant:'🤖 模型', tool:'🔧 工具结果', system:'📌 系统（长期记忆）'}[m.role] || m.role;
-    const calls = (m.tool_calls && m.tool_calls.length)
-      ? m.tool_calls.map(n => `<span class="toolchip">→ ${esc(n)}</span>`).join('') : '';
-    const content = m.content ? esc(m.content) : '<span class="faint">(空)</span>';
-    return `<div class="msg ${m.role}"><div class="who">${who}</div>${calls}<div class="pre">${content}</div></div>`;
-  }).join('') : '<div class="empty">暂无</div>';
+  renderChat(s);
+  $('chatMeta').textContent = s.chat
+    ? `连续对话 · 第 ${s.turns || 1} 轮 · ${s.session_id || ''}`
+    : (s.session_id ? `单次运行 · ${s.session_id}` : '单次运行');
+  $('composerHint').textContent = $('chatMode').checked ? '连续对话 · 上下文延续' : '单次运行 · 每次独立';
 
   const trace = s.trace || [];
   $('trace').innerHTML = trace.length ? trace.slice().reverse().map(e => {
@@ -496,12 +611,14 @@ function render(s) {
     return `<div class="tl"><span class="dot ${cls}"></span><span>${meta}</span><span class="meta">${esc(detail)}</span></div>`;
   }).join('') : '<div class="empty">暂无</div>';
 
+  // 连续对话：回答已在对话气泡里，此卡展示"运行摘要"（步数/备注）；单次运行：展示最终回答
+  const outText = (s.chat && s.output) ? s.output : (s.answer || s.output);
   $('output').innerHTML = s.error
     ? `<span style="color:var(--err)">错误: ${esc(s.error)}</span>`
-    : (s.output
-        ? (s.output.includes('LLM调用失败')
-            ? `<span style="color:var(--err)">⚠ 接口异常：${esc(s.output)}<br>可点上方橙色「重试上次任务」</span>`
-            : esc(s.output))
+    : (outText
+        ? (outText.includes('LLM调用失败')
+            ? `<span style="color:var(--err)">⚠ 接口异常：${esc(outText)}<br>可点上方橙色「重试上次任务」</span>`
+            : esc(outText))
         : '<span class="muted">暂无</span>');
   $('retryBtn').style.display = (s.status === 'done' && s.output && s.output.includes('LLM调用失败')) ? 'block' : 'none';
 }

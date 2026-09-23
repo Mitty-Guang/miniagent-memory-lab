@@ -43,7 +43,7 @@ from mini_agent.tracing import TraceLogger
 HERE = Path(__file__).resolve().parent
 APPROVAL_TIMEOUT = 30.0
 STATE_LOCK = threading.Lock()
-STATE = {"run": None}
+STATE = {"run": None, "chat": None}   # chat: 连续对话会话（复用同一 agent，短时记忆延续）
 PORT = 8901
 
 
@@ -88,7 +88,9 @@ def _read_memory(query: str = "", limit: int = 300) -> dict:
 
 
 class RunState:
-    def __init__(self, task, policy, budget, approval_mode, max_steps, auto_params=False):
+    def __init__(
+        self, task, policy, budget, approval_mode, max_steps, auto_params=False, chat=False
+    ):
         self.task = task
         self.policy = policy
         self.budget = budget
@@ -96,6 +98,10 @@ class RunState:
         self.max_steps = max_steps
         self.auto_params = auto_params
         self.auto_plan = {}
+        self.chat = chat            # 连续对话：复用会话上下文
+        self.turns = 0              # 当前会话第几轮
+        self.session_id = ""
+        self.answer = ""            # 本轮最终回答（无工具调用的最后一条助手消息）
         self.status = "running"
         self.error = ""
         self.output = ""
@@ -141,6 +147,10 @@ class RunState:
             "max_steps": self.max_steps,
             "auto_params": self.auto_params,
             "auto_plan": self.auto_plan,
+            "chat": self.chat,
+            "turns": self.turns,
+            "session_id": self.session_id,
+            "answer": self.answer[:4000],
             "approval_mode": self.approval_mode,
             "task": self.task,
             "pending": self.pending,
@@ -208,9 +218,19 @@ class RunState:
                     ],
                     "tool_call_id": msg.tool_call_id,
                 }
-                for msg in self.agent.memory.messages
+                for msg in self.agent.memory.messages[-80:]   # 连续对话下只回传最近 80 条
             ]
         return data
+
+
+def last_answer(agent) -> str:
+    """取最近一条"无工具调用"的助手消息作为本轮回答（连续对话时用于展示）。"""
+    messages = getattr(getattr(agent, "memory", None), "messages", []) or []
+    for message in reversed(messages):
+        role = getattr(message.role, "value", message.role)
+        if role == "assistant" and message.content and not message.tool_calls:
+            return str(message.content)
+    return ""
 
 
 def run_worker(state: RunState):
@@ -219,9 +239,28 @@ def run_worker(state: RunState):
         old_cwd = os.getcwd()
         os.chdir(workdir)
         try:
+            with STATE_LOCK:
+                session = STATE.get("chat")
+            reuse = bool(state.chat and session and session.get("agent"))
+
+            if reuse:
+                # 连续对话：复用 agent 的短时记忆（上下文延续）。
+                # 注意：LLM 客户端与 SQLite 连接都绑定线程/事件循环，不能跨轮复用，
+                # 因此每轮在当前线程重建，轮末同线程关闭（见 finally）。
+                state.agent = session["agent"]
+                state.session_id = session["session_id"]
+                state.turns = int(session.get("turns", 0)) + 1
+            else:
+                state.session_id = f"gui-{int(state.started_at)}"
+                state.turns = 1
+
             state.llm = CountingLLM(
                 **llm_kwargs(), trace=state.trace, max_retries=8, base_delay=3.0
             )
+            path = ltm_path()
+            path.parent.mkdir(exist_ok=True)
+            ltm = LongTermMemory(path=str(path))
+
             # 模型自动选择运行参数（预算 / 最大步数）：1 次轻量调用，失败自动回退规则
             if state.auto_params:
                 plan = await estimate(state.task, state.llm)
@@ -238,32 +277,58 @@ def run_worker(state: RunState):
                         "source": plan["source"],
                     },
                 )
-            # 长期记忆跨运行持久化（放在 results/ 下），演示“记住 → 换会话使用”
-            path = ltm_path()
-            path.parent.mkdir(exist_ok=True)
-            ltm = LongTermMemory(path=str(path))
-            state.agent = MemoryAgent(
-                llm=state.llm,
-                ltm=ltm,
-                session_id=f"gui-{int(state.started_at)}",
-                policy=state.policy,
-                budget_chars=state.budget,
-                approval_fn=state.approval_fn,
-                trace=state.trace,
-                max_steps=state.max_steps,
-            )
+
+            if reuse:
+                # 每轮可改策略/预算/步数（策略与预算作用在增长的对话历史上）
+                state.agent.llm = state.llm
+                state.agent.ltm = ltm
+                state.agent.memory.policy = state.policy
+                state.agent.memory.budget_chars = state.budget
+                state.agent.max_steps = state.max_steps
+            else:
+                state.agent = MemoryAgent(
+                    llm=state.llm,
+                    ltm=ltm,
+                    session_id=state.session_id,
+                    policy=state.policy,
+                    budget_chars=state.budget,
+                    approval_fn=state.approval_fn,
+                    trace=state.trace,
+                    max_steps=state.max_steps,
+                )
+
             with contextlib.redirect_stdout(io.StringIO()):
                 state.output = await state.agent.run(state.task)
+            state.answer = last_answer(state.agent) or state.output
             state.ltm_rows = ltm.all()
-            ltm.close()
+
+            if state.chat:
+                base = session if reuse else {}
+                with STATE_LOCK:
+                    STATE["chat"] = {
+                        "agent": state.agent,
+                        "session_id": state.session_id,
+                        "turns": state.turns,
+                        "created_at": base.get("created_at", time.time()),
+                        "calls": int(base.get("calls", 0)) + state.llm.calls,
+                        "prompt_tokens": int(base.get("prompt_tokens", 0))
+                        + state.llm.prompt_tokens,
+                        "completion_tokens": int(base.get("completion_tokens", 0))
+                        + state.llm.completion_tokens,
+                    }
         except Exception as exc:
             state.error = str(exc)
         finally:
-            try:
+            # LLM 客户端与 SQLite 连接都在本线程创建，必须在本线程关闭
+            with contextlib.suppress(Exception):
                 if state.llm is not None:
                     await state.llm.client.close()
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                if state.agent is not None and state.agent.ltm is not None:
+                    state.agent.ltm.close()
+            if not state.chat:
+                with STATE_LOCK:
+                    STATE["chat"] = None
             os.chdir(old_cwd)
             state.status = "error" if state.error else "done"
             state.finished_at = time.time()
@@ -286,7 +351,20 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/state"):
             with STATE_LOCK:
                 run = STATE["run"]
-                data = run.to_dict() if run else {"status": "idle"}
+                session = STATE.get("chat") or {}
+                data = run.to_dict() if run else {
+                    "status": "idle",
+                    "chat": bool(session),
+                    "turns": session.get("turns", 0),
+                    "session_id": session.get("session_id", ""),
+                }
+                if isinstance(data, dict) and data.get("chat"):
+                    data["session_totals"] = {
+                        "turns": session.get("turns", 0),
+                        "calls": session.get("calls", 0),
+                        "prompt_tokens": session.get("prompt_tokens", 0),
+                        "completion_tokens": session.get("completion_tokens", 0),
+                    }
             self._send(200, json.dumps(data, ensure_ascii=False).encode("utf-8"))
             return
         if self.path.startswith("/api/memory"):
@@ -316,10 +394,24 @@ class Handler(BaseHTTPRequestHandler):
                 approval_mode=payload.get("approval_mode", "auto"),
                 max_steps=int(payload.get("max_steps", 20)),
                 auto_params=bool(payload.get("auto_params")),
+                chat=bool(payload.get("chat")),
             )
             with STATE_LOCK:
                 STATE["run"] = run
             threading.Thread(target=run_worker, args=(run,), daemon=True).start()
+            self._send(200, b'{"ok":true}')
+            return
+
+        if self.path.startswith("/api/new_session"):
+            with STATE_LOCK:
+                session = STATE.get("chat")
+                STATE["chat"] = None
+                STATE["run"] = None
+            if session:
+                with contextlib.suppress(Exception):
+                    asyncio.run(session["llm"].client.close())
+                with contextlib.suppress(Exception):
+                    session["agent"].ltm.close()
             self._send(200, b'{"ok":true}')
             return
 

@@ -342,6 +342,41 @@ def test_auto_budget():
     print("test_auto_budget passed")
 
 
+def test_chat_continuation():
+    """连续对话：同一 agent 连跑两轮，第二轮应看到第一轮的消息（短时记忆延续）。"""
+    from mini_agent.memory_agent import MemoryAgent
+
+    agent = MemoryAgent(
+        llm=MockLLM(),
+        ltm=LongTermMemory(path=":memory:"),
+        session_id="chat-test",
+        policy="relevance",
+        budget_chars=1200,
+        max_steps=3,
+    )
+
+    async def scenario():
+        await agent.run("记住：我的项目代号是 ORION")
+        first_turn = len(agent.memory.messages)
+        await agent.run("按我的偏好把 10÷3 写成报告")
+        return first_turn
+
+    first_turn = asyncio.run(scenario())
+    messages = agent.memory.messages
+    assert len(messages) > first_turn, (len(messages), first_turn)  # 消息累积（上下文延续）
+    contents = [str(m.content or "") for m in messages]
+    assert any("ORION" in c for c in contents), contents          # 第一轮内容仍在上下文里
+    assert any("10÷3" in c for c in contents), contents           # 第二轮任务已追加
+
+    # 单次运行（新会话）对照：新 agent 不携带上一轮消息
+    fresh = MemoryAgent(
+        llm=MockLLM(), ltm=LongTermMemory(path=":memory:"), session_id="single", max_steps=3
+    )
+    asyncio.run(fresh.run("另一个任务"))
+    assert len(fresh.memory.messages) == 3, len(fresh.memory.messages)  # user + assistant + ...
+    print("test_chat_continuation passed")
+
+
 if __name__ == "__main__":
     test_ltm_basic()
     test_trace_summary()
@@ -354,4 +389,5 @@ if __name__ == "__main__":
     test_web_tools()
     test_memory_browser()
     test_auto_budget()
-    print("\n✅ 所有离线测试通过（记忆 / tracing / HITL / multi-agent / sandbox / 检索 / 联网 / 记忆浏览器 / 自动参数）")
+    test_chat_continuation()
+    print("\n✅ 所有离线测试通过（记忆 / tracing / HITL / multi-agent / sandbox / 检索 / 联网 / 记忆浏览器 / 自动参数 / 连续对话）")
