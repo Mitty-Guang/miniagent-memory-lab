@@ -118,7 +118,16 @@ async def demo_multiturn() -> None:
 
     说明：`make_checkpointer(path)` 走 AsyncSqliteSaver 可跨进程持久化；
     本演示用内存版（InMemorySaver）避免旧库文件锁导致的挂起。
+    演示内切到临时工作目录，避免 agent 写出的文件污染仓库。
     """
+    old_cwd = with_workdir()
+    try:
+        await _demo_multiturn_inner()
+    finally:
+        os.chdir(old_cwd)
+
+
+async def _demo_multiturn_inner() -> None:
     graph = build_team(
         checkpointer=await make_checkpointer(),
         max_retries=0,
@@ -143,6 +152,14 @@ async def demo_multiturn() -> None:
 async def demo_hitl() -> None:
     """interrupt：计划审批（拒绝）+ 工具级审批（bash 放行）。"""
     print("\n[人工审批 / interrupt]")
+    old_cwd = with_workdir()
+    try:
+        await _demo_hitl_inner()
+    finally:
+        os.chdir(old_cwd)
+
+
+async def _demo_hitl_inner() -> None:
     # 场景 1：计划审批被拒 → 图提前结束
     reject_graph = build_team(checkpointer=await make_checkpointer(), max_retries=0)
     config = {"configurable": {"thread_id": "hitl-reject"}}
