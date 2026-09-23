@@ -128,7 +128,8 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 - **[STUDY_NOTES.md](docs/STUDY_NOTES.md)**：架构讲解、踩过的坑（工具调用组原子性 / 冷启动 / 失败样本污染 / ToolNode config）、面试问答；
 - **[ISSUES.md](docs/ISSUES.md)**：问题记录（用户提出的问题 + 工程问题 + 环境问题 → 定位/修复/验证）；
 - **[DEMOS.md](docs/DEMOS.md)**：7 个能体现本项目独特方法的演示（跨会话记忆 / 预算裁剪 / 影响度策略 / 联网鲁棒性 / 记忆干预 / HITL / 自动参数）；
-- **[SEARCH_BACKENDS.md](docs/SEARCH_BACKENDS.md)**：联网能力的问题分层与业界方案（搜索 API 对比、tool retrieval、MCP）与本项目取舍。
+- **[SEARCH_BACKENDS.md](docs/SEARCH_BACKENDS.md)**：联网能力的问题分层与业界方案（搜索 API 对比、tool retrieval、MCP）与本项目取舍；
+- **[SEARCH_EVAL.md](docs/SEARCH_EVAL.md)**：搜索质量对照评估（30 条分层评估集；Bing RSS / DuckDuckGo / Tavily × 启发式开关）。
 
 ## 许可与致谢
 

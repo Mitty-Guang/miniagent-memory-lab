@@ -12,6 +12,7 @@
 """
 import asyncio
 import ipaddress
+import json
 import os
 import re
 import socket
@@ -202,6 +203,20 @@ def _item_text(item: Dict[str, str]) -> str:
     return (item.get("title", "") + " " + item.get("snippet", "")).lower()
 
 
+def _ddg_real_url(href: str) -> str:
+    """DuckDuckGo 结果链接形如 //duckduckgo.com/l/?uddg=<urlencoded>，取出真实 URL。"""
+    if not href:
+        return ""
+    if href.startswith("//"):
+        href = "https:" + href
+    parsed = urllib.parse.urlparse(href)
+    if "duckduckgo.com" in parsed.netloc:
+        params = urllib.parse.parse_qs(parsed.query)
+        target = (params.get("uddg") or [""])[0]
+        return urllib.parse.unquote(target) if target else ""
+    return href
+
+
 def _is_relevant(item: Dict[str, str], tokens: List[str]) -> bool:
     """整体相关性判断（决定是否触发自动重搜）。
 
@@ -346,6 +361,23 @@ class WebSearchTool(BaseTool):
     }
     timeout: int = 15
     max_results: int = 5
+    backend: str = ""        # 空则读环境变量 WEB_SEARCH_BACKEND（bing_rss 默认 / duckduckgo / tavily / openwebsearch）
+    heuristics: Optional[bool] = None  # None=按后端自动（爬取类开、API 类关）；False 时只做原始检索（A/B 用）
+
+    def _backend(self) -> str:
+        return (self.backend or os.getenv("WEB_SEARCH_BACKEND", "bing_rss")).strip().lower()
+
+    def _use_heuristics(self, override: Optional[bool] = None) -> bool:
+        """启发式（相关性过滤/自动重搜/平台词兜底）默认只对爬取类后端启用。
+
+        实测（docs/SEARCH_EVAL.md）：在 Tavily 这类优质后端上，启发式会因"跨语言结果被
+        中文 bigram 过滤"等原因误伤结果（hit@3 100% → 96.7%），故按后端自动关闭。
+        """
+        if override is not None:
+            return bool(override)
+        if self.heuristics is not None:
+            return bool(self.heuristics)
+        return self._backend() in {"bing_rss", "bing"}
 
     def _fetch(self, url: str) -> str:
         request = urllib.request.Request(
@@ -406,8 +438,37 @@ class WebSearchTool(BaseTool):
             )
         return results
 
-    async def _search_once(self, query: str) -> List[Dict[str, str]]:
-        """执行一次搜索：优先 RSS（结构稳定），失败或为空则回退 HTML 解析。"""
+    def parse_ddg(self, page_html: str) -> List[Dict[str, str]]:
+        """解析 DuckDuckGo 结果页（html.duckduckgo.com / lite）。真实链接在 uddg 参数里。"""
+        results: List[Dict[str, str]] = []
+        patterns = (
+            r'<a[^>]*class=["\']result__a["\'][^>]*href="([^"]+)"[^>]*>(.*?)</a>',   # html 版
+            r'<a[^>]*href="([^"]+)"[^>]*class=["\']result-link["\'][^>]*>(.*?)</a>',  # lite 版
+        )
+        seen = set()
+        for pattern in patterns:
+            for href, title_html in re.findall(pattern, page_html, re.S):
+                url = _ddg_real_url(href)
+                if not url or url in seen:
+                    continue
+                seen.add(url)
+                results.append(
+                    {
+                        "url": url,
+                        "title": _clean_html(title_html, 160),
+                        "snippet": "",
+                    }
+                )
+        # 摘要（html 版）：result__snippet / result-snippet
+        snippets = re.findall(
+            r'class=["\']result(?:__snippet|-snippet)["\'][^>]*>(.*?)</(?:a|td)>', page_html, re.S
+        )
+        for item, snippet in zip(results, snippets):
+            item["snippet"] = _clean_html(snippet, 240)
+        return results
+
+    async def _bing_search_once(self, query: str) -> List[Dict[str, str]]:
+        """Bing：优先 RSS（结构稳定），失败或为空则回退 HTML 解析。"""
         quoted = urllib.parse.quote(query)
         rss_url = f"https://cn.bing.com/search?format=rss&q={quoted}"
         html_url = f"https://cn.bing.com/search?setlang=zh-cn&q={quoted}"
@@ -421,19 +482,136 @@ class WebSearchTool(BaseTool):
         page = await asyncio.to_thread(self._fetch, html_url)
         return self.parse_results(page)
 
-    async def execute(self, query: str, max_results: int = 0, **kwargs) -> ToolResult:
-        limit = max_results or self.max_results
+    async def _ddg_search_once(self, query: str) -> List[Dict[str, str]]:
+        """DuckDuckGo（免费、无 key；国内需代理：设置 HTTPS_PROXY 即可被 urllib 自动采用）。"""
+        url = "https://html.duckduckgo.com/html/?q=" + urllib.parse.quote(query)
+        page = await asyncio.to_thread(self._fetch, url)
+        return self.parse_ddg(page)
+
+    def _post_json(self, url: str, payload: Dict, headers: Optional[Dict] = None) -> str:
+        body = json.dumps(payload).encode("utf-8")
+        request = urllib.request.Request(
+            url,
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "miniagent/1.0",
+                **(headers or {}),
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            return response.read(600_000).decode("utf-8", errors="replace")
+
+    async def _tavily_search_once(self, query: str) -> List[Dict[str, str]]:
+        """Tavily（agent-native 搜索 API；免费额度 1000 credits/月，basic=1 credit）。
+
+        key 从环境变量 TAVILY_API_KEY 读取（写在 .env，仓库不落库）。
+        """
+        import contextlib
+
+        with contextlib.suppress(Exception):
+            from mini_agent.config import load_env_file  # 懒加载 .env
+
+            load_env_file()
+        key = os.getenv("TAVILY_API_KEY", "").strip()
+        if not key:
+            raise RuntimeError("未配置 TAVILY_API_KEY（请在 .env 中设置）")
+
+        payload = {
+            "api_key": key,
+            "query": query,
+            "max_results": max(self.max_results, 5),
+            "search_depth": "basic",
+            "include_answer": False,
+        }
+        page = await asyncio.to_thread(
+            self._post_json, "https://api.tavily.com/search", payload
+        )
+        data = json.loads(page)
+        results: List[Dict[str, str]] = []
+        for item in data.get("results", []):
+            results.append(
+                {
+                    "url": str(item.get("url") or ""),
+                    "title": _clean_html(str(item.get("title") or ""), 160),
+                    "snippet": _clean_html(str(item.get("content") or ""), 240),
+                }
+            )
+        return results
+
+    async def _openwebsearch_once(self, query: str) -> List[Dict[str, str]]:
+        """Open-WebSearch 本地 daemon（免 key 多引擎聚合；默认 bing，可配 baidu/duckduckgo）。
+
+        启动：`npx --yes open-websearch@latest serve`（默认 http://127.0.0.1:3000）
+        可用环境变量：OPEN_WEBSEARCH_URL、OPEN_WEBSEARCH_ENGINES（如 bing,baidu,duckduckgo）
+        """
+        base = os.getenv("OPEN_WEBSEARCH_URL", "http://127.0.0.1:3000").rstrip("/")
+        payload: Dict = {"query": query, "limit": max(self.max_results, 5)}
+        engines = os.getenv("OPEN_WEBSEARCH_ENGINES", "").strip()
+        if engines:
+            payload["engines"] = [e.strip() for e in engines.split(",") if e.strip()]
+        page = await asyncio.to_thread(self._post_json, f"{base}/search", payload)
+        data = json.loads(page)
+        items = data.get("results") or data.get("data") or []
+        if isinstance(items, dict):   # 兼容 {"results": {"bing": [...]}} 形式
+            flat: List = []
+            for value in items.values():
+                flat.extend(value if isinstance(value, list) else [])
+            items = flat
+        results: List[Dict[str, str]] = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            url = str(item.get("url") or item.get("link") or "")
+            if not url:
+                continue
+            results.append(
+                {
+                    "url": url,
+                    "title": _clean_html(str(item.get("title") or ""), 160),
+                    "snippet": _clean_html(
+                        str(
+                            item.get("description")
+                            or item.get("snippet")
+                            or item.get("content")
+                            or ""
+                        ),
+                        240,
+                    ),
+                }
+            )
+        return results
+
+    async def _search_once(self, query: str) -> List[Dict[str, str]]:
+        backend = self._backend()
+        if backend in {"duckduckgo", "ddg"}:
+            return await self._ddg_search_once(query)
+        if backend == "tavily":
+            return await self._tavily_search_once(query)
+        if backend in {"openwebsearch", "open-websearch", "ows"}:
+            return await self._openwebsearch_once(query)
+        return await self._bing_search_once(query)
+
+    async def search_results(
+        self, query: str, limit: int = 0, heuristics: Optional[bool] = None
+    ) -> tuple:
+        """返回 (results, note)。
+
+        heuristics=False 时只做原始检索（不排序/不重试），用于 A/B 评估对照。
+        """
+        limit = limit or self.max_results
         query = " ".join((query or "").split())
         if not query:
-            return ToolResult(success=False, error="搜索关键词不能为空")
+            return [], ""
+        use_heuristics = self.heuristics if heuristics is None else heuristics
+        results = await self._search_once(query)
+        if not use_heuristics:
+            return results[:limit], ""
 
         tokens = _query_tokens(query)
+        results = _sort_by_relevance(results, tokens)
         note = ""
-        try:
-            results = _sort_by_relevance(await self._search_once(query), tokens)
-        except Exception as exc:
-            return ToolResult(success=False, error=f"搜索请求失败: {exc}")
-
         # 结果整体不相关时（长短语常被引擎错误分词），自动缩短关键词重搜一次；
         # 仍不相关则用"平台词 + 核心词"再试一次（泛词检索退化的兜底）。
         hint, expected = _vertical_expected(query)
@@ -463,8 +641,15 @@ class WebSearchTool(BaseTool):
                             f"（原查询结果不相关，已自动改用「{hinted}」重搜；"
                             "泛词检索建议加平台词并前置，如「实习僧 北京」）"
                         )
+        return results[:limit], note
 
-        results = results[:limit]
+    async def execute(self, query: str, max_results: int = 0, **kwargs) -> ToolResult:
+        limit = max_results or self.max_results
+        try:
+            results, note = await self.search_results(query, limit=limit)
+        except Exception as exc:
+            return ToolResult(success=False, error=f"搜索请求失败: {exc}")
+
         if not results:
             return ToolResult(success=False, error="搜索没有返回可解析的结果（页面结构可能变化）")
         lines = []

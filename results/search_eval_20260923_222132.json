@@ -1,0 +1,880 @@
+{
+  "timestamp": "2026-09-23 22:19:51",
+  "limit": 3,
+  "runs": [
+    {
+      "backend": "bing_rss",
+      "heuristics": false,
+      "summary": {
+        "n": 30,
+        "hit@k": 53.3,
+        "auto_corrected": 0.0,
+        "avg_seconds": 0.2,
+        "by_category": {
+          "单实体": "5/8 (62%)",
+          "垂直领域": "3/7 (43%)",
+          "时效性": "4/7 (57%)",
+          "泛词口语": "4/8 (50%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "诺（汉字）_百度百科",
+            "诺的意思,诺的解释,诺的拼音,诺的部首,诺的笔顺-汉语国学",
+            "诺_诺怎么读_诺的意思 - 汉语字典"
+          ],
+          "seconds": 0.22,
+          "error": ""
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Welcome to Python.org",
+            "Welcome to Python.org",
+            "欢迎来到 Python.org - Python 编程语言"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Contact-Tsinghua University",
+            "清华大学（中国北京市公办高校）_百度百科",
+            "清华大学"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "特（汉语汉字）_百度百科",
+            "特的意思,特的解释,特的拼音,特的部首,特的笔顺-汉语国学",
+            "《特》的拼音,特字的意思、组词、部首、笔画、笔顺 - 汉语查"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "HUAWEI Mate 70 规格参数 - 华为官网",
+            "【华为HUAWEI Mate 70 12GB/512GB参数】华为 HUAWEI ...",
+            "HUAWEI Mate 70 Air 规格参数 - 华为官网"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "上海市人民政府",
+            "上海市_百度百科",
+            "上海旅游必去十大景点游玩攻略，2025年11月魔都十大必去 ..."
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Apple (中国大陆) - 官方网站",
+            "iPhone - Apple (中国大陆)",
+            "Apple"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "OpenAI",
+            "OpenAI_百度百科",
+            "OpenAI 官网入口地址：如何轻松找到"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "今年是什么年、今年是什么生肖年-华易黄历网 - k366",
+            "日历网",
+            "今年（词语解释）_百度百科"
+          ],
+          "seconds": 0.21,
+          "error": ""
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "影院热映大片_热映电影票房_高清电影影视大全-猫眼电影",
+            "豆瓣电影排行榜",
+            "2025年我最喜欢的14部电影，强烈推荐给每一个人！"
+          ],
+          "seconds": 0.24,
+          "error": ""
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "我（汉语汉字）_百度百科",
+            "我（2000年张国荣演唱的流行歌曲）_百度百科",
+            "《我的世界》官网-全新视界 探索无限"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "百度地图"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "新手盒子官网 wclbox · 为热爱的游戏，打开新世界",
+            "魔兽世界插件库 · 泰坦重铸 - 新手盒子",
+            "新手（汉语词语）_百度百科"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "有（汉语文字）_百度百科",
+            "有道翻译_文本、文档、网页、在线即时翻译",
+            "有的意思,有的解释,有的拼音,有的部首,有的笔顺-汉语国学"
+          ],
+          "seconds": 0.25,
+          "error": ""
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "帮_百度百科",
+            "帮的意思,帮的解释,帮的拼音,帮的部首,帮的笔顺-汉语国学",
+            "《帮》的拼音,帮字的意思、组词、部首、笔画、笔顺 - 汉语查"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "今年是什么年、今年是什么生肖年-华易黄历网 - k366",
+            "日历网",
+            "今年（词语解释）_百度百科"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "百度地图"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "百度地图"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "上海市人民政府",
+            "上海市_百度百科",
+            "上海旅游必去十大景点游玩攻略，2025年11月魔都十大必去 ..."
+          ],
+          "seconds": 0.22,
+          "error": ""
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "贵州茅台 (600519)_最新价格_行情_走势图—东方财富网",
+            "贵州茅台 (600519) 股票股价_股价行情_财报_数据报告 - 雪球",
+            "贵州茅台 (600519)股票股价,行情,新闻,财报数据_新浪财经 ..."
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "毕业（学生完成规定的学业任务）_百度百科",
+            "毕业（韩国2024年郑丽媛、魏嘏隽主演的电视剧）_百度百科",
+            "中国高等教育学生信息网（学信网）"
+          ],
+          "seconds": 0.21,
+          "error": ""
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "深圳市_百度百科",
+            "深圳政府在线_深圳市人民政府门户网站",
+            "百度地图"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "百度地图"
+          ],
+          "seconds": 0.22,
+          "error": ""
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "本（汉语文字）_百度百科",
+            "本的意思,本的解释,本的拼音,本的部首,本的笔顺-汉语国学",
+            "本_本字的拼音,意思,字典释义 - 《新华字典》 - 汉辞宝"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "国务院办公厅关于2026年部分节假日安排的通知_国务院文件 ...",
+            "2026年国庆节放假安排发布：10月1日至7日连休7天，调休补 ...",
+            "图解：国务院办公厅关于2026年部分节假日安排的通知"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "最近（李圣杰2006年演唱的歌曲，收录于专辑《关于你的歌 ...",
+            "最近 - 李圣杰 - 单曲 - 网易云音乐",
+            "最近（汉语词语）_百度百科"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "今日金价 (实时更新),黄金价格, 最新国际黄金价格走势图_汇率表",
+            "金价网-今日金价查询表",
+            "今日金价 - 黄金价格多少钱1克 - 我查"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "2026年大事、要事、重要节日一览表（附放假安排）",
+            "2026年日历全年完整图_带农历节假日放假安排_高清可打印 ...",
+            "2026中国节假日安排｜放假、调休、补班日历"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "现在（汉语词语）_百度百科",
+            "现在的中国时间 - Time.is",
+            "现在北京时间几点几分几秒 - 标准北京时间在线校准 | 时间 ..."
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026年全国硕士研究生招生考试报名公告",
+            "2026考研报名时间官方明确！预报名10月10日开启，流程 ...",
+            "全国硕士研究生招生考试网上报名"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "backend": "bing_rss",
+      "heuristics": true,
+      "summary": {
+        "n": 30,
+        "hit@k": 66.7,
+        "auto_corrected": 23.3,
+        "avg_seconds": 0.76,
+        "by_category": {
+          "单实体": "7/8 (88%)",
+          "垂直领域": "3/7 (43%)",
+          "时效性": "5/7 (71%)",
+          "泛词口语": "5/8 (62%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": true,
+          "auto_corrected": true,
+          "results": [
+            "诺坎普再创辉煌！104600人容纳量的欧洲最大体育场诞生",
+            "诺坎普球场：欧洲最大足球场的历史、容量与参观攻略_百度文库",
+            "Spotify诺坎普球场 | 参观巴塞罗那足球俱乐部的球场，2026 年"
+          ],
+          "seconds": 0.39,
+          "error": ""
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Python（计算机编程语言）_百度百科",
+            "Welcome to Python.org",
+            "Welcome to Python.org"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "清华大学（中国北京市公办高校）_百度百科",
+            "清华大学",
+            "清华大学地址 - 百度知道"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": true,
+          "auto_corrected": true,
+          "results": [
+            "纯电动车、太阳能和清洁能源 | 特斯拉中国",
+            "特斯拉（美国电动车及能源公司）_百度百科",
+            "Model Y – 电动中型 SUV | 特斯拉中国"
+          ],
+          "seconds": 0.37,
+          "error": ""
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "HUAWEI Mate 70 规格参数 - 华为官网",
+            "【华为HUAWEI Mate 70 12GB/512GB参数】华为 HUAWEI ...",
+            "HUAWEI Mate 70 Air 规格参数 - 华为官网"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "上海旅游攻略大全（精华版），收藏起来慢慢看 - 知乎",
+            "上海旅游指南和前往上海旅行-上海官方中国旅游网站",
+            "上海市人民政府"
+          ],
+          "seconds": 0.2,
+          "error": ""
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "苹果公司_百度百科",
+            "苹果（蔷薇科苹果属植物）_百度百科"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "个人怎么才能使用OpenAI? - 知乎",
+            "OpenAI官网入口（2026）：7个官方地址与真假辨别清单",
+            "OpenAI"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": true,
+          "auto_corrected": true,
+          "results": [
+            "设计岗（实习）-国家大学生就业服务平台",
+            "实习岗位-国家大学生就业服务平台",
+            "教育部大学生实习网-国家大学生就业服务平台"
+          ],
+          "seconds": 15.57,
+          "error": ""
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2025年我最喜欢的14部电影，强烈推荐给每一个人！",
+            "影院热映大片_热映电影票房_高清电影影视大全-猫眼电影",
+            "豆瓣电影排行榜"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "我（汉语汉字）_百度百科",
+            "我（2000年张国荣演唱的流行歌曲）_百度百科",
+            "《我的世界》官网-全新视界 探索无限"
+          ],
+          "seconds": 0.36,
+          "error": ""
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "北京概况_首都之窗_北京市人民政府门户网站 - Beijing"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "新手盒子官网 wclbox · 为热爱的游戏，打开新世界",
+            "魔兽世界插件库 · 泰坦重铸 - 新手盒子",
+            "新手（汉语词语）_百度百科"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "有道翻译_文本、文档、网页、在线即时翻译",
+            "有道词典"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "帮_百度百科",
+            "帮的意思,帮的解释,帮的拼音,帮的部首,帮的笔顺-汉语国学",
+            "《帮》的拼音,帮字的意思、组词、部首、笔画、笔顺 - 汉语查"
+          ],
+          "seconds": 0.35,
+          "error": ""
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": true,
+          "auto_corrected": true,
+          "results": [
+            "流行（汉语词汇）_百度百科",
+            "流行音乐（一种音乐风格）_百度百科",
+            "流行指数榜 - QQ音乐-千万正版音乐海量无损曲库新歌热歌 ..."
+          ],
+          "seconds": 0.35,
+          "error": ""
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "北京概况_首都之窗_北京市人民政府门户网站 - Beijing"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "北京概况_首都之窗_北京市人民政府门户网站 - Beijing"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "上海市人民政府",
+            "上海市_百度百科",
+            "上海旅游必去十大景点游玩攻略，2025年11月魔都十大必去 ..."
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "贵州茅台 (600519) 股票股价_股价行情_财报_数据报告 - 雪球",
+            "贵州茅台 (600519)股票股价,行情,新闻,财报数据_新浪财经 ...",
+            "贵州茅台 (600519) 股价、新闻、报价和图表 - 富途牛牛"
+          ],
+          "seconds": 0.21,
+          "error": ""
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "中国高等教育学生信息网（学信网）",
+            "全国高校毕业生毕业去向登记系统",
+            "毕业（学生完成规定的学业任务）_百度百科"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "深圳市_百度百科",
+            "深圳政府在线_深圳市人民政府门户网站",
+            "深圳必去的10个景点：深圳不止有高楼大厦，还有这10个必 ..."
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [
+            "北京市_百度百科",
+            "Beijing - 北京市人民政府门户网站",
+            "北京概况_首都之窗_北京市人民政府门户网站 - Beijing"
+          ],
+          "seconds": 0.21,
+          "error": ""
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": false,
+          "auto_corrected": true,
+          "results": [
+            "今天是第几周|本周是第几周查询-第几周查询工具 - 日出日落 ...",
+            "周数日历_查询本周是今年第多少周 - syiban.com",
+            "ISO 周历 - 本周、假期与周数 | GClocks"
+          ],
+          "seconds": 0.38,
+          "error": ""
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026年国庆节放假安排发布：10月1日至7日连休7天，调休补 ...",
+            "2026年中秋国庆放假安排！_腾讯新闻",
+            "2026年放假安排时间表（含调休补班日历，可订阅）｜拼假日历"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "最近（李圣杰2006年演唱的歌曲，收录于专辑《关于你的歌 ...",
+            "最近 - 李圣杰 - 单曲 - 网易云音乐",
+            "最近（汉语词语）_百度百科"
+          ],
+          "seconds": 0.19,
+          "error": ""
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "今日金价 (实时更新),黄金价格, 最新国际黄金价格走势图_汇率表",
+            "金价网-今日金价查询表",
+            "今日金价 - 黄金价格多少钱1克 - 我查"
+          ],
+          "seconds": 0.17,
+          "error": ""
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": false,
+          "auto_corrected": true,
+          "results": [
+            "实习岗位-国家大学生就业服务平台",
+            "教育部大学生实习网-国家大学生就业服务平台",
+            "实习生-国家大学生就业服务平台"
+          ],
+          "seconds": 0.54,
+          "error": ""
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": true,
+          "auto_corrected": true,
+          "results": [
+            "比特币（BTC）实时价格、合约和现货数据 | CoinGlass",
+            "比特币（2009年正式诞生的加密数字货币）_百度百科",
+            "比特币价格-BTC今日行情,Bitcoin最新消息,24小时实时汇率K ..."
+          ],
+          "seconds": 0.45,
+          "error": ""
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026考研报名时间官方明确！预报名10月10日开启，流程 ...",
+            "26考研全流程及时间节点 - 知乎",
+            "定了！2026年考研报名时间、初试时间已明确！（附报名入口）"
+          ],
+          "seconds": 0.18,
+          "error": ""
+        }
+      ]
+    }
+  ]
+}

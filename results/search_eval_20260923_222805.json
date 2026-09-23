@@ -1,0 +1,876 @@
+{
+  "timestamp": "2026-09-23 22:24:00",
+  "limit": 3,
+  "runs": [
+    {
+      "backend": "tavily",
+      "heuristics": false,
+      "summary": {
+        "n": 30,
+        "hit@k": 100.0,
+        "auto_corrected": 0.0,
+        "avg_seconds": 2.84,
+        "by_category": {
+          "单实体": "8/8 (100%)",
+          "垂直领域": "7/7 (100%)",
+          "时效性": "7/7 (100%)",
+          "泛词口语": "8/8 (100%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "巴塞罗那Spotify 诺坎普球场- 预订门票和观光游",
+            "诺坎普之旅：体验巴塞罗那足球俱乐部体育场（+门票）",
+            "巴塞罗那足球俱乐部 - Spotify 诺坎普之旅 | 折扣门票 | Go City®"
+          ],
+          "seconds": 2.38,
+          "error": ""
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Python 3.12 性能暴增50%！这5个新特性让老项目直接起飞Python 3.12 性能暴增50%！这5个新特性 - 掘金",
+            "Python 3.12 新特性：更优雅的类型提示实践-阿里云开发者社区",
+            "Python 3.12 新特性 | 隔叶黄莺 Yanbin's Blog - 软件编程实践"
+          ],
+          "seconds": 1.56,
+          "error": ""
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "清华大学（中国北京市公办高校）_百度百科",
+            "Tsinghua University",
+            "清华大学信息公开申请-清华大学"
+          ],
+          "seconds": 3.22,
+          "error": ""
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "特斯拉宣布：續航力830公里Model 3車型開賣",
+            "特斯拉Model 3 - 维基百科，自由的百科全书",
+            "特斯拉中國官網上線Model 3長續航後輪驅動版車型"
+          ],
+          "seconds": 2.06,
+          "error": ""
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "HUAWEI Mate 70 规格参数 - 华为官网",
+            "【华为 Mate 70 12GB/512GB】报价_参数_图片_论坛_华为 HUAWEI Mate 70(12GB/512GB)手机报价-Z",
+            "HUAWEI Mate 70"
+          ],
+          "seconds": 2.58,
+          "error": ""
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "上海中心大厦",
+            "上海中心大厦_百度百科",
+            "国家科学技术进步奖二等奖：上海中心大厦工程关键技术_国企动态"
+          ],
+          "seconds": 3.89,
+          "error": ""
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "iOS 18.4正式版推出！iOS 18新功能/實用貼士/支援機型懶人包 | 友和 YOHO",
+            "具透 | iOS 18 正式版来了，升级后记得试试这些新功能 - 少数派",
+            "iOS 18正式版功能總整理，58項iPhone必學新功能一次看 - 瘋先生"
+          ],
+          "seconds": 4.41,
+          "error": ""
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "GPT-5 - 维基百科，自由的百科全书",
+            "OpenAI 发布 GPT-5：一个智能统一系统",
+            "GPT-5 正式发布"
+          ],
+          "seconds": 2.45,
+          "error": ""
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "【北京实习生招聘网_2026年北京实习生招聘信息】-北京猎聘",
+            "Search Jobs - 学生: 实习生- 招贤纳才(中国)",
+            "实习生计划"
+          ],
+          "seconds": 2.19,
+          "error": ""
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "近期上映 - 開眼電影網首頁--本週新片--",
+            "2025美国即将上映电影推荐- 万众期待的热门大片- 12月最新",
+            "最新上映的电影- 观影指南"
+          ],
+          "seconds": 2.55,
+          "error": ""
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "這次我精進更簡單的做法了，減少備料程序、不複雜的料理做法，相信你學得會也會喜歡！｜阿慶師",
+            "家常菜做法大全有图_家常菜菜谱大全做法_好吃的家常菜_下厨房",
+            "家庭料理零失敗指南：4道經典菜色一次學會，新手也能變大廚！ | 金蘭知識+"
+          ],
+          "seconds": 3.1,
+          "error": ""
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京周末去哪玩_北京周末好去处-北京本地宝",
+            "周末去哪儿｜好玩还人少 北京鲜为人知的小景点_文化快报_首都之窗_北京市人民政府门户网站",
+            "【中国】第一次去北京 TOP 16 精选，玩转老北京胡同、地道小吃、文创店铺全景点清单"
+          ],
+          "seconds": 2.35,
+          "error": ""
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "相機入門指南｜新手、學生單眼／類單眼相機介紹、挑選重點及平價機種推薦",
+            "2026 新手買相機指南：三種機型怎麼選、五大規格盲點全破解",
+            "女生入门相机推荐| 7款高颜值相机，美貌与实力并存，买它！"
+          ],
+          "seconds": 6.25,
+          "error": ""
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "18 top tips for improving your English | Study English with SKOLA UK",
+            "學英文-從入門到精通-學好英語的關鍵| 跟EF學英語| EF香港和澳門",
+            "英文如何自學？把握4個心法，自學英文網站這10個一定要收藏 語言學習平台｜線上英文課程推薦Hi家教"
+          ],
+          "seconds": 1.98,
+          "error": ""
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "新手小白开启健身，这一篇就够了！——训练计划篇·重训",
+            "适合初学者的健身房力量训练计划 | 如何高效地进行全身训练，每周一次 | 体育俱乐部及健身俱乐部 [中央体育]",
+            "健身房新手该如何训练？健身计划表献上！！！ - 哔哩哔哩"
+          ],
+          "seconds": 2.81,
+          "error": ""
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026年12種話題髮型：鎖骨中長髮、男孩鮑伯、Bixie短髮、隨性層次捲…… | Vogue Taiwan",
+            "2026最新发型趋势：“乱”才时髦_时尚频道_央视网(cctv.com)",
+            "2026髮型趨勢｜流行短髮、中長髮、髮色範本一次看！ - BEAUTY美人圈"
+          ],
+          "seconds": 2.61,
+          "error": ""
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京一居室整租",
+            "北京酒店式公寓租房网: 北京酒店式公寓出租-北京服务式租房价格",
+            "北京租房小组"
+          ],
+          "seconds": 1.67,
+          "error": ""
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京暑期实习招聘信息",
+            "北京实习生招聘信息",
+            "校园招聘"
+          ],
+          "seconds": 1.67,
+          "error": ""
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "前往上海的特价机票 - 机票预订",
+            "查找飞往上海市的低价航班 - Google 机票",
+            "上海平機票✈️低至HK$387 | Trip.com"
+          ],
+          "seconds": 2.1,
+          "error": ""
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "贵州茅台(600519)股吧_贵州茅台股票怎么样？交流社区_论坛平台_英为财情",
+            "贵州茅台 - 维基百科，自由的百科全书",
+            "贵州茅台(600519)股票历史数据"
+          ],
+          "seconds": 1.8,
+          "error": ""
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "PaperCCB(查查呗)官网_免费AIGC检测_论文降重_AIGC降重_论文查重",
+            "论文查重软件_论文检测软件_笔杆网",
+            "维普查重_维普论文查重入口_维普网论文检测系统【官方正版】"
+          ],
+          "seconds": 2.07,
+          "error": ""
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "中港两地搬家推荐—深圳中港达搬家公司",
+            "深圳搬家公司口碑前十(深圳搬家行业最新排名)",
+            "深圳搬家公司排名前十名"
+          ],
+          "seconds": 1.73,
+          "error": ""
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "【北京天气预报】北京天气预报15天,30天,一周天气预报,天气网提供7天,10天,40天,今天,明天,未来一周天气预报查询_天气网",
+            "北京天气预报,北京7天天气预报,北京15天天气预报,北京天气查询",
+            "Beijing (China) weather"
+          ],
+          "seconds": 3.32,
+          "error": ""
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "西甲_百度体育",
+            "西甲联盟正式公布2026/27赛季赛程",
+            "西甲赛程赛果数页_体育频道_新浪网"
+          ],
+          "seconds": 3.44,
+          "error": ""
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026十一国庆节放假调休时间表（附高速免费+加班工资）",
+            "关于2026年中秋节和国庆节放假安排的通知",
+            "国务院办公厅关于2026年部分节假日安排的通知"
+          ],
+          "seconds": 4.49,
+          "error": ""
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "AI News | Latest News | Insights Powering AI-Driven Business Growth",
+            "AI资讯_获取AGI最新头条资讯_AIbase",
+            "每日AI资讯、热点、动态、融资、产品发布"
+          ],
+          "seconds": 1.96,
+          "error": ""
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "黄金价格走势-今日金价",
+            "今日黄金金价 - Top 100件今日黄金金价 - 2026年9月更新 - 淘宝Taobao｜天猫Tmall",
+            "金价今日价格 - Top 100件金价今日价格 - 2026年9月更新 - 淘宝Taobao｜天猫Tmall"
+          ],
+          "seconds": 4.14,
+          "error": ""
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "来讨论一下即将到来的2026年秋招吧！_牛客网",
+            "2026应届毕业生校招时间轴，带你看懂求职时间线 - 知乎",
+            "GitHub - namewyf/Campus2026: 2026届互联网校招&2025互联网实习信息汇总，欢迎共创"
+          ],
+          "seconds": 5.4,
+          "error": ""
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "今日比特币价格｜BTC 的实时价格、图表和市场数据",
+            "Bitcoin价格、BTC价格、实时图表和市值 - Coinbase",
+            "比特币价格| BTC 价格指数、实时图表和市值| 欧易 - OKX"
+          ],
+          "seconds": 2.08,
+          "error": ""
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026年全国硕士研究生招生考试报名公告",
+            "教育部关于印发《2026年全国硕士研究生招生工作管理规定》的通知 - 中华人民共和国教育部政府门户网站",
+            "教育部部署2026年全国硕士研究生考试招生工作 - 中国教育考试网"
+          ],
+          "seconds": 3.0,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "backend": "tavily",
+      "heuristics": true,
+      "summary": {
+        "n": 30,
+        "hit@k": 96.7,
+        "auto_corrected": 0.0,
+        "avg_seconds": 3.71,
+        "by_category": {
+          "单实体": "7/8 (88%)",
+          "垂直领域": "7/7 (100%)",
+          "时效性": "7/7 (100%)",
+          "泛词口语": "8/8 (100%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "诺坎普球场体验--足球俱乐部博物馆参观 门票_欧洲遍游网",
+            "巴塞罗那诺坎普球场参观开放票",
+            "诺坎普之旅：体验巴塞罗那足球俱乐部体育场（+门票）"
+          ],
+          "seconds": 1.98,
+          "error": ""
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Python 3.12 新特性：更优雅的类型提示实践",
+            "Python 3.12 性能暴增50%！这5个新特性让老项目直接起飞 - 稀土掘金",
+            "Python 3.12 新特性 - 隔叶黄莺Yanbin's Blog - 软件编程实践"
+          ],
+          "seconds": 1.65,
+          "error": ""
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "清华大学（中国北京市公办高校）_百度百科",
+            "Tsinghua University",
+            "清华大学信息公开申请"
+          ],
+          "seconds": 2.04,
+          "error": ""
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "后驱长续航的Model 3终于来了！830km续航很香但我劝你冷静！_车家号_发现车生活_汽车之家",
+            "特斯拉宣布：續航力830公里Model 3車型開賣",
+            "特斯拉Model 3 - 維基百科"
+          ],
+          "seconds": 2.94,
+          "error": ""
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "HUAWEI Mate 70 规格参数- 华为官网",
+            "HUAWEI Mate 70 Air - 华为官网",
+            "HUAWEI Mate 70_百度百科"
+          ],
+          "seconds": 6.89,
+          "error": ""
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 20.32,
+          "error": "The read operation timed out"
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "iOS 18.4正式版推出！iOS 18新功能/實用貼士/支援機型懶人包",
+            "iOS 18正式版功能總整理，58項iPhone必學新功能一次看",
+            "iOS 18 功能有哪些？iOS 18 更新什麼？12 大亮點帶你看！ - Roo.Cash"
+          ],
+          "seconds": 2.28,
+          "error": ""
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "OpenAI发布新版本GPT-5 自称已达到“博士水平” - BBC",
+            "GPT-5 正式发布",
+            "GPT-5 - 維基百科，自由的百科全書"
+          ],
+          "seconds": 4.64,
+          "error": ""
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026年北京实习生招聘信息",
+            "北京实习生招聘信息",
+            "Search Jobs - 学生: 实习生- 招贤纳才(中国)"
+          ],
+          "seconds": 3.28,
+          "error": ""
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "最近五一有什么好看的电影吗",
+            "[心情] 有没有什么好看的电影推荐 - 新手保护区 - SS同盟",
+            "最近更新的武侠电影2023_最近有什么好看的武侠片电影 - 漫漫看影视剧"
+          ],
+          "seconds": 5.1,
+          "error": ""
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "家常菜菜谱大全做法 - 下厨房"
+          ],
+          "seconds": 2.29,
+          "error": ""
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京周末去哪玩",
+            "周末去哪儿｜好玩还人少北京鲜为人知的小景点",
+            "悠闲又省钱的北京周末2日游攻略，建议收藏！-北京游记攻略【携程攻略】"
+          ],
+          "seconds": 3.4,
+          "error": ""
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026年新手（入门）相机推荐买什么牌子的好？（3900字选购攻略）",
+            "【买前必看】相机选购指南：4000-20000，从入门到专业，高性价比选购！_哔哩哔哩_bilibili",
+            "新手入门怎么选相机？全品牌相机购买大推荐！让你一次看个够！"
+          ],
+          "seconds": 2.51,
+          "error": ""
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "学英语老是记不住？用这些科学方法，彻底记住学过的英语，人人适用！",
+            "学英语-从入门到精通-学好英语的关键 | 跟EF学英语 | EF海外游学留学",
+            "俞敏洪：中国学生怎样学英语最有效？"
+          ],
+          "seconds": 3.55,
+          "error": ""
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "健身房新手该如何训练？健身计划表献上！！！",
+            "新手小白开启健身，这一篇就够了！——训练计划篇·重训",
+            "适合初学者的健身房力量训练计划| 如何高效地进行全身训练"
+          ],
+          "seconds": 3.08,
+          "error": ""
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026最新发型趋势：“乱”才时髦 - 时尚频道- 央视网",
+            "2026髮型趨勢｜流行短髮、中長髮、髮色範本一次看！",
+            "流行趨勢-資訊中心 - Round2 Hair Salon"
+          ],
+          "seconds": 2.59,
+          "error": ""
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "【北京租房网_北京租房信息|房屋出租】- 房天下",
+            "【北京租房网_北京租房信息|房屋出租】- 房天下",
+            "北京租房小组- 豆瓣"
+          ],
+          "seconds": 2.13,
+          "error": ""
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "【北京暑期实习招聘网_2026年北京暑期实习招聘信息】-北京猎聘",
+            "北京实习生招聘信息",
+            "校园招聘 - 美团招聘"
+          ],
+          "seconds": 2.31,
+          "error": ""
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "前往上海的特价机票 - 机票预订",
+            "上海 航班优惠 | AirAsia MOVE",
+            "飛上海(SHA)便宜機票｜機票日最高折NT$500｜雄獅旅遊"
+          ],
+          "seconds": 3.59,
+          "error": ""
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "貴州茅台- 維基百科，自由的百科全書",
+            "贵州茅台(600519)股票历史数据",
+            "贵州茅台(SH600519)股票股价_股价行情_讨论"
+          ],
+          "seconds": 3.3,
+          "error": ""
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "免费论文查重_PaperCcb查查呗论文检测",
+            "PaperRed免费查重官网-AIGC论文检测-AI智能降重-ai智能写作",
+            "万方检测"
+          ],
+          "seconds": 6.49,
+          "error": ""
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "深圳搬家公司排名前十名_搬运工_居民_企业",
+            "中港两地搬家推荐—深圳中港达搬家公司",
+            "深圳搬家_深圳搬家价格电话 - 58同城"
+          ],
+          "seconds": 1.91,
+          "error": ""
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "北京天气预报",
+            "北京天气预报,北京7天天气预报,北京15天天气预报,北京天气查询",
+            "北京-天气预报 - 中央气象台"
+          ],
+          "seconds": 4.02,
+          "error": ""
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "第六轮西甲赛程全览与深度前瞻：9场对决时间与转播一目了然 - 搜狐时间线",
+            "西甲赛程赛果数页_体育频道 - 直播",
+            "西甲"
+          ],
+          "seconds": 2.94,
+          "error": ""
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "关于2026年中秋节和国庆节放假安排的通知",
+            "国务院办公厅关于2026年部分节假日安排的通知",
+            "国务院办公厅关于2026年部分节假日安排的通知 - 百度百科"
+          ],
+          "seconds": 1.72,
+          "error": ""
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "AI News | Latest News | Insights Powering AI-Driven Business Growth",
+            "AI资讯_获取AGI最新头条资讯",
+            "每日AI资讯、热点、动态、融资、产品发布"
+          ],
+          "seconds": 2.13,
+          "error": ""
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "黄金价格走势图- 即时黄金,白银,铂金和钯金现货价格 - BullionVault",
+            "XAUUSD图表— 今日黄金现货价格",
+            "今日纽约国际金价实时行情走势图 - 黄金价格"
+          ],
+          "seconds": 2.7,
+          "error": ""
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "秋招啥时候开始？2026年应届生校招时间线全解析",
+            "GitHub - namewyf/Campus2026: 2026届互联网校招&2025互联网实习信息汇总，欢迎共创",
+            "完美世界2026年春季校园招聘Q&A"
+          ],
+          "seconds": 2.73,
+          "error": ""
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "今日比特币价格｜BTC 的实时价格、图表和市场数据",
+            "比特币价格| BTC 价格指数、实时图表和市值| 欧易 - OKX",
+            "Bitcoin - 比特币价格行情,今日最新币价,实时走势图"
+          ],
+          "seconds": 2.89,
+          "error": ""
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "2026年全国硕士研究生招生考试报名公告",
+            "教育部关于印发《2026年全国硕士研究生招生工作管理规定》 ...",
+            "教育部部署2026年全国硕士研究生考试招生工作"
+          ],
+          "seconds": 3.83,
+          "error": ""
+        }
+      ]
+    }
+  ]
+}

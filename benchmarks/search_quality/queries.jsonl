@@ -1,0 +1,33 @@
+{"id": "E01", "category": "单实体", "query": "诺坎普球场 参观", "expect_any": ["诺坎普", "camp nou", "fcbarcelona"], "note": "实测 Bing 对带空格长短语曾退化"}
+{"id": "E02", "category": "单实体", "query": "Python 3.12 新特性", "expect_any": ["python", "3.12"], "note": "英文/技术词，基线应命中"}
+{"id": "E03", "category": "单实体", "query": "清华大学 地址", "expect_any": ["清华大学", "tsinghua"], "note": "中文实体"}
+{"id": "E04", "category": "单实体", "query": "特斯拉 Model 3 续航", "expect_any": ["特斯拉", "model 3", "续航"], "note": "中英混合"}
+{"id": "E05", "category": "单实体", "query": "华为 Mate 70 参数", "expect_any": ["华为", "mate"], "note": "中英混合"}
+{"id": "E06", "category": "单实体", "query": "上海中心大厦 高度", "expect_any": ["上海中心", "632", "shanghai tower"], "note": "事实型"}
+{"id": "E07", "category": "单实体", "query": "苹果 iOS 18 新功能", "expect_any": ["ios 18", "apple", "苹果"], "note": "英文版本号"}
+{"id": "E08", "category": "单实体", "query": "OpenAI GPT-5 发布", "expect_any": ["openai", "gpt"], "note": "纯英文"}
+
+{"id": "F01", "category": "泛词口语", "query": "今年的北京实习推荐", "expect_any": ["实习", "招聘", "ncss", "牛客", "实习僧"], "note": "踩坑样本：泛词退化 + 弱词误判"}
+{"id": "F02", "category": "泛词口语", "query": "最近有什么好看的电影", "expect_any": ["电影", "豆瓣", "票房", "上映"], "note": "口语长句"}
+{"id": "F03", "category": "泛词口语", "query": "我想学做饭 推荐几个菜谱", "expect_any": ["菜谱", "下厨房", "美食", "做法"], "note": "口语 + 推荐"}
+{"id": "F04", "category": "泛词口语", "query": "北京周末去哪玩好", "expect_any": ["北京", "景点", "游玩", "周末"], "note": "本地生活"}
+{"id": "F05", "category": "泛词口语", "query": "新手买什么相机好", "expect_any": ["相机", "摄影", "入门"], "note": "选购建议"}
+{"id": "F06", "category": "泛词口语", "query": "有什么好的英语学习方法", "expect_any": ["英语", "学习", "方法"], "note": "方法类"}
+{"id": "F07", "category": "泛词口语", "query": "帮我找几个健身计划", "expect_any": ["健身", "训练", "计划"], "note": "口语 + 帮我"}
+{"id": "F08", "category": "泛词口语", "query": "今年流行什么发型", "expect_any": ["发型", "流行", "2026"], "note": "时效 + 泛词"}
+
+{"id": "V01", "category": "垂直领域", "query": "北京 租房 一居室", "expect_any": ["租房", "贝壳", "链家", "安居客"], "note": "垂直平台词"}
+{"id": "V02", "category": "垂直领域", "query": "北京 暑期实习 招聘", "expect_any": ["实习", "招聘", "ncss", "牛客"], "note": "垂直平台词"}
+{"id": "V03", "category": "垂直领域", "query": "上海 机票 特价", "expect_any": ["机票", "航班", "携程", "去哪儿"], "note": "垂直平台词"}
+{"id": "V04", "category": "垂直领域", "query": "贵州茅台 股价", "expect_any": ["茅台", "股价", "600519"], "note": "财经"}
+{"id": "V05", "category": "垂直领域", "query": "毕业论文 查重 系统", "expect_any": ["查重", "知网", "维普", "论文"], "note": "学术"}
+{"id": "V06", "category": "垂直领域", "query": "深圳 搬家 公司 推荐", "expect_any": ["搬家", "深圳", "货拉拉"], "note": "本地服务"}
+{"id": "V07", "category": "垂直领域", "query": "北京 天气 明天", "expect_any": ["天气", "气温", "weather", "降雨"], "note": "实时信息"}
+
+{"id": "T01", "category": "时效性", "query": "本周 西甲 赛程", "expect_any": ["西甲", "赛程", "laliga"], "note": "时效"}
+{"id": "T02", "category": "时效性", "query": "2026 年 国庆 放假安排", "expect_any": ["国庆", "放假", "国务院", "假期"], "note": "时效 + 政策"}
+{"id": "T03", "category": "时效性", "query": "最近的 AI 新闻", "expect_any": ["ai", "人工智能", "新闻"], "note": "时效 + 泛词"}
+{"id": "T04", "category": "时效性", "query": "今日 黄金价格", "expect_any": ["黄金", "金价"], "note": "实时数据"}
+{"id": "T05", "category": "时效性", "query": "2026 秋季 校招 时间", "expect_any": ["校招", "秋招", "招聘"], "note": "时效 + 垂直"}
+{"id": "T06", "category": "时效性", "query": "现在 比特币 价格", "expect_any": ["比特币", "btc", "bitcoin"], "note": "实时数据"}
+{"id": "T07", "category": "时效性", "query": "2026 年 考研 报名时间", "expect_any": ["考研", "报名", "研招网"], "note": "时效 + 政策"}

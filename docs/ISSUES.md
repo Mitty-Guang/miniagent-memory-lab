@@ -63,6 +63,8 @@
 | T7 | 任务在临时目录执行，相对路径易错 | 每个任务独立 `mkdtemp` 工作目录，产物不污染仓库；脚本用 `sys.path` 自举保证可从任意位置运行 |
 | T8 | 同一端口起了两个进程（旧 venv 残留 + 新 venv），请求可能落到旧代码 | Windows `SO_REUSEADDR` 允许重复绑定；多次重启未清理旧进程。排查方法：`Get-NetTCPConnection -LocalPort 8899 -State Listen` 看 PID 归属 → 清理为单实例 |
 | T9 | 官网（fcbarcelona.com / ESPN）对 `http_get` 返回 403、JS 渲染页面抓不到正文 | 属反爬/前端渲染限制：如实标注"无法核实"；中长期改用 agent-native 搜索 API 的 `include_raw_content`（见 `docs/SEARCH_BACKENDS.md`） |
+| T10 | DuckDuckGo 免费但**被风控**：30 条评估查询中 28 条返回空页（前 2 条正常） | 免费爬取类后端的通病。结论：免费方案不能只靠单引擎，需要"多引擎 + 冷却 + 兜底链"（open-websearch / web-mcp 的设计要点）；本仓库保留 DDG 仅作兜底 |
+| T11 | Open-WebSearch daemon 启动即崩：`ReferenceError: File is not defined` | 其依赖 `undici@7` 要求 **Node ≥20.18.1**，本机 Node 18.16.1 不满足（`cheerio`/`@hono/node-server` 同样要求 Node 20+）。处理：装 Node 20+ 后再跑（`npx open-websearch@latest serve`）；后端适配代码已就绪 |
 
 ---
 

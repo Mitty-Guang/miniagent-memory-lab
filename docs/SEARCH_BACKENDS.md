@@ -57,13 +57,22 @@ Tavily 在**难检索/多跳**任务上更强（任务完成 51% vs 38%；多跳
 
 ## 4. 本项目的取舍（务实路线）
 
+| 阶段 | 做法 | 状态 |
+| --- | --- | --- |
+| 现状（零成本、国内直连） | Bing RSS 解析 + 相关性过滤 + 自动缩短 + **平台词前置**兜底 | ✅ 已实现（`bing_rss`） |
+| Agent-native 检索 | Tavily（免费额度 1000 credits/月，`include_answer`/`include_raw_content`） | ✅ 已实现（`tavily`），实测 hit@3 100% |
+| 免费多引擎聚合 | Open-WebSearch 本地 daemon（免 key，bing/baidu/ddg/sogou 聚合） | ⚠️ 后端已实现（`openwebsearch`），daemon 需 Node ≥20.18.1 |
+| 免费兜底 | DuckDuckGo HTML（无需 key） | ⚠️ 已实现（`duckduckgo`），但实测 28/30 被风控 → 只能作兜底 |
+| 工具变多时 | 复用现有 `retrieval.py`（TF-IDF / bigram / embedding）做 **tool retrieval** | 📋 规划 |
+
+**实测数据见 [`docs/SEARCH_EVAL.md`](SEARCH_EVAL.md)**（30 条分层评估集：Bing RSS 53.3%→66.7%（启发式）、
+Tavily 100%、DDG 受风控影响）。启发式默认只对爬取类后端启用（`WebSearchTool._use_heuristics`）。
+
 | 阶段 | 做法 | 理由 |
 | --- | --- | --- |
-| 现状（零成本、国内直连） | Bing RSS 解析 + 相关性过滤 + 自动缩短 + **平台词前置**兜底 | 无 API key、无代理也能跑；启发式覆盖已知退化模式 |
-| 下一步（推荐） | 抽象 `SearchBackend` 接口：`bing_rss`（默认）/ `tavily` / `brave` / `serper`，key 走环境变量 | 保留零依赖默认值；有 key 时一键切到 agent-native 检索 |
 | 再下一步 | 接 Tavily `include_raw_content` 替代 `http_get` 抓 JS 页面 | 直接解决官网 403 / JS 渲染抓不到正文的痛点 |
 | 工具变多时 | 复用现有 `retrieval.py`（TF-IDF / bigram / embedding）做 **tool retrieval** | 组件已存在，索引工具描述即可；这也是"抽象复用"的加分点 |
-| 网络注意 | Brave/Serper(Google)/Exa 在国内需代理，Tavily 需实测 | 国内演示场景下"可插拔 + 默认 Bing"更稳 |
+| 网络注意 | Brave/Serper(Google)/Exa 在国内需代理；Tavily 实测直连可用 | 国内演示场景下"可插拔 + 默认 Bing"更稳 |
 
 ---
 

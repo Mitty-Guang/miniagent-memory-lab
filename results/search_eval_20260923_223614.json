@@ -1,0 +1,650 @@
+{
+  "timestamp": "2026-09-23 22:33:12",
+  "limit": 3,
+  "runs": [
+    {
+      "backend": "duckduckgo",
+      "heuristics": false,
+      "summary": {
+        "n": 30,
+        "hit@k": 6.7,
+        "auto_corrected": 0.0,
+        "avg_seconds": 1.57,
+        "by_category": {
+          "单实体": "2/8 (25%)",
+          "垂直领域": "0/7 (0%)",
+          "时效性": "0/7 (0%)",
+          "泛词口语": "0/8 (0%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Barça Stadium Tour & Museum | FC Barcelona Official Channel",
+            "诺坎普之旅：体验巴塞罗那足球俱乐部体育场（+门票）",
+            "游览诺坎普 - 参观路线与体验"
+          ],
+          "seconds": 2.59,
+          "error": ""
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": true,
+          "auto_corrected": false,
+          "results": [
+            "Python 3.12 有什么新变化 — Python 3.12.14 文档",
+            "Python3.12 新特性——GIL 重大突破! - 一无是处的研究僧 - 博客园",
+            "Python 3.12 新特性盘点：从错误消息到性能优化 - 知乎"
+          ],
+          "seconds": 3.6,
+          "error": ""
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.21,
+          "error": ""
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.81,
+          "error": ""
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.29,
+          "error": ""
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.25,
+          "error": ""
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.78,
+          "error": ""
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.46,
+          "error": ""
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.47,
+          "error": ""
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.78,
+          "error": ""
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.74,
+          "error": ""
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 2.18,
+          "error": ""
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.95,
+          "error": ""
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.78,
+          "error": ""
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.18,
+          "error": ""
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.51,
+          "error": ""
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.17,
+          "error": ""
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.46,
+          "error": ""
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.48,
+          "error": ""
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.79,
+          "error": ""
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 4.69,
+          "error": ""
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.93,
+          "error": ""
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.79,
+          "error": ""
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.73,
+          "error": ""
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.03,
+          "error": ""
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.31,
+          "error": ""
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.5,
+          "error": ""
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.8,
+          "error": ""
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.36,
+          "error": ""
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.37,
+          "error": ""
+        }
+      ]
+    },
+    {
+      "backend": "duckduckgo",
+      "heuristics": true,
+      "summary": {
+        "n": 30,
+        "hit@k": 0.0,
+        "auto_corrected": 0.0,
+        "avg_seconds": 1.47,
+        "by_category": {
+          "单实体": "0/8 (0%)",
+          "垂直领域": "0/7 (0%)",
+          "时效性": "0/7 (0%)",
+          "泛词口语": "0/8 (0%)"
+        }
+      },
+      "rows": [
+        {
+          "id": "E01",
+          "category": "单实体",
+          "query": "诺坎普球场 参观",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.44,
+          "error": ""
+        },
+        {
+          "id": "E02",
+          "category": "单实体",
+          "query": "Python 3.12 新特性",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.73,
+          "error": ""
+        },
+        {
+          "id": "E03",
+          "category": "单实体",
+          "query": "清华大学 地址",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.79,
+          "error": ""
+        },
+        {
+          "id": "E04",
+          "category": "单实体",
+          "query": "特斯拉 Model 3 续航",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.8,
+          "error": ""
+        },
+        {
+          "id": "E05",
+          "category": "单实体",
+          "query": "华为 Mate 70 参数",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.39,
+          "error": ""
+        },
+        {
+          "id": "E06",
+          "category": "单实体",
+          "query": "上海中心大厦 高度",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.8,
+          "error": ""
+        },
+        {
+          "id": "E07",
+          "category": "单实体",
+          "query": "苹果 iOS 18 新功能",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.38,
+          "error": ""
+        },
+        {
+          "id": "E08",
+          "category": "单实体",
+          "query": "OpenAI GPT-5 发布",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.8,
+          "error": ""
+        },
+        {
+          "id": "F01",
+          "category": "泛词口语",
+          "query": "今年的北京实习推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 2.0,
+          "error": ""
+        },
+        {
+          "id": "F02",
+          "category": "泛词口语",
+          "query": "最近有什么好看的电影",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.96,
+          "error": ""
+        },
+        {
+          "id": "F03",
+          "category": "泛词口语",
+          "query": "我想学做饭 推荐几个菜谱",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.04,
+          "error": ""
+        },
+        {
+          "id": "F04",
+          "category": "泛词口语",
+          "query": "北京周末去哪玩好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.82,
+          "error": ""
+        },
+        {
+          "id": "F05",
+          "category": "泛词口语",
+          "query": "新手买什么相机好",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.45,
+          "error": ""
+        },
+        {
+          "id": "F06",
+          "category": "泛词口语",
+          "query": "有什么好的英语学习方法",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.8,
+          "error": ""
+        },
+        {
+          "id": "F07",
+          "category": "泛词口语",
+          "query": "帮我找几个健身计划",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.5,
+          "error": ""
+        },
+        {
+          "id": "F08",
+          "category": "泛词口语",
+          "query": "今年流行什么发型",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.79,
+          "error": ""
+        },
+        {
+          "id": "V01",
+          "category": "垂直领域",
+          "query": "北京 租房 一居室",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.91,
+          "error": ""
+        },
+        {
+          "id": "V02",
+          "category": "垂直领域",
+          "query": "北京 暑期实习 招聘",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 2.16,
+          "error": ""
+        },
+        {
+          "id": "V03",
+          "category": "垂直领域",
+          "query": "上海 机票 特价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.44,
+          "error": ""
+        },
+        {
+          "id": "V04",
+          "category": "垂直领域",
+          "query": "贵州茅台 股价",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 2.34,
+          "error": ""
+        },
+        {
+          "id": "V05",
+          "category": "垂直领域",
+          "query": "毕业论文 查重 系统",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.52,
+          "error": ""
+        },
+        {
+          "id": "V06",
+          "category": "垂直领域",
+          "query": "深圳 搬家 公司 推荐",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 0.79,
+          "error": ""
+        },
+        {
+          "id": "V07",
+          "category": "垂直领域",
+          "query": "北京 天气 明天",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 2.03,
+          "error": ""
+        },
+        {
+          "id": "T01",
+          "category": "时效性",
+          "query": "本周 西甲 赛程",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.27,
+          "error": "HTTP Error 403: Forbidden"
+        },
+        {
+          "id": "T02",
+          "category": "时效性",
+          "query": "2026 年 国庆 放假安排",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.95,
+          "error": "HTTP Error 403: Forbidden"
+        },
+        {
+          "id": "T03",
+          "category": "时效性",
+          "query": "最近的 AI 新闻",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.83,
+          "error": "HTTP Error 403: Forbidden"
+        },
+        {
+          "id": "T04",
+          "category": "时效性",
+          "query": "今日 黄金价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 2.36,
+          "error": "HTTP Error 403: Forbidden"
+        },
+        {
+          "id": "T05",
+          "category": "时效性",
+          "query": "2026 秋季 校招 时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.96,
+          "error": "HTTP Error 403: Forbidden"
+        },
+        {
+          "id": "T06",
+          "category": "时效性",
+          "query": "现在 比特币 价格",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.28,
+          "error": "HTTP Error 403: Forbidden"
+        },
+        {
+          "id": "T07",
+          "category": "时效性",
+          "query": "2026 年 考研 报名时间",
+          "hit": false,
+          "auto_corrected": false,
+          "results": [],
+          "seconds": 1.84,
+          "error": "HTTP Error 403: Forbidden"
+        }
+      ]
+    }
+  ]
+}
