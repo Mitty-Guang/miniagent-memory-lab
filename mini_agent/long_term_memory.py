@@ -1,23 +1,25 @@
-"""长期记忆层：SQLite 持久化 + 轻量检索（跨会话）。
+"""长期记忆层：SQLite 持久化 + 可插拔检索（跨会话）。
 
 对应 Agent 记忆的 write / read 两个环节：
 - write：任务结束后把「任务 + 结果」压缩成一条记忆写入；
-- read：新任务开始时按文本相关性检索历史记忆，注入上下文（可跨会话）。
+- read：新任务开始时按相关性检索历史记忆，注入上下文（可跨会话）。
 
-检索用字符二元组 Jaccard（与短期记忆选择同一套打分，保持口径一致）。
+检索默认用 TF-IDF（零依赖，见 mini_agent/retrieval.py），
+可通过 retriever 参数替换为 BigramRetriever 或 EmbeddingRetriever（fastembed）。
 """
 import sqlite3
 import time
 from typing import Dict, List, Optional
 
-from mini_agent.memory_policies import bigrams, jaccard
+from mini_agent.retrieval import TfidfRetriever
 
 
 class LongTermMemory:
     """SQLite 长期记忆库。path=":memory:" 时为进程内临时库。"""
 
-    def __init__(self, path: str = ":memory:"):
+    def __init__(self, path: str = ":memory:", retriever=None):
         self.path = path
+        self.retriever = retriever or TfidfRetriever()
         self.conn = sqlite3.connect(path)
         self.conn.execute(
             """
@@ -53,16 +55,21 @@ class LongTermMemory:
         k: int = 3,
         exclude_session: Optional[str] = None,
     ) -> List[Dict]:
-        """按与 query 的文本相关性检索历史记忆（默认排除当前会话）。"""
+        """按与 query 的相关性检索历史记忆（默认排除当前会话）。"""
         rows = self.conn.execute(
             "SELECT id, text, session_id, task_id, kind, created_at FROM memories"
         ).fetchall()
-        query_bg = bigrams(query)
+        candidates = [
+            (rid, text, sid, tid, kind, ts)
+            for rid, text, sid, tid, kind, ts in rows
+            if not (exclude_session and sid == exclude_session)
+        ]
+        if not candidates:
+            return []
+
+        scores = self.retriever.rank(query, [c[1] for c in candidates])
         scored = []
-        for rid, text, sid, tid, kind, ts in rows:
-            if exclude_session and sid == exclude_session:
-                continue
-            score = jaccard(query_bg, bigrams(text))
+        for (rid, text, sid, tid, kind, ts), score in zip(candidates, scores):
             if score > 0:
                 scored.append(
                     (
@@ -74,7 +81,7 @@ class LongTermMemory:
                             "session_id": sid,
                             "task_id": tid,
                             "kind": kind,
-                            "score": round(score, 4),
+                            "score": round(float(score), 4),
                         },
                     )
                 )

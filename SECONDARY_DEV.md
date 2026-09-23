@@ -75,12 +75,15 @@
 `mini_agent/long_term_memory.py` + `mini_agent/memory_agent.py`：
 
 - **write**：任务结束后把「任务 + 最终结果」压缩成一条记忆写入 SQLite（可跨进程持久化）；
-- **read**：新任务开始时用任务文本检索历史记忆（字符二元组 Jaccard，与短期选择同口径），
-  按分数取 Top-k 注入上下文；默认排除当前会话（保证测的是跨会话记忆）；
+- **read**：新任务开始时用任务文本检索历史记忆，按分数取 Top-k 注入上下文；
+  检索器**可插拔**（`mini_agent/retrieval.py`）：默认 `TfidfRetriever`（中英混排分词 + TF-IDF，零依赖），
+  另有 `BigramRetriever`（早期对照）与 `EmbeddingRetriever`（装 fastembed 即启用向量检索）；
+  默认排除当前会话（保证测的是跨会话记忆）；
 - 分层设计：**短期** = 固定预算的消息选择（已有），**长期** = SQLite 记忆库（新增）；
-- 离线测试覆盖 read（检索并注入）与 write（摘要落库）。
+- 记忆注入方式可切换：拼进系统提示词（默认，消融更优）或独立 system 消息（见 6.6）；
+- 离线测试覆盖 read（检索并注入，两种注入模式都验证）与 write（摘要落库）。
 
-### 2.7 跨会话任务集（18 个任务）
+### 2.7 任务集（21 个任务）
 
 `task_suite.py` 从 6 个扩展到 **18 个**：
 
@@ -109,6 +112,28 @@
 `run_sweep.py`：预算 × 策略网格（默认 300/500/800/1200 × recent/relevance/impact），
 输出各格的成功率、平均步数、累计 token/字符，落盘 `results/sweep_*.json`。
 
+### 2.11 执行沙箱与权限（2026-09-23 新增）
+
+`mini_agent/sandbox.py`：
+
+- `SandboxedPythonExecutor`：子进程执行（超时 + cwd 限制 + 输出截断），替代进程内 exec；
+- `SandboxedFileEditor`：`PathGuard` 把文件操作限制在沙箱根目录（防 `../` 逃逸）；
+- `SandboxedBashExecutor`：危险命令黑名单（`rm -rf` / `del /f` / `format` / 递归删除等）+ 超时；
+- 通过 `MemoryAgent(sandbox=True)` 或 `ApprovalToolCollection(sandbox_root=...)` 启用。
+
+> 诚实边界：这是"进程级"沙箱，不是容器级隔离；生产环境需叠加容器/低权限用户/网络隔离。
+
+### 2.12 同一会话多轮任务（2026-09-23 新增）
+
+`task_suite.py` 新增 3 个 `turns` 型任务（同一 Agent 连续多轮、短期记忆累积）：
+文件链式操作、增量追加与计数、**带更正的指令跟随**（reports → docs）。
+`runner.py` 统一支持三种形态：单阶段 / phases（跨会话）/ turns（同一会话多轮）。
+
+### 2.13 跨模型对照（2026-09-23 新增）
+
+`compare_models.py`：同一批任务、同一策略下顺序切换 `MODEL_NAME`
+（如 `deepseek-flash` vs `deepseek-v4-pro`），比较成功率与成本。
+
 ## 3. 如何运行
 
 ```powershell
@@ -133,7 +158,8 @@
 
 ## 4. 实验协议
 
-- 同一任务集（18 个）、同一模型（`deepseek-flash`, temperature 0.7）、同一最大步数（10）；
+- 同一任务集（21 个：6 单步 + 8 多步 + 4 跨会话 + 3 同一会话多轮）、
+  同一模型（`deepseek-flash`, temperature 0.7）、同一最大步数（10）；
 - 同预算对比：`recent` / `relevance` / `impact` 共享同一字符预算，
   `all` 不裁剪作为上界参照；扫描 300/500/800/1200 四档预算；
 - 所有策略共用同一套长期记忆配置（MemoryAgent），差异只来自短期消息选择策略；
@@ -237,7 +263,53 @@
 - 失败构成：网络重试耗尽（`LLM调用失败: 重试 5 次后仍失败`）与模型在"长期记忆 + 新任务"下偶发误读
   （把历史记忆当任务、或反过来向用户索要指令）各占一部分；
 - 记忆链路本身正常：复现显示注入顺序为 `[system(长期记忆), user(任务)]`，`ltm_reads=1 / writes=2` 全程生效；
-- 下一步：把长期记忆注入到 **system prompt**（而不是独立 system 消息）、降低温度、失败重试后再判分。
+- 后续改进已落地：长期记忆改为注入 **system prompt**（见 6.6 消融）、失败样本判分收紧；
 - 另注：教学阶段（phase 1）的 `_answer_ok` 检查过于宽松（错误信息也算"有回答"），已修正为排除错误内容。
 
-原始数据：`results/sweep_*.json`、`results/compare_multi_agent_*.json`、`results/compare_*.json`。
+### 6.6 记忆注入方式消融（2026-09-23）
+
+4 个跨会话任务 × 2 次重复 × 预算 800（impact 策略）：
+
+| 注入方式 | 成功 | 平均调用 | 平均 Prompt tokens | 平均耗时(s) |
+| --- | --- | --- | --- | --- |
+| system_prompt（拼进系统提示词） | **8/8** | 4.88 | 3804 | **5.36** |
+| message（独立 system 消息） | 7/8 | 5.62 | 3837 | 13.75 |
+
+- 任务级：`xs_project_code` 1/2 → **2/2**，其余任务两者都 2/2；
+- 方向性证据（样本较小）：把长期记忆拼进系统提示词**更快更稳**——默认已切换为 `system_prompt`；
+- 说明：6.1 的预算扫描使用旧默认（message 模式），复现时若用新默认可能有小幅差异。
+
+### 6.7 执行沙箱（2026-09-23）
+
+- 子进程 Python 执行（超时 / cwd 限制 / 输出截断）+ 路径白名单（防 `../` 逃逸）+
+  命令黑名单（`rm -rf` / `del /f` / `format` 等）；
+- 离线单测覆盖：越界路径拦截、黑名单命令拦截、正常命令执行、超时终止；
+- 边界：进程级隔离，非容器级。
+
+### 6.8 同一会话多轮任务（2026-09-23）
+
+`turns` 型任务 3 个（文件链式操作 / 增量追加与计数 / 带更正的指令跟随）；
+冒烟测试 3 轮全部通过（短期记忆在同一会话内累积）。任务集总数 18 → **21**。
+
+### 6.9 跨模型对照（2026-09-23）
+
+6 个任务 × 预算 500（impact 策略）：
+
+| 模型 | 成功率 | 平均调用 | 平均 Prompt tokens | 平均耗时(s) |
+| --- | --- | --- | --- | --- |
+| deepseek-flash | **6/6** | 5.33 | 3994 | **5.76** |
+| deepseek-v4-pro | 5/6 | 3.67 | **1583** | 27.87 |
+
+- pro 的调用数 −31%、**累计 token 仅为 flash 的 40%**（一次想得更准，更少返工），
+  但单次延迟高（平均耗时约 5×），本批任务成功率未提升（1/6 失败）；
+- 结论（诚实）：**更强模型≠更高成功率**，但可能显著省 token——选型要按"任务难度 × 延迟/成本约束"权衡。
+
+### 6.10 向量检索（EmbeddingRetriever，2026-09-23）
+
+- 安装 `fastembed` 后可用（模型 `BAAI/bge-small-zh-v1.5`，首次使用自动下载）；
+- 冒烟验证：查询"项目代号是什么"对三条记忆打分 `0.726 / 0.181 / 0.401`，目标记忆排第一；
+- 国内网络可用镜像：`HF_ENDPOINT=https://hf-mirror.com`；
+- 接口已接入 `LongTermMemory`（`get_retriever("embedding")` 或 `retriever=` 参数），默认仍是零依赖 TF-IDF。
+
+原始数据：`results/sweep_*.json`、`results/compare_*.json`、`results/compare_multi_agent_*.json`、
+`results/compare_models_*.json`、`results/ablation_injection_*.json`。

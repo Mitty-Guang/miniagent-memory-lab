@@ -14,10 +14,19 @@ class ApprovalToolCollection(ToolCollection):
         self,
         approval_fn: Optional[Callable[[str, dict], bool]] = None,
         trace=None,
+        sandbox_root: Optional[str] = None,
     ):
         super().__init__()
+        if sandbox_root:
+            # 用沙箱版工具替换默认工具（子进程 / 路径白名单 / 命令黑名单）
+            from mini_agent.sandbox import build_sandboxed_tools
+
+            self.tools = {}
+            for tool in build_sandboxed_tools(sandbox_root):
+                self.register_tool(tool)
         self.approval_fn = approval_fn
         self.trace = trace
+        self.sandbox_root = sandbox_root
         self.decisions = []
 
     async def execute_tool(self, name: str, **kwargs) -> ToolResult:

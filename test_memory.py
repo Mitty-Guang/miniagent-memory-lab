@@ -4,6 +4,7 @@
     .\\.venv\\Scripts\\python.exe test_memory.py
 """
 import asyncio
+from pathlib import Path
 
 from mini_agent.approval import ApprovalToolCollection
 from mini_agent.llm import LLMResponse
@@ -107,25 +108,99 @@ async def test_multi_agent_retry():
     print("test_multi_agent_retry passed")
 
 
+def test_sandbox():
+    import tempfile
+
+    from mini_agent.sandbox import PathGuard, build_sandboxed_tools, is_blocked_command
+
+    # 路径白名单：越界路径必须被拦截
+    with tempfile.TemporaryDirectory() as root:
+        resolved_root = Path(root).resolve()
+        guard = PathGuard(str(resolved_root))
+        target = guard.resolve("sub/a.txt")
+        assert str(resolved_root) in str(target), target
+        try:
+            guard.resolve("../escape.txt")
+            raise AssertionError("越界路径未被拦截")
+        except PermissionError:
+            pass
+
+    # 命令黑名单
+    assert is_blocked_command("rm -rf /") is not None
+    assert is_blocked_command("echo hi") is None
+
+    async def scenario():
+        tools = {t.name: t for t in build_sandboxed_tools(".", timeout=1)}
+        blocked = await tools["bash_execute"].execute(command="rm -rf /tmp/x")
+        assert not blocked.success and "拦截" in blocked.error, blocked
+        ok = await tools["bash_execute"].execute(command="echo sandbox-ok")
+        assert ok.success and "sandbox-ok" in ok.output, ok
+        py = await tools["python_execute"].execute(code="print(6 * 7)")
+        assert py.success and "42" in py.output, py
+        slow = await tools["python_execute"].execute(code="import time; time.sleep(3)")
+        assert not slow.success and "超时" in slow.error, slow
+
+    asyncio.run(scenario())
+    print("test_sandbox passed")
+
+
 async def test_memory_agent_read_write():
     ltm = LongTermMemory(":memory:")
     ltm.add("项目代号是 ORION", session_id="old-session")
 
+    # 模式 A（message）：注入为独立 system 消息
     agent = MemoryAgent(
-        llm=MockLLM(), ltm=ltm, session_id="new-session", task_id="t1"
+        llm=MockLLM(),
+        ltm=ltm,
+        session_id="new-session",
+        task_id="t1",
+        memory_injection="message",
     )
     await agent.run("请记住：项目代号是 ORION。")
-
-    # read：历史记忆被检索并注入
     assert agent.retrieved, "未检索到历史记忆"
     assert any(
         "长期记忆" in (m.content or "") for m in agent.memory.messages
-    ), "未注入长期记忆上下文"
+    ), "未注入长期记忆（message 模式）"
 
-    # write：任务结束后写入摘要
-    assert ltm.count() == 2, ltm.count()
+    # 模式 B（system_prompt，默认）：拼进系统提示词（运行中检查）
+    seen = {}
+
+    class SpyLLM(MockLLM):
+        async def chat(self, messages, system_prompt=None, tools=None):
+            seen["system_prompt"] = system_prompt or ""
+            return await super().chat(messages, system_prompt=system_prompt, tools=tools)
+
+    agent2 = MemoryAgent(
+        llm=SpyLLM(), ltm=ltm, session_id="new-session-2", task_id="t2"
+    )
+    await agent2.run("请记住：项目代号是 ORION。")
+    assert "长期记忆" in seen.get("system_prompt", ""), seen
+    assert "ORION" in seen.get("system_prompt", ""), seen
+
+    # write：任务结束后写入摘要（1 初始 + 2 次运行各 1 条）
+    assert ltm.count() == 3, ltm.count()
     assert any("已记住" in item["text"] for item in ltm.all()), ltm.all()
     print("test_memory_agent_read_write passed")
+
+
+def test_retrievers():
+    from mini_agent.retrieval import (
+        BigramRetriever,
+        TfidfRetriever,
+        get_retriever,
+        tokenize,
+    )
+
+    texts = ["任务：项目代号是 ORION；结果：已记住", "今天天气不错", "报告目录改为 docs"]
+    query = "项目代号是什么"
+
+    tfidf_scores = TfidfRetriever().rank(query, texts)
+    assert tfidf_scores[0] == max(tfidf_scores), tfidf_scores
+    bigram_scores = BigramRetriever().rank(query, texts)
+    assert bigram_scores[0] == max(bigram_scores), bigram_scores
+    assert tokenize("项目 code 123"), "中英混排分词为空"
+    assert isinstance(get_retriever(), TfidfRetriever)
+    print("test_retrievers passed")
 
 
 if __name__ == "__main__":
@@ -135,4 +210,6 @@ if __name__ == "__main__":
     asyncio.run(test_memory_agent_read_write())
     asyncio.run(test_multi_agent_orchestration())
     asyncio.run(test_multi_agent_retry())
-    print("\n✅ 所有离线测试通过（long-term memory / tracing / HITL / multi-agent）")
+    test_sandbox()
+    test_retrievers()
+    print("\n✅ 所有离线测试通过（long-term memory / tracing / HITL / multi-agent / sandbox / retrieval）")

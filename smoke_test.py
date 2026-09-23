@@ -15,8 +15,9 @@ async def main():
 
     single = next(t for t in TASKS if t["id"] == "sum_1_100")
     phased = next(t for t in TASKS if t["id"] == "xs_project_code")
+    multiturn = next(t for t in TASKS if t["id"] == "mt_file_chain")
 
-    for task in (single, phased):
+    for task in (single, phased, multiturn):
         result = await run_agent_task(task, policy="relevance", budget_chars=500)
         print(
             f"\n[{task['id']}] success={result['success']} steps={result['steps']} "

@@ -1,11 +1,13 @@
 """带长期记忆的 Agent：read（检索注入）+ write（任务后写入）。
 
-- read：任务开始前用任务文本检索历史记忆（排除当前会话），以系统消息注入；
-- write：任务结束后把「任务 + 最终结果」压缩为一条记忆写回长期库。
+- read：任务开始前用任务文本检索历史记忆（排除当前会话），默认拼进系统提示词
+  （memory_injection="system_prompt"；消融实验显示比独立 system 消息更快、更稳）；
+- write：任务结束后把「任务 + 最终结果」压缩为一条记忆写回长期库；
+- sandbox=True 时使用沙箱工具（子进程 / 路径白名单 / 命令黑名单）。
 
-其余行为（ReAct 循环、固定预算短期记忆选择）与 BudgetedMiniAgent 完全一致，
-保证与「无长期记忆」的对照口径相同。
+其余行为（ReAct 循环、固定预算短期记忆选择）与 BudgetedMiniAgent 完全一致。
 """
+import os
 from typing import Optional
 
 from mini_agent.approval import ApprovalToolCollection, auto_approve
@@ -24,7 +26,8 @@ class MemoryAgent(BudgetedMiniAgent):
         retrieve_k: int = 3,
         approval_fn=None,
         trace=None,
-        memory_injection: str = "message",
+        memory_injection: str = "system_prompt",
+        sandbox: bool = False,
         **kwargs,
     ):
         super().__init__(llm=llm, **kwargs)
@@ -34,10 +37,12 @@ class MemoryAgent(BudgetedMiniAgent):
         self.retrieve_k = retrieve_k
         self.retrieved = []
         self.trace = trace
-        # message：注入为独立 system 消息；system_prompt：拼进系统提示词
+        # message：注入为独立 system 消息；system_prompt：拼进系统提示词（默认，消融更优）
         self.memory_injection = memory_injection
         self.tools = ApprovalToolCollection(
-            approval_fn=approval_fn or auto_approve, trace=trace
+            approval_fn=approval_fn or auto_approve,
+            trace=trace,
+            sandbox_root=os.getcwd() if sandbox else None,
         )
 
     async def run(self, user_input: str) -> str:

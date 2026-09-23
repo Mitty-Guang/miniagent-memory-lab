@@ -46,6 +46,17 @@ def task_phases(task: Dict) -> List[Dict]:
     return [{"prompt": task["prompt"], "check": task["check"]}]
 
 
+def task_units(task: Dict) -> List[Dict]:
+    """统一三种任务形态为单元列表：
+    - turns：同一会话多轮（Agent 复用、短期记忆累积）；
+    - phases：跨会话多阶段（每阶段新 Agent、共享长期记忆）；
+    - 单阶段：普通任务。
+    """
+    if task.get("turns"):
+        return task["turns"]
+    return task_phases(task)
+
+
 async def run_agent_task(
     task: Dict,
     policy: str = "all",
@@ -55,7 +66,8 @@ async def run_agent_task(
     use_memory: bool = True,
     trace_path: Optional[str] = None,
     approval_fn: Optional[Callable[[str, dict], bool]] = None,
-    memory_injection: str = "message",
+    memory_injection: str = "system_prompt",
+    sandbox: bool = False,
 ) -> Dict:
     """跑一个任务（含全部阶段），返回聚合指标 + 最后阶段的消息流。"""
     workdir = tempfile.mkdtemp(prefix=f"miniagent_{task['id']}_")
@@ -83,37 +95,51 @@ async def run_agent_task(
 
     start = time.time()
     try:
-        for index, phase in enumerate(task_phases(task)):
-            llm = CountingLLM(**llm_kwargs(), trace=trace)
-            agent = MemoryAgent(
-                llm=llm,
-                ltm=ltm,
-                session_id=f"{task['id']}#{index}",
-                task_id=task["id"],
-                policy=policy,
-                budget_chars=budget_chars,
-                impact_priors=impact_priors,
-                max_steps=max_steps,
-                approval_fn=approval_fn,
-                trace=trace,
-                memory_injection=memory_injection,
+        shared_session = bool(task.get("turns"))
+        units = task_units(task)
+        agent = None
+        llm = None
+        for index, unit in enumerate(units):
+            if not shared_session or agent is None:
+                llm = CountingLLM(**llm_kwargs(), trace=trace)
+                agent = MemoryAgent(
+                    llm=llm,
+                    ltm=ltm,
+                    session_id=f"{task['id']}#{'session' if shared_session else index}",
+                    task_id=task["id"],
+                    policy=policy,
+                    budget_chars=budget_chars,
+                    impact_priors=impact_priors,
+                    max_steps=max_steps,
+                    approval_fn=approval_fn,
+                    trace=trace,
+                    memory_injection=memory_injection,
+                    sandbox=sandbox,
+                )
+
+            before = (
+                llm.calls,
+                llm.prompt_chars,
+                llm.prompt_tokens,
+                llm.completion_tokens,
+                agent.current_step,
             )
             with contextlib.redirect_stdout(io.StringIO()):
-                await agent.run(phase["prompt"])
+                await agent.run(unit["prompt"])
 
             final_answer = extract_final_answer(agent.memory.messages)
             answers.append(final_answer)
             try:
-                ok = bool(phase["check"](final_answer, workdir))
+                ok = bool(unit["check"](final_answer, workdir))
             except Exception:
                 ok = False
             success = success and ok
 
-            totals["steps"] += agent.current_step
-            totals["llm_calls"] += llm.calls
-            totals["prompt_chars"] += llm.prompt_chars
-            totals["prompt_tokens"] += llm.prompt_tokens
-            totals["completion_tokens"] += llm.completion_tokens
+            totals["llm_calls"] += llm.calls - before[0]
+            totals["prompt_chars"] += llm.prompt_chars - before[1]
+            totals["prompt_tokens"] += llm.prompt_tokens - before[2]
+            totals["completion_tokens"] += llm.completion_tokens - before[3]
+            totals["steps"] += agent.current_step  # 每次 run() 重置，逐单元累加即为总数
             ltm_reads += len(agent.retrieved)
             last_agent = agent
     except Exception as exc:

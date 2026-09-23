@@ -12,13 +12,15 @@
 | --- | --- |
 | 基础 Agent | ReAct 循环（Thought → Action → Observation）、Function Calling（Python / 文件 / bash 工具）、异常重试、max_steps 保险丝 |
 | 短期记忆 | 固定预算消息选择：`all / recent / relevance / impact` 四策略；**工具调用组原子化**选择；必保任务与最新状态 |
-| 长期记忆 | SQLite 记忆库：任务摘要写入 + 跨会话检索注入（分层记忆） |
+| 长期记忆 | SQLite 记忆库：任务摘要写入 + 跨会话检索注入；检索器**可插拔**（TF-IDF 默认 / 字符 Jaccard / fastembed 向量检索） |
 | 决策影响分析 | leave-one-out 反事实重放 → 每条消息的决策影响先验（驱动 impact 策略） |
-| 评测框架 | 18 个确定性任务（6 单步 + 8 多步 + **4 跨会话**）；4 档预算 × 3 策略网格；成功率/步数/调用数/token/耗时 |
+| 评测框架 | 21 个确定性任务（6 单步 + 8 多步 + **4 跨会话** + **3 同一会话多轮**）；4 档预算 × 3 策略网格；成功率/步数/调用数/token/耗时 |
 | HITL 审批 | 工具执行前人工审批；拒绝时回填原因、模型自动改道（`demo_hitl.py`） |
+| 执行沙箱 | 子进程 Python 执行 + 路径白名单 + 命令黑名单 + 超时（`mini_agent/sandbox.py`） |
 | 可观测性 | `TraceLogger`：LLM / 工具 / 审批 / 记忆读写事件 + token / 延迟统计 |
 | 可视化 | 交互式 GUI（实时轨迹 / 上下文选择 / 审批按钮 / token 面板）+ 实验监控面板 |
 | 多 Agent | Planner → Executor → Reviewer 监督式协作（含失败反馈重试）与单 Agent 对照 |
+| 对照实验 | 手写循环 vs LangGraph、单 Agent vs 多 Agent、跨模型（flash vs pro）、记忆注入方式消融 |
 
 ## 快速开始
 
@@ -48,10 +50,19 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 # 单 Agent vs 多 Agent 对照
 .\.venv\Scripts\python.exe compare_multi_agent.py --limit 8 --budget 800
 
+# 跨模型对照（flash vs pro）
+.\.venv\Scripts\python.exe compare_models.py --models deepseek-flash,deepseek-v4-pro --limit 6
+
+# 记忆注入方式消融（system_prompt vs 独立 system 消息）
+.\.venv\Scripts\python.exe ablation_injection.py --repeat 2 --budget 800 --policy impact
+
 # 可视化
 .\.venv\Scripts\python.exe gui.py            # 交互式 Demo: http://127.0.0.1:8901
 .\.venv\Scripts\python.exe monitor.py        # 实验监控: http://127.0.0.1:8899
 ```
+
+> 可选向量检索：`pip install fastembed` 后把 `LongTermMemory(retriever=EmbeddingRetriever())`
+> 或 `get_retriever("embedding")` 接入即可（首次使用会下载小模型）。
 
 ## 实验结论（摘要）
 
@@ -73,6 +84,16 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 
 **LangGraph 对照**：同一套记忆策略移植到 StateGraph（`extras/langgraph_compare/`），
 成功率 100% vs 100%、成本同量级；增益在 checkpointer / interrupt / 可视化等框架原语。
+
+**记忆注入方式消融**（4 个跨会话任务 × 2 次重复）：拼进系统提示词 **8/8**、
+平均耗时 5.36s；独立 system 消息 7/8、13.75s——默认已切换为系统提示词注入。
+
+**跨模型对照**（6 任务）：`deepseek-flash` 6/6、3994 tokens、5.76s；
+`deepseek-v4-pro` 5/6、**1583 tokens**、27.87s——更强模型调用更少、token 仅 40%，
+但延迟高且本批成功率未提升。
+
+**向量检索**：`EmbeddingRetriever`（fastembed + bge-small-zh）冒烟通过；
+国内可用 `HF_ENDPOINT=https://hf-mirror.com` 下载模型，默认仍是零依赖 TF-IDF。
 
 ## 目录结构
 

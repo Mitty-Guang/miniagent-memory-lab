@@ -1,8 +1,8 @@
-"""任务集：可确定性判分的小任务（18 个：单步 / 多步 / 跨会话）。
+"""任务集：可确定性判分的小任务（21 个：单步 / 多步 / 跨会话 / 同一会话多轮）。
 
 - 单阶段任务：check(final_answer, workdir) -> bool；
-- 跨会话任务：phases = [phase1, phase2]，phase 1 教学、phase 2 使用（验证长期记忆），
-  两个阶段跑在各自的新会话里、共享同一个长期记忆库；
+- 跨会话任务：phases = [phase1, phase2]，各自新会话、共享长期记忆库（验证长期记忆）；
+- 同一会话多轮任务：turns = [...]，同一个 Agent 连续多轮（验证短期记忆连续性）；
 - 全部判分确定性实现，不依赖 LLM judge，保证评测可复现。
 """
 import json
@@ -213,6 +213,65 @@ TASKS: List[Dict] = [
                 "check": lambda answer, workdir: _file_contains(
                     workdir, "reports/status.txt", "OK"
                 ),
+            },
+        ],
+    },
+
+    # ---------- 同一会话多轮任务（短期记忆连续性） ----------
+    {
+        "id": "mt_file_chain",
+        "turns": [
+            {
+                "prompt": "创建 draft.txt，内容写 TURN-1。完成后告诉我。",
+                "check": _answer_ok,
+            },
+            {
+                "prompt": "读取 draft.txt，把它的内容写进 final.txt。",
+                "check": lambda answer, workdir: _file_contains(
+                    workdir, "final.txt", "TURN-1"
+                ),
+            },
+            {
+                "prompt": "final.txt 里是什么内容？直接回答。",
+                "check": lambda answer, workdir: "TURN-1" in (answer or ""),
+            },
+        ],
+    },
+    {
+        "id": "mt_accumulate",
+        "turns": [
+            {
+                "prompt": "创建 list.txt，写入一行 first。",
+                "check": _answer_ok,
+            },
+            {
+                "prompt": "在 list.txt 末尾追加一行 second（保留 first）。",
+                "check": lambda answer, workdir: _file_contains(workdir, "list.txt", "first")
+                and _file_contains(workdir, "list.txt", "second"),
+            },
+            {
+                "prompt": "list.txt 现在有几行？只回答数字。",
+                "check": lambda answer, workdir: "2" in (answer or ""),
+            },
+        ],
+    },
+    {
+        "id": "mt_correction",
+        "turns": [
+            {
+                "prompt": "记住：报告目录是 reports。",
+                "check": _answer_ok,
+            },
+            {
+                "prompt": "更正：报告目录改为 docs。",
+                "check": _answer_ok,
+            },
+            {
+                "prompt": "在（最新的）报告目录里创建 note.txt，内容写 OK。",
+                "check": lambda answer, workdir: _file_contains(
+                    workdir, "docs/note.txt", "OK"
+                )
+                and not (Path(workdir) / "reports" / "note.txt").exists(),
             },
         ],
     },
