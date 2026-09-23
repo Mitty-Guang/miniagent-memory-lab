@@ -302,6 +302,46 @@ def test_memory_browser():
     print("test_memory_browser passed")
 
 
+def test_auto_budget():
+    """自动参数估计：规则兜底 / JSON 解析 / 安全夹逼 / 模型失败回退。"""
+    from mini_agent.auto_budget import estimate, parse_plan, rule_based
+
+    assert rule_based("创建三个文件并复制到 backup 目录")["category"] == "多步文件"
+    assert rule_based("创建 reports/project.txt，内容写我的项目代号")["category"] == "跨会话"
+    assert rule_based("上次说的偏好是什么")["category"] == "跨会话"
+    assert rule_based("搜索 Python 3.12 新特性")["category"] == "联网研究"
+    assert rule_based("计算 1+1")["budget"] == 300
+
+    plan = parse_plan(
+        '```json\n{"category":"联网研究","budget":1000,"max_steps":20,"reason":"需检索"}\n```'
+    )
+    assert plan and plan["budget"] == 1000 and plan["source"] == "llm", plan
+    assert parse_plan("这不是 JSON") is None
+    assert parse_plan('{"budget": 50, "max_steps": 3}') is None   # 超出安全区间 → 拒绝
+    assert parse_plan('{"budget": "abc", "max_steps": 8}') is None
+
+    class FakeLLM:
+        def __init__(self, content=None, boom=False):
+            self.content = content
+            self.boom = boom
+
+        async def chat(self, messages, system_prompt=None, tools=None):
+            if self.boom:
+                raise RuntimeError("network down")
+            return type("R", (), {"content": self.content})()
+
+    ok = asyncio.run(
+        estimate(
+            "规划一次看球路线",
+            FakeLLM('{"category":"联网研究","budget":900,"max_steps":18,"reason":"需要实时信息"}'),
+        )
+    )
+    assert ok["source"] == "llm" and ok["max_steps"] == 18, ok
+    fallback = asyncio.run(estimate("规划一次看球路线", FakeLLM(boom=True)))
+    assert fallback["source"] == "rule" and "回退" in fallback["reason"], fallback
+    print("test_auto_budget passed")
+
+
 if __name__ == "__main__":
     test_ltm_basic()
     test_trace_summary()
@@ -313,4 +353,5 @@ if __name__ == "__main__":
     test_retrievers()
     test_web_tools()
     test_memory_browser()
-    print("\n✅ 所有离线测试通过（long-term memory / tracing / HITL / multi-agent / sandbox / retrieval / web / 记忆浏览器）")
+    test_auto_budget()
+    print("\n✅ 所有离线测试通过（记忆 / tracing / HITL / multi-agent / sandbox / 检索 / 联网 / 记忆浏览器 / 自动参数）")

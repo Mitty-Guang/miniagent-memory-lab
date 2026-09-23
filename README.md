@@ -124,8 +124,9 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 
 ## 文档
 
-- **[SECONDARY_DEV.md](docs/SECONDARY_DEV.md)**：相对上游做了什么、如何复现、全部实验数据；
-- **[STUDY_NOTES.md](docs/STUDY_NOTES.md)**：架构讲解、踩过的坑（工具调用组原子性 / 冷启动 / 失败样本污染 / ToolNode config）、20 组面试问答。
+- **[SECONDARY_DEV.md](docs/SECONDARY_DEV.md)**：相对上游做了什么、如何复现、全部实验数据（含"预算与步数怎么定"）；
+- **[STUDY_NOTES.md](docs/STUDY_NOTES.md)**：架构讲解、踩过的坑（工具调用组原子性 / 冷启动 / 失败样本污染 / ToolNode config）、面试问答；
+- **[ISSUES.md](docs/ISSUES.md)**：问题记录（用户提出的问题 + 工程问题 + 环境问题 → 定位/修复/验证）。
 
 ## 许可与致谢
 

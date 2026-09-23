@@ -54,6 +54,26 @@ def warmup(attempts: int = 8, delay: float = 3.0, trace=None) -> bool:
     return asyncio.run(warmup_async(attempts=attempts, delay=delay, trace=trace))
 
 
+def as_chat_message(message) -> dict:
+    """把消息统一成 OpenAI 格式（兼容 dict 与 Message 对象）。
+
+    教训：曾因接口只接受 dict 而调用方传了 Message 对象，异常被上层 except 吞掉，
+    表现为"功能静默回退"，排查成本高。这里做一次归一化，避免同类问题。
+    """
+    if isinstance(message, dict):
+        return message
+    role = getattr(message, "role", "user")
+    role = getattr(role, "value", role)
+    data = {"role": str(role), "content": getattr(message, "content", "") or ""}
+    tool_calls = getattr(message, "tool_calls", None)
+    if tool_calls:
+        data["tool_calls"] = tool_calls
+    tool_call_id = getattr(message, "tool_call_id", None)
+    if tool_call_id:
+        data["tool_call_id"] = tool_call_id
+    return data
+
+
 class CountingLLM(SimpleLLM):
     """统计调用次数/字符数/token/延迟，对失败调用做指数退避重试，可选 trace。
 
@@ -80,10 +100,11 @@ class CountingLLM(SimpleLLM):
         self.trace = trace
 
     async def chat(self, messages, system_prompt=None, tools=None):
+        normalized = [as_chat_message(m) for m in messages]
         chat_messages = []
         if system_prompt:
             chat_messages.append({"role": "system", "content": system_prompt})
-        chat_messages.extend(messages)
+        chat_messages.extend(normalized)
 
         request_params = {
             "model": self.model,
@@ -98,7 +119,7 @@ class CountingLLM(SimpleLLM):
         last_error = ""
         for attempt in range(self.max_retries):
             self.calls += 1
-            for msg in messages:
+            for msg in normalized:
                 self.prompt_chars += len(str(msg.get("content") or ""))
                 self.prompt_chars += len(str(msg.get("tool_calls") or ""))
             if system_prompt:
