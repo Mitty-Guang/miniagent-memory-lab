@@ -75,7 +75,8 @@ class MemoryAgent(BudgetedMiniAgent):
 
         if self.ltm is not None:
             summary = self._summarize(user_input)
-            if summary:
+            # 失败样本不写入记忆（否则错误信息会污染长期记忆）
+            if summary and "LLM调用失败" not in summary:
                 memory_id = self.ltm.add(
                     summary, session_id=self.session_id, task_id=self.task_id
                 )

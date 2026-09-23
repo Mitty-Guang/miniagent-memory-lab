@@ -28,7 +28,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from mini_agent.config import CountingLLM, llm_kwargs
+from mini_agent.config import CountingLLM, llm_kwargs, warmup_async
 from mini_agent.long_term_memory import LongTermMemory
 from mini_agent.memory_agent import MemoryAgent
 from mini_agent.tracing import TraceLogger
@@ -387,7 +387,11 @@ function render(s) {
 
   $('output').innerHTML = s.error
     ? `<span style="color:#b91c1c">错误: ${esc(s.error)}</span>`
-    : (s.output ? esc(s.output) : '<span class="muted">暂无</span>');
+    : (s.output
+        ? (s.output.includes('LLM调用失败')
+            ? `<span style="color:#b91c1c">⚠ 接口异常（重试已耗尽）：${esc(s.output)}<br>请再点一次「运行任务」重试</span>`
+            : esc(s.output))
+        : '<span class="muted">暂无</span>');
 }
 refresh();
 </script>
@@ -465,6 +469,12 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8901)
     args = parser.parse_args()
     PORT = args.port
+
+    # 启动时后台预热一次（规避冷启动/瞬时网络问题导致的首次调用失败）
+    threading.Thread(
+        target=lambda: asyncio.run(warmup_async(attempts=3, delay=2.0)), daemon=True
+    ).start()
+
     server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     print(f"[gui] http://127.0.0.1:{PORT} （Ctrl+C 停止）", flush=True)
     server.serve_forever()

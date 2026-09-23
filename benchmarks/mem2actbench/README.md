@@ -33,7 +33,9 @@ git clone --depth 1 https://github.com/Cantaloupe-M/Mem2ActBench.git benchmarks/
 | 判分 | 参数 F1 / BLEU-1 / Tool Accuracy | **参数精确匹配（TA）+ 参数 F1**（工具名与参数统一归一化） |
 | 对照 | 不同记忆框架 | **有记忆 vs 无记忆**（同一模型同一 prompt，仅上下文不同） |
 
-> 由于工具名含 `/`、空格等非法字符，适配器会做统一清洗（`sanitize_name`），判分时两侧同样处理。
+> 由于工具名含 `/`、空格等非法字符，适配器会做统一清洗（`sanitize_name`）；
+> 判分时工具名按"字母数字核心"归一化比较（`core_name`，忽略大小写与分隔符差异），
+> 参数按归一化后的键值对精确匹配 + F1。
 
 ## 结果
 

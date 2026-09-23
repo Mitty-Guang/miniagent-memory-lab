@@ -62,8 +62,14 @@ INVALID_NAME_CHARS = re.compile(r"[^a-zA-Z0-9_-]")
 
 
 def sanitize_name(name: str) -> str:
-    """把工具名清洗成 API 合法形式（判分时两侧用同一函数归一）。"""
+    """把工具名清洗成 API 合法形式（基准里存在 '/'、空格等字符）。"""
     cleaned = INVALID_NAME_CHARS.sub("_", (name or "").strip())
+    return cleaned or "unknown_tool"
+
+
+def core_name(name: str) -> str:
+    """仅保留字母数字并小写，用于比较工具名的格式变体（大小写 / 分隔符差异）。"""
+    cleaned = re.sub(r"[^a-z0-9]", "", str(name or "").lower())
     return cleaned or "unknown_tool"
 
 
@@ -153,10 +159,10 @@ def _norm(value) -> str:
 
 
 def grade(call: Optional[Dict], gold: Dict) -> Tuple[bool, float]:
-    """返回 (TA 是否通过, 参数 F1)。工具名与两侧都做同一套清洗后再比较。"""
+    """返回 (TA 是否通过, 参数 F1)。工具名按"字母数字核心"归一化后比较。"""
     if not call:
         return False, 0.0
-    name_ok = sanitize_name(call.get("name", "")) == sanitize_name(gold.get("name", ""))
+    name_ok = core_name(call.get("name", "")) == core_name(gold.get("name", ""))
     gold_args = {k: _norm(v) for k, v in (gold.get("arguments") or {}).items()}
     pred_args = {k: _norm(v) for k, v in (call.get("arguments") or {}).items()}
     if not gold_args:

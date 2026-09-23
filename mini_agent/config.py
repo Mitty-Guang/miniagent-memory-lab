@@ -103,7 +103,7 @@ class CountingLLM(SimpleLLM):
                 response = await self.client.chat.completions.create(**request_params)
             except Exception as exc:
                 print(f"[llm-retry] 第 {attempt + 1} 次异常: {exc}", flush=True)
-                await asyncio.sleep(self.base_delay * (2**attempt))
+                await asyncio.sleep(min(self.base_delay * (2**attempt), 16.0))
                 continue
 
             latency = time.time() - started

@@ -1,0 +1,106 @@
+{
+  "summary": {
+    "memory": {
+      "n": 1,
+      "tool_accuracy": 0.0,
+      "avg_param_f1": 0.667
+    },
+    "nomemory": {
+      "n": 1,
+      "tool_accuracy": 0.0,
+      "avg_param_f1": 0.667
+    }
+  },
+  "rows": [
+    {
+      "qa_id": "qa_001",
+      "mode": "memory",
+      "ta": false,
+      "param_f1": 0.667,
+      "pred": {
+        "name": "_get-social-trending_impressions",
+        "arguments": {
+          "social": "Twitter",
+          "limit": 50
+        }
+      },
+      "gold": {
+        "name": "/get-social-trending/impressions",
+        "arguments": {
+          "social": "Twitter",
+          "isCrypto": true,
+          "limit": 50,
+          "timestamp": "24h"
+        },
+        "grounding_info": {
+          "social": {
+            "source_text": "No platform mentioned in memory; Twitter is the de-facto standard for finance-ticker chatter",
+            "type": "default"
+          },
+          "isCrypto": {
+            "source_text": "User requests the latest videos on cryptocurrency trends",
+            "type": "inferred"
+          },
+          "limit": {
+            "source_text": "Schema allows 1-50; 50 gives the full top-list",
+            "type": "default"
+          },
+          "timestamp": {
+            "source_text": "Schema default for social-trending endpoints is 24h",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    },
+    {
+      "qa_id": "qa_001",
+      "mode": "nomemory",
+      "ta": false,
+      "param_f1": 0.667,
+      "pred": {
+        "name": "_get-social-trending_impressions",
+        "arguments": {
+          "social": "Twitter",
+          "limit": 50
+        }
+      },
+      "gold": {
+        "name": "/get-social-trending/impressions",
+        "arguments": {
+          "social": "Twitter",
+          "isCrypto": true,
+          "limit": 50,
+          "timestamp": "24h"
+        },
+        "grounding_info": {
+          "social": {
+            "source_text": "No platform mentioned in memory; Twitter is the de-facto standard for finance-ticker chatter",
+            "type": "default"
+          },
+          "isCrypto": {
+            "source_text": "User requests the latest videos on cryptocurrency trends",
+            "type": "inferred"
+          },
+          "limit": {
+            "source_text": "Schema allows 1-50; 50 gives the full top-list",
+            "type": "default"
+          },
+          "timestamp": {
+            "source_text": "Schema default for social-trending endpoints is 24h",
+            "type": "default"
+          }
+        }
+      },
+      "evidence_found": 1,
+      "retrieved": 3
+    }
+  ],
+  "config": {
+    "limit": 1,
+    "top_k": 3,
+    "distractors": 40,
+    "modes": "memory,nomemory"
+  }
+}
