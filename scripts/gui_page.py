@@ -12,7 +12,7 @@ status / elapsed / chipLlm / chipTok / progress / autoPlan / selection / llm / l
 approvalBanner / approvalText / steps / trace / output / memQuery / memList
 """
 
-PAGE = """<!DOCTYPE html>
+PAGE = r"""<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="utf-8">
@@ -464,7 +464,7 @@ async function runTask() {
   });
 }
 
-async function newSession() {  await fetch(apiUrl('/api/new_session', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
+async function newSession() {  await fetch(apiUrl('/api/new_session'), {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
   $('chat').innerHTML = '<div class="empty">新会话已开始（上下文已清空），在下方输入框继续。</div>';
   $('trace').innerHTML = '<div class="empty">暂无</div>';
   $('output').innerHTML = '<span class="muted">暂无</span>';
@@ -482,7 +482,7 @@ async function submit(body) {
   lastBody = body;
   $('runBtn').disabled = true;
   $('retryBtn').style.display = 'none';
-  const r = await fetch(apiUrl('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const r = await fetch(apiUrl('/api/run'), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('runBtn').disabled = false; return; }
   $('task').value = '';   // 发送后清空输入框（对话习惯）；内容已存 lastBody 供重试
@@ -491,7 +491,7 @@ async function submit(body) {
 
 async function loadLhTasks() {
   try {
-    const data = await (await fetch(apiUrl('/api/lh_tasks')).json();
+    const data = await (await fetch(apiUrl('/api/lh_tasks'))).json();
     const tasks = data.tasks || [];
     const sel = $('lhTask');
     sel.innerHTML = tasks.length
@@ -509,19 +509,19 @@ async function runLhTask() {
     policy: $('policy').value,
     budget: parseInt($('budget').value || '1200', 10),
   };
-  const r = await fetch(apiUrl('/api/lh_run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  const r = await fetch(apiUrl('/api/lh_run'), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
   const j = await r.json();
   if (!j.ok) { alert('启动失败: ' + (j.error || r.status)); $('lhBtn').disabled = false; return; }
   startPolling();
 }
 
 async function decide(approved) {
-  await fetch(apiUrl('/api/approve', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({approved})});
+  await fetch(apiUrl('/api/approve'), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({approved})});
 }
 
 /* ---------- 记忆库 ---------- */
 async function clearLtm() {
-  await fetch(apiUrl('/api/clear_ltm', {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
+  await fetch(apiUrl('/api/clear_ltm'), {method:'POST', headers:{'Content-Type':'application/json'}, body: '{}'});
   refresh(); loadMemory();
 }
 
@@ -534,7 +534,7 @@ function fmtTime(ts) {
 async function loadMemory() {
   const q = $('memQuery').value.trim();
   let data;
-  try { data = await (await fetch(apiUrl('/api/memory?q=' + encodeURIComponent(q))).json(); } catch (e) { return; }
+  try { data = await (await fetch(apiUrl('/api/memory?q=' + encodeURIComponent(q)))).json(); } catch (e) { return; }
   const items = data.items || [];
   $('memList').innerHTML = items.length ? items.map(it => `
     <div class="mem">
@@ -548,7 +548,7 @@ async function loadMemory() {
 }
 
 async function deleteMemory(id) {
-  await fetch(apiUrl('/api/memory_delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id})});
+  await fetch(apiUrl('/api/memory_delete'), {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id})});
   loadMemory();
 }
 
@@ -561,7 +561,7 @@ function startPolling() {
 
 async function refresh() {
   let s;
-  try { s = await (await fetch(apiUrl('/api/state')).json(); } catch (e) { return; }
+  try { s = await (await fetch(apiUrl('/api/state'))).json(); } catch (e) { return; }
   render(s);
   if (s.status === 'done' || s.status === 'error' || s.status === 'idle') {
     clearInterval(polling); polling = null; $('runBtn').disabled = false;
