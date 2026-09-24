@@ -70,6 +70,17 @@ copy .env.example .env      # 填入任意 OpenAI 兼容服务的 key（不填�
 .\.venv\Scripts\python.exe scripts\monitor.py        # 实验监控: http://127.0.0.1:8899
 ```
 
+### 一键启动（Windows）
+
+双击 `start_all.bat`（一键起 GUI + 监控并自动打开浏览器）；只想起界面用 `start_gui.bat`。
+桌面快捷方式可用 `make_shortcuts.bat` 一键重建。推荐用 `.venv312` 跑 GUI（Python ≥3.11，
+LangGraph 的 `interrupt` 与同进程运行需要），没装时脚本会自动回退 `.venv`。
+
+- 「运行时」下拉可在**手写循环**（零框架依赖）与 **LangGraph 图**（extras）之间切换；
+- GUI 默认开放局域网同端口（`--host 0.0.0.0`，无口令）；如需口令：设环境变量 `GUI_TOKEN=xxx` 再启动；
+- 左侧可切换审批模式（自动 / 仅 bash / 全部），运行中可随时点「⏹ 中止」；
+- 右栏「运行日志」可查看本轮 stdout 与进程日志（并落盘 `results/logs/run_*.log`）。
+
 > 可选向量检索：`pip install fastembed` 后把 `LongTermMemory(retriever=EmbeddingRetriever())`
 > 或 `get_retriever("embedding")` 接入即可（首次使用会下载小模型）。
 
