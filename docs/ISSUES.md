@@ -49,6 +49,8 @@
 | E15 | 兜底查询的验收标准难定（严格 ≥2 命中会拒掉好结果；宽松 ≥1 又会放过"只命中地名"的百科页） | 泛词查询里"北京"这类地名 token 命中率高、区分度低 | 兜底结果改用**领域话题词**验收（实习→实习/招聘/岗位/校招），无领域配置时退回普通相关性 | 「北京实习」百科页被拒 → 继续尝试平台词前置查询 ✓ |
 | E16 | GUI 连续对话报 `重试 8 次后仍失败（422 … missing field content）` | assistant 消息带 tool_calls 但 content 为空时，消息转换 `if msg.content:` 把 **content 字段整个省略** → 接口反序列化失败（422） | 统一为"content 始终存在（空内容用空串）"，3 处：`memory_policies.to_openai_messages` / `schema.Memory.get_messages` / `config.as_chat_message`；新增回归测试 `test_openai_message_shape` | 修复后 422 消失（随即暴露下一层 E17） |
 | E17 | 修完 E16 出现 400 `The reasoning_content in the thinking mode must be passed back to the API` | 思考模式模型的**思维链未保存/未回传**（只留 content），接口判定上下文不完整 | `LLMResponse`/`Message` 增加 `reasoning_content`；`SimpleLLM` 与 `CountingLLM` 解析时保存；`agent.think()` 写回消息时携带；消息转换按需回传 | 真实 API 两步验证通过（"content 与 reasoning_content 都通过校验"） |
+| E18 | GUI 各面板卡在"加载中…"（长周期下拉不填充、运行按钮置灰） | 前端 JS 有语法错误 → 整段 `<script>` 不执行。两个根因：① `gui_page.PAGE` 是普通三引号字符串，JS 里的 `\n` 被 **Python 提前转义**成真实换行；② 批量把 `fetch('/api/x')` 改成 `fetch(apiUrl('/api/x')` 时**漏右括号**，带选项的调用还把 options 塞进了 `apiUrl` 参数 | ① `PAGE` 改为 raw 字符串；② 逐处修正 12 个 `fetch` 调用点括号（含 `await (await fetch(...))).json()` 形式） | `node --check` 语法通过；`/api/lh_tasks` 返回 11 个任务；页面 34.6KB 含 `loadLhTasks`/`apiUrl`。**流程改进**：前端改动后必跑 `node --check` |
+| E19 | LangGraph 连续第 2 轮必失败（`Event loop is closed` / `client has been closed`） | GUI 每次 run 都新建事件循环，而同进程模式下 aiosqlite 连接与 httpx 客户端会**绑定循环**，跨轮复用即崩（先后复现两种错误） | LangGraph 默认改走**子进程**（每轮全新进程、零跨轮状态）；同进程降级为 `GUI_LG_INPROCESS=1`（供 HITL 桥接演示）；`llm_factory` 增加客户端登记+逐轮关闭；checkpointer 连接用后即关 | 子进程模式连续 3 轮通过（轮 2/3 正确答出 ORION）；同进程模式仍建议单轮演示 |
 
 ---
 
